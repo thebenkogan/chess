@@ -6,4 +6,4 @@ Team members: Ben Kogan, Nick Runje, Kyle Fowler, and Aariz Faisal.
 
 # Description
 
-Two player chess game that can be played on two different computers.
+Two player chess game that can be played on two different computers. Have some fun playing chess! 
