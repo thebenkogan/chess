@@ -1,4 +1,4 @@
-# Chess
+# OCaml Chess
 
 Final Project for CS 3110, Fall 2021.
 
