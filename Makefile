@@ -16,8 +16,8 @@ finalcheck:
 	@bash check.sh final
 
 zip:
-	zip -r enigma.zip . -x _build/\* .git/\*
+	zip -r chess.zip . -x _build/\* .git/\*
 
 clean:
 	dune clean
-	rm -f enigma.zip
+	rm -f chess.zip

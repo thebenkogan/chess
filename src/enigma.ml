@@ -5,9 +5,7 @@
    or use it for commercial purposes.
  ************************************************************)
 
-(** CS 3110 Fall 2021 Assignment A1 Enigma
-
-    @author Nicholas Runje (njr85) *)
+(** CS 3110 Fall 2021 Assignment A1 Enigma @author *)
 
 (* TODO: complete the academic integrity statement below, then delete
    this TODO comment. *)
