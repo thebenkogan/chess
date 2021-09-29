@@ -1,2 +1,4 @@
 (library
- (name enigma))
+ (name game)
+ (public_name Game)
+ (libraries yojson ANSITerminal))
