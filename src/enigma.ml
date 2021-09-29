@@ -23,13 +23,13 @@
   collaboration, here is the list of other students with whom I
   collaborated, and a brief summary of that collaboration:
 
-  - Nicholas Runje
+  - none
 
   ************************************************************)
 
 (** [index c] is the 0-based index of [c] in the alphabet. Requires: [c]
     is an uppercase letter in A..Z. *)
-let index (c : char) : int = Char.code c - 65
+let index (c : char) : int = raise (Failure "Unimplemented")
 
 (** [map_r_to_l wiring top_letter input_pos] is the left-hand output
     position at which current would appear when current enters at
@@ -41,23 +41,13 @@ let index (c : char) : int = Char.code c - 65
     is in 0..25. *)
 let map_r_to_l (wiring : string) (top_letter : char) (input_pos : int) :
     int =
-  let initial_pos = (input_pos + index top_letter) mod 26 in
-  let w = index wiring.[initial_pos] in
-
-  (* Below is output *)
-  let output = w - index top_letter in
-  (output + 26) mod 26
+  raise (Failure "Unimplemented")
 
 (** [map_l_to_r] computes the same function as [map_r_to_l], except for
     current flowing left to right. *)
 let map_l_to_r (wiring : string) (top_letter : char) (input_pos : int) :
     int =
-  let enters_left = (input_pos + index top_letter) mod 26 in
-  let w_inverse =
-    String.index wiring "ABCDEFGHIJKLMNOPQRSTUVWXYZ".[enters_left]
-  in
-  let output = w_inverse - index top_letter in
-  (output + 26) mod 26
+  raise (Failure "Unimplemented")
 
 (** [map_refl wiring input_pos] is the output position at which current
     would appear when current enters at input position [input_pos] to a
@@ -65,20 +55,13 @@ let map_l_to_r (wiring : string) (top_letter : char) (input_pos : int) :
     [wiring] is a valid reflector specification, and [input_pos] is in
     0..25. *)
 let map_refl (wiring : string) (input_pos : int) : int =
-  let output = map_r_to_l wiring 'A' input_pos in
-  output
+  raise (Failure "Unimplemented")
 
 (** [map_plug plugs c] is the letter to which [c] is transformed by the
     plugboard [plugs]. Requires: [plugs] is a valid plugboard, and [c]
     is in A..Z. *)
 let rec map_plug (plugs : (char * char) list) (c : char) : char =
-  match plugs with
-  | [] -> c
-  | [ (f, l) ] when f = c -> l
-  | [ (f, l) ] when l = c -> f
-  | (f, l) :: t when f = c -> l
-  | (f, l) :: t when l = c -> f
-  | (f, l) :: t -> map_plug t c
+  raise (Failure "Unimplemented")
 
 type rotor = {
   wiring : string;  (** A valid rotor wiring specification. *)
