@@ -1,2 +1,4 @@
 (library
- (name enigma))
+ (name chess)
+ (public_name Chess)
+ (libraries yojson ANSITerminal))

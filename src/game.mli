@@ -1,0 +1,50 @@
+(** Type of soldier fighting for one of the two players of the game. *)
+type color =
+  | White
+  | Black
+
+(** Type of piece on the chess board with unique capabilities. *)
+type soldier =
+  | Pawn
+  | Knight
+  | Bishop
+  | Rook
+  | Queen
+  | King
+
+type piece = color * soldier
+(** A piece on the chess board. *)
+
+type t = piece list
+(** 2d list of pieces representing the chess pieces on the board. For a
+    piece in the [i]th list and [j]th element in that list, that piece
+    is located at [i] [j] on the chess board, where [i] is the file
+    starting at the A file and [j] is the rank starting at the 1st rank. *)
+
+type move = (int * int) * (int * int)
+(** Chess board coordinate of the old position of the moved piece, and
+    the coordinate of the new position of the moved piece. *)
+
+type properties = {
+  (*The board with all of the pieces.*)
+  board : t;
+  (*The color of this player's pieces.*)
+  color : color;
+  (*The legal moves on the pieces in the board for this color.*)
+  moves : move list;
+  (*True if the starting rook on the A file has moved.*)
+  king_moved : bool;
+  (*True if the starting rook on the H file has moved.*)
+  a_rook_moved : bool;
+  (*Add more fields after this as we need them.*)
+  h_rook_moved : bool;
+}
+
+val legal_moves : properties -> color -> move list
+(** [legal_moves color] is a list of legal moves for [color] with
+    [state] providing context to the position.*)
+
+val load_game : Yojson.Basic.t -> t
+(** [from_json j] is the board that [j] represents. This is what we will
+    call initially to create a starting position of pieces that we will
+    use to initialize a starting state. *)
