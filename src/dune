@@ -1,4 +1,4 @@
 (library
- (name game)
- (public_name Game)
+ (name chess)
+ (public_name Chess)
  (libraries yojson ANSITerminal))

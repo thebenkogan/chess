@@ -1,42 +1,30 @@
-(** Representation of dynamic adventure state.
+(** Representation of dynamic chess game.
 
-    This module represents the state of an adventure as it is being
-    played, including the adventurer's current room, the rooms that have
-    been visited, and functions that cause the state to change. *)
+    This module represents the state of a game of chess as it is being
+    played, including the player's current chess position, their legal
+    moves, the properties of their position, and functions that update
+    their state upon a new move from this player or their opponent. *)
 
-(**********************************************************************
- * DO NOT CHANGE THIS FILE
- * It is part of the interface the course staff will use to test your
- * submission.
- **********************************************************************)
+type t = {
+  (*The board with all of the pieces and properties.*)
+  game_state : Game.properties;
+  (*Players can only make a move if turn is true? After a move is
+    played, we set this to false, and back to true when we receive a
+    move from the opponent.*)
+  turn : bool;
+}
 
-type t
-(** The abstract type of values representing the game state. *)
+val init_state : Game.t -> Game.color -> t
+(** [init_state board color] is the initial state of the game starting
+    with the chess position given by [board] for [color]'s pieces. This
+    state includes the legal starting moves for [color] and the initial
+    conditions. Need to think about this. To get the initial legal
+    moves, either pass in a specified last move of the game if not at
+    the beginning, or pass in a null move otherwise, such as a pawn
+    moving in place. *)
 
-val init_state : Adventure.t -> t
-(** [init_state a] is the initial state of the game when playing
-    adventure [a]. In that state the adventurer is currently located in
-    the starting room, and they have visited only that room. *)
-
-val current_room_id : t -> Adventure.room_id
-(** [current_room_id st] is the identifier of the room in which the
-    adventurer currently is located in state [st]. *)
-
-val visited : t -> Adventure.room_id list
-(** [visited st] is a set-like list of the room identifiers the
-    adventurer has visited in state [st]. The adventurer has visited a
-    room [rm] if their current room location is or has ever been [rm]. *)
-
-(** The type representing the result of an attempted movement. *)
-type result =
-  | Legal of t
-  | Illegal
-
-val go : Adventure.exit_name -> Adventure.t -> t -> result
-(** [go exit adv st] is [r] if attempting to go through exit [exit] in
-    state [st] and adventure [adv] results in [r]. If [exit] is an exit
-    from the adventurer's current room, then [r] is [Legal st'], where
-    in [st'] the adventurer is now located in the room to which [exit]
-    leads. Otherwise, the result is [Illegal].
-
-    Effects: none. [go] is not permitted to do any printing. *)
+val play_move : t -> Game.move -> t
+(** [play_move st move] is the state of the chess position with [move]
+    played. This can be called for moves by this player and received
+    moves from the opponent to update the current board and calculate
+    the new moves.*)

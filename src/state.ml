@@ -1,26 +1,12 @@
 type t = {
-  current_room : Adventure.room_id;
-  visited_rooms : Adventure.room_id list;
+  (*The board with all of the pieces and properties.*)
+  game_state : Game.properties;
+  (*Players can only make a move if turn is true? After a move is
+    played, we set this to false, and back to true when we receive a
+    move from the opponent.*)
+  turn : bool;
 }
 
-let init_state adv =
-  let starting_room = Adventure.start_room adv in
-  { current_room = starting_room; visited_rooms = [ starting_room ] }
+let init_state board color = raise (Failure "Unimplemented")
 
-let current_room_id st = st.current_room
-
-let visited st = List.sort_uniq compare st.visited_rooms
-
-type result =
-  | Legal of t
-  | Illegal
-
-let go ex adv st =
-  try
-    let next_room = Adventure.next_room adv st.current_room ex in
-    Legal
-      {
-        current_room = next_room;
-        visited_rooms = next_room :: st.visited_rooms;
-      }
-  with _ -> Illegal
+let play_move st move = raise (Failure "Unimplemented")
