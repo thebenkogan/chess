@@ -34,5 +34,3 @@ type properties = {
 let legal_moves prop color = raise (Failure "Unimplemented")
 
 let load_game j = raise (Failure "Unimplemented")
-
-let to_json board = raise (Failure "Unimplemented")
