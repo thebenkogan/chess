@@ -15,7 +15,7 @@ type soldier =
 type piece = color * soldier
 (** A piece on the chess board. *)
 
-type t = piece list
+type t = piece list list
 (** 2d list of pieces representing the chess pieces on the board. For a
     piece in the [i]th list and [j]th element in that list, that piece
     is located at [i] [j] on the chess board, where [i] is the file
@@ -30,8 +30,8 @@ type properties = {
   board : t;
   (*The color of this player's pieces.*)
   color : color;
-  (*The legal moves on the pieces in the board for this color.*)
-  moves : move list;
+  (*The last move played on this board.*)
+  last_move : move;
   (*True if the starting rook on the A file has moved.*)
   king_moved : bool;
   (*True if the starting rook on the H file has moved.*)
@@ -40,9 +40,13 @@ type properties = {
   h_rook_moved : bool;
 }
 
-val legal_moves : properties -> color -> move list
-(** [legal_moves color] is a list of legal moves for [color] with
-    [state] providing context to the position.*)
+val update_board : t -> move -> t
+(** [update_board board move] is the board with [move] played.*)
+
+val legal_moves : properties -> move list
+(** [legal_moves color] is a list of legal moves with [properties]
+    providing context to the position and specifying the [color] to
+    output moves for.*)
 
 val load_game : Yojson.Basic.t -> t
 (** [from_json j] is the board that [j] represents. This is what we will

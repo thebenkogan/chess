@@ -1,9 +1,6 @@
 type t = {
-  (*The board with all of the pieces and properties.*)
   game_state : Game.properties;
-  (*Players can only make a move if turn is true? After a move is
-    played, we set this to false, and back to true when we receive a
-    move from the opponent.*)
+  moves : Game.move list;
   turn : bool;
 }
 
