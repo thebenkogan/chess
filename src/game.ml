@@ -85,7 +85,8 @@ end
 let rec moves_for_row prop row_num col_num = function
   | [] -> []
   | (color, soldier) :: t ->
-      if color <> prop.color then []
+      if color <> prop.color then
+        moves_for_row prop row_num (col_num + 1) t
       else
         begin
           begin
