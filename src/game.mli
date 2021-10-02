@@ -15,7 +15,7 @@ type soldier =
 type piece = color * soldier
 (** A piece on the chess board. *)
 
-type t = piece list list
+type t = piece option list list
 (** 2d list of pieces representing the chess pieces on the board. For a
     piece in the [i]th list and [j]th element in that list, that piece
     is located at [i] [j] on the chess board, where [i] is the file
