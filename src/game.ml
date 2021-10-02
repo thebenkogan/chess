@@ -12,7 +12,7 @@ type soldier =
 
 type piece = color * soldier
 
-type t = piece list list
+type t = piece option list list
 
 type move = (int * int) * (int * int)
 
@@ -34,9 +34,9 @@ let load_game j = raise (Failure "Unimplemented")
  **********************************************************************)
 
 (** [SoldierLogic] defines the interface for each piece to determine the
-    legal moves for that piece. Requires: the color of the piece at the
-    specified coordinates is the same as the color defined in the
-    properties.
+    legal moves for that piece. Requires: the piece at [coords] is of
+    the correct soldier type and is of the same color as specified in
+    [properties].
 
     When implementing this: insert everything specific to the piece's
     logic in its module unexposed. If you suspect some definition will
@@ -84,7 +84,8 @@ end
     the row. Requires: row_num and col_num are in 0..7.*)
 let rec moves_for_row prop row_num col_num = function
   | [] -> []
-  | (color, soldier) :: t ->
+  | None :: t -> moves_for_row prop row_num (col_num + 1) t
+  | Some (color, soldier) :: t ->
       if color <> prop.color then
         moves_for_row prop row_num (col_num + 1) t
       else
