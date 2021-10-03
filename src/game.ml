@@ -1,3 +1,5 @@
+open Helper
+
 type color =
   | White
   | Black
@@ -51,7 +53,25 @@ module Pawn : SoldierLogic = struct
 end
 
 module Knight : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let potential_squares (x, y) board color =
+    List.filter
+      (is_valid_square board color)
+      [
+        (x + 2, y + 1);
+        (x + 2, y - 1);
+        (x - 2, y + 1);
+        (x - 2, y - 1);
+        (x + 1, y + 2);
+        (x + 1, y - 2);
+        (x - 1, y + 2);
+        (x - 1, y - 2);
+      ]
+
+  (* Right now, this only returns the knight moves that are on the board
+     and do not move to a square with a same color piece on it. *)
+  let legal_moves prop coords =
+    let board = board_to_array prop.board in
+    squares_to_moves coords (potential_squares coords board prop.color)
 end
 
 module Bishop : SoldierLogic = struct
@@ -72,38 +92,38 @@ end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
    pieces as defined above, where the first element in that list is the
-   first row on the chess board (row 0). Each element in a corresponding
-   row is ordered by column starting at 0. We get the legal moves for
-   each piece of our color by iterating through every row and getting
-   the legal moves for the elements in those rows that match the color
-   defined in prop, then concatenating the results together. *)
+   first column on the chess board (column 0, leftmost). Each element in
+   a corresponding column is ordered by row starting at 0. We get the
+   legal moves for each piece of our color by iterating through every
+   column and getting the legal moves for the elements in those columns
+   that match the color defined in prop, then concatenating the results
+   together. *)
 
-(** [moves_for_row prop row_num col_num row] is the list of all legal
-    moves for each piece in row number [row_num] that is of the same
-    color as defined in [prop], beginning at the [col_num]th element of
-    the row. Requires: row_num and col_num are in 0..7.*)
-let rec moves_for_row prop row_num col_num = function
+(** [moves_for_row prop (x, y) row] is the list of all legal moves for
+    each piece in column number [x] that is of the same color as defined
+    in [prop], beginning at the [y]th element of the column. Requires:
+    [x] and [y] are in 0..7.*)
+let rec moves_for_column prop (x, y) = function
   | [] -> []
-  | None :: t -> moves_for_row prop row_num (col_num + 1) t
+  | None :: t -> moves_for_column prop (x, y + 1) t
   | Some (color, soldier) :: t ->
-      if color <> prop.color then
-        moves_for_row prop row_num (col_num + 1) t
+      if color <> prop.color then moves_for_column prop (x, y + 1) t
       else
         begin
           begin
             match soldier with
-            | Pawn -> Pawn.legal_moves prop (row_num, col_num)
-            | Knight -> Knight.legal_moves prop (row_num, col_num)
-            | Bishop -> Bishop.legal_moves prop (row_num, col_num)
-            | Rook -> Rook.legal_moves prop (row_num, col_num)
-            | Queen -> Queen.legal_moves prop (row_num, col_num)
-            | King -> King.legal_moves prop (row_num, col_num)
+            | Pawn -> Pawn.legal_moves prop (x, y)
+            | Knight -> Knight.legal_moves prop (x, y)
+            | Bishop -> Bishop.legal_moves prop (x, y)
+            | Rook -> Rook.legal_moves prop (x, y)
+            | Queen -> Queen.legal_moves prop (x, y)
+            | King -> King.legal_moves prop (x, y)
           end
-          @ moves_for_row prop row_num (col_num + 1) t
+          @ moves_for_column prop (x, y + 1) t
         end
 
 let legal_moves prop =
-  let row_handler (lst, row_num) row =
-    (lst @ moves_for_row prop row_num 0 row, row_num + 1)
+  let column_handler (lst, col_num) column =
+    (lst @ moves_for_column prop (col_num, 0) column, col_num + 1)
   in
-  fst (List.fold_left row_handler ([], 0) prop.board)
+  fst (List.fold_left column_handler ([], 0) prop.board)
