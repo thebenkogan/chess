@@ -49,7 +49,8 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) : move list =
+    raise (Failure "Unimplemented")
 end
 
 module Knight : SoldierLogic = struct
@@ -69,25 +70,29 @@ module Knight : SoldierLogic = struct
 
   (* Right now, this only returns the knight moves that are on the board
      and do not move to a square with a same color piece on it. *)
-  let legal_moves prop coords =
+  let legal_moves (prop : properties) (coords : int * int) : move list =
     let board = board_to_array prop.board in
     squares_to_moves coords (potential_squares coords board prop.color)
 end
 
 module Bishop : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) : move list =
+    raise (Failure "Unimplemented")
 end
 
 module Rook : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) : move list =
+    raise (Failure "Unimplemented")
 end
 
 module Queen : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) : move list =
+    raise (Failure "Unimplemented")
 end
 
 module King : SoldierLogic = struct
-  let legal_moves prop coords = raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) : move list =
+    raise (Failure "Unimplemented")
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
