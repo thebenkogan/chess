@@ -27,9 +27,10 @@ type properties = {
   h_rook_moved : bool;
 }
 
-let update_board bd mv = raise (Failure "Unimplemented")
+let update_board (bd : t) (mv : move) : t =
+  raise (Failure "Unimplemented")
 
-let load_game j = raise (Failure "Unimplemented")
+let load_game (j : Yojson.Basic.t) = raise (Failure "Unimplemented")
 
 (**********************************************************************
  * SOLDIER LOGIC:
