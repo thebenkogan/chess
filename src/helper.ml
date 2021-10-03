@@ -1,3 +1,7 @@
+(* NOTE: This file cannot contain any refrences to definitions in
+   game.ml as that would cause a dependency cycle. Put any helper
+   functions that require that dependency into game.ml. *)
+
 (** [board_to_array board] converts the list representation of a board
     to an array representation, where each column is now an array,
     joined together in a larger array. In other words, this converts a
