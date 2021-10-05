@@ -48,7 +48,22 @@ val legal_moves : properties -> move list
     providing context to the position and specifying the [color] to
     output moves for.*)
 
-val load_game : Yojson.Basic.t -> t
-(** [from_json j] is the board that [j] represents. This is what we will
-    call initially to create a starting position of pieces that we will
-    use to initialize a starting state. *)
+(**[SoldierLogic] defines the interface for each piece to determine the
+   legal moves for that piece. Requires: the piece at [coords] is of the
+   correct soldier type and is of the same color as specified in
+   [properties].*)
+module type SoldierLogic = sig
+  val legal_moves : properties -> int * int -> move list
+end
+
+module Pawn : SoldierLogic
+
+module Knight : SoldierLogic
+
+module Bishop : SoldierLogic
+
+module Rook : SoldierLogic
+
+module Queen : SoldierLogic
+
+module King : SoldierLogic
