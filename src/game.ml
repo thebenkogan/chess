@@ -22,6 +22,7 @@ type properties = {
   board : t;
   color : color;
   last_move : move;
+  enemy_moves : move list;
   king_moved : bool;
   a_rook_moved : bool;
   h_rook_moved : bool;
@@ -29,6 +30,10 @@ type properties = {
 
 let update_board (bd : t) (mv : move) : t =
   raise (Failure "Unimplemented")
+
+let is_attacked (prop : properties) (coords : int * int) =
+  let targets = get_targets prop.enemy_moves in
+  List.mem coords targets
 
 (**********************************************************************
  * SOLDIER LOGIC:

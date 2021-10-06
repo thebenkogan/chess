@@ -32,3 +32,9 @@ let is_valid_square board color coords =
 let squares_to_moves first squares =
   let to_move start target = (start, target) in
   List.map (to_move first) squares
+
+(** [get_targets moves] is the list of coordinates that each move in
+    [moves] targets.*)
+let rec get_targets = function
+  | [] -> []
+  | h :: t -> snd h :: get_targets t
