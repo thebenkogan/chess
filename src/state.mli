@@ -14,6 +14,12 @@ type t = {
     played, we set this to false, and back to true when we receive a
     move from the opponent.*)
   turn : bool;
+  (*True if the starting rook on the A file has moved.*)
+  a_rook_moved : bool;
+  (*True if the starting rook on the H file has moved.*)
+  h_rook_moved : bool;
+  (*True if the king has moved.*)
+  king_moved : bool;
 }
 
 val init_state : Game.t -> Game.color -> t

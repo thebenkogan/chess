@@ -23,15 +23,16 @@ type properties = {
   color : color;
   last_move : move;
   enemy_moves : move list;
-  king_moved : bool;
-  a_rook_moved : bool;
-  h_rook_moved : bool;
+  king_pos : int * int;
+  king_in_check : bool;
+  kingside_castle : bool;
+  queenside_castle : bool;
 }
 
 let update_board (bd : t) (mv : move) : t =
   raise (Failure "Unimplemented")
 
-let is_attacked (enemy_moves : move list) (coords : int * int) =
+let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
   let targets = get_targets enemy_moves in
   List.mem coords targets
 
@@ -44,12 +45,18 @@ let is_attacked (enemy_moves : move list) (coords : int * int) =
    shared by all modules, pull it out of its module and define it in
    this file. *)
 module type SoldierLogic = sig
-  val legal_moves : properties -> int * int -> move list
+  val legal_moves :
+    properties ->
+    int * int ->
+    (properties -> int * int -> bool) ->
+    move list
 end
 
 module Pawn : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else raise (Failure "Unimplemented")
 end
 
 module Knight : SoldierLogic = struct
@@ -69,29 +76,41 @@ module Knight : SoldierLogic = struct
 
   (* Right now, this only returns the knight moves that are on the board
      and do not move to a square with a same color piece on it. *)
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    let board = board_to_array prop.board in
-    squares_to_moves coords (potential_squares coords board prop.color)
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else
+      let board = board_to_array prop.board in
+      squares_to_moves coords
+        (potential_squares coords board prop.color)
 end
 
 module Bishop : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else raise (Failure "Unimplemented")
 end
 
 module Rook : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else raise (Failure "Unimplemented")
 end
 
 module Queen : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else raise (Failure "Unimplemented")
 end
 
 module King : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let legal_moves (prop : properties) (coords : int * int) pin_checker :
+      move list =
+    if pin_checker prop coords then []
+    else raise (Failure "Unimplemented")
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
@@ -103,31 +122,51 @@ end
    that match the color defined in prop, then concatenating the results
    together. *)
 
-(** [moves_for_row prop (x, y) row] is the list of all legal moves for
-    each piece in column number [x] that is of the same color as defined
-    in [prop], beginning at the [y]th element of the column. Requires:
-    [x] and [y] are in 0..7.*)
-let rec moves_for_column prop (x, y) = function
+(** [moves_for_column prop (x, y) pin_checker column] is the list of all
+    legal moves for each piece in column number [x] that is of the same
+    color as defined in [prop], beginning at the [y]th element of the
+    column. If a piece is considered pinned by [pin_checker], then no
+    moves will be returned for that piece. Requires: [x] and [y] are in
+    0..7.*)
+let rec moves_for_column prop (x, y) pin_checker = function
   | [] -> []
-  | None :: t -> moves_for_column prop (x, y + 1) t
+  | None :: t -> moves_for_column prop (x, y + 1) pin_checker t
   | Some (color, soldier) :: t ->
-      if color <> prop.color then moves_for_column prop (x, y + 1) t
+      if color <> prop.color then
+        moves_for_column prop (x, y + 1) pin_checker t
       else
         begin
           begin
             match soldier with
-            | Pawn -> Pawn.legal_moves prop (x, y)
-            | Knight -> Knight.legal_moves prop (x, y)
-            | Bishop -> Bishop.legal_moves prop (x, y)
-            | Rook -> Rook.legal_moves prop (x, y)
-            | Queen -> Queen.legal_moves prop (x, y)
-            | King -> King.legal_moves prop (x, y)
+            | Pawn -> Pawn.legal_moves prop (x, y) pin_checker
+            | Knight -> Knight.legal_moves prop (x, y) pin_checker
+            | Bishop -> Bishop.legal_moves prop (x, y) pin_checker
+            | Rook -> Rook.legal_moves prop (x, y) pin_checker
+            | Queen -> Queen.legal_moves prop (x, y) pin_checker
+            | King -> King.legal_moves prop (x, y) pin_checker
           end
-          @ moves_for_column prop (x, y + 1) t
+          @ moves_for_column prop (x, y + 1) pin_checker t
         end
 
-let legal_moves prop =
+let legal_moves ?pin_checker:(pc = fun _ _ -> false) (prop : properties)
+    =
   let column_handler (lst, col_num) column =
-    (lst @ moves_for_column prop (col_num, 0) column, col_num + 1)
+    (lst @ moves_for_column prop (col_num, 0) pc column, col_num + 1)
   in
   fst (List.fold_left column_handler ([], 0) prop.board)
+
+(*Can only test this when legal_moves is complete.*)
+let pin_checker (prop : properties) (x, y) : bool =
+  let board_arr = board_to_array prop.board in
+  board_arr.(x).(y) <- None;
+  let new_board = array_to_board board_arr in
+  let enemy_color = if prop.color = White then Black else White in
+  is_attacked
+    (legal_moves
+       {
+         prop with
+         board = new_board;
+         color = enemy_color;
+         king_in_check = false;
+       })
+    prop.king_pos
