@@ -31,8 +31,8 @@ type properties = {
 let update_board (bd : t) (mv : move) : t =
   raise (Failure "Unimplemented")
 
-let is_attacked (prop : properties) (coords : int * int) =
-  let targets = get_targets prop.enemy_moves in
+let is_attacked (enemy_moves : move list) (coords : int * int) =
+  let targets = get_targets enemy_moves in
   List.mem coords targets
 
 (**********************************************************************
