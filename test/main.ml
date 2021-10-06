@@ -4,13 +4,9 @@ open State
 open Game
 open Boards
 
-(* SAMPLE TEST HELPER FUNCTION: let index_test (name : string) (input :
-   char) (expected_output : int) : test = name >:: fun _ -> assert_equal
-   expected_output (index input) ~printer:string_of_int *)
-
-(** [start_room_test name input expected_output] constructs an OUnit
-    test named [name] that asserts the quality of [expected_output] with
-    [start_room input]. *)
+(** [is_attacked_test name enemy_moves coords expected_output]
+    constructs an OUnit test named [name] that asserts the quality of
+    [expected_output] with [is_attacked enemy_moves coords]. *)
 let is_attacked_test
     (name : string)
     (enemy_moves : move list)
