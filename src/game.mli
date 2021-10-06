@@ -32,6 +32,8 @@ type properties = {
   color : color;
   (*The last move played on this board.*)
   last_move : move;
+  (*The opponent's legal moves in the current position.*)
+  enemy_moves : move list;
   (*True if the starting rook on the A file has moved.*)
   king_moved : bool;
   (*True if the starting rook on the H file has moved.*)
@@ -42,6 +44,13 @@ type properties = {
 
 val update_board : t -> move -> t
 (** [update_board board move] is the board with [move] played.*)
+
+val is_attacked : move list -> int * int -> bool
+(** [is_attacked enemy_moves coords] is true if the square at [coords]
+    is attacked by one or more of the opponent's pieces, specified by
+    their legal moves [enemy_moves]. Requires: [coords] is on the board
+    and contains either no piece or a piece of the opposite color to
+    those for [enemy_moves].*)
 
 val legal_moves : properties -> move list
 (** [legal_moves color] is a list of legal moves with [properties]
