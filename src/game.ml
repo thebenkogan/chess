@@ -30,21 +30,14 @@ type properties = {
 let update_board (bd : t) (mv : move) : t =
   raise (Failure "Unimplemented")
 
-let load_game (j : Yojson.Basic.t) = raise (Failure "Unimplemented")
-
 (**********************************************************************
  * SOLDIER LOGIC:
  **********************************************************************)
 
-(** [SoldierLogic] defines the interface for each piece to determine the
-    legal moves for that piece. Requires: the piece at [coords] is of
-    the correct soldier type and is of the same color as specified in
-    [properties].
-
-    When implementing this: insert everything specific to the piece's
-    logic in its module unexposed. If you suspect some definition will
-    be shared by all modules, pull it out of its module and define it in
-    this file. *)
+(* When implementing this: insert everything specific to the piece's
+   logic in its module unexposed. If you suspect some definition will be
+   shared by all modules, pull it out of its module and define it in
+   this file. *)
 module type SoldierLogic = sig
   val legal_moves : properties -> int * int -> move list
 end
@@ -55,9 +48,9 @@ module Pawn : SoldierLogic = struct
 end
 
 module Knight : SoldierLogic = struct
-  let potential_squares (x, y) board color =
+  let potential_squares (x, y) board_arr color =
     List.filter
-      (is_valid_square board color)
+      (is_valid_square board_arr color)
       [
         (x + 2, y + 1);
         (x + 2, y - 1);

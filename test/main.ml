@@ -1,4 +1,8 @@
 open OUnit2
+open Chess
+open State
+open Game
+open Boards
 
 (** [index_test name input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with
@@ -9,6 +13,6 @@ open OUnit2
 
 let sample_tests = []
 
-let tests = "test suite for A1" >::: List.flatten [ sample_tests ]
+let tests = "test suite for chess" >::: List.flatten [ sample_tests ]
 
 let _ = run_test_tt_main tests
