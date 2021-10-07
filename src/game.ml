@@ -131,17 +131,15 @@ module King : SoldierLogic = struct
         (x - 1, y - 1);
       ]
 
-  let legal_moves (prop : properties) (coords : int * int) pin_checker :
-      move list =
-    if pin_checker prop coords then []
-    else
-      let board = board_to_array prop.board in
-      let not_attacked square =
-        not (is_attacked prop.enemy_moves square)
-      in
-      squares_to_moves coords
-        (List.filter not_attacked
-           (potential_squares coords board prop.color))
+  let legal_moves (prop : properties) (coords : int * int) _ : move list
+      =
+    let board = board_to_array prop.board in
+    let not_attacked square =
+      not (is_attacked prop.enemy_moves square)
+    in
+    squares_to_moves coords
+      (List.filter not_attacked
+         (potential_squares coords board prop.color))
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
