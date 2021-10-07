@@ -60,6 +60,11 @@ module Pawn : SoldierLogic = struct
 end
 
 module Knight : SoldierLogic = struct
+  (** [potential_squares coords board_arr color] are all of the
+      potential moves for the knight located at [coords] on the board
+      array [board_arr] with color [color]. A potential square is one
+      that is on the board and does not contain a piece of the same
+      color. *)
   let potential_squares (x, y) board_arr color =
     List.filter
       (is_valid_square board_arr color)
@@ -107,10 +112,36 @@ module Queen : SoldierLogic = struct
 end
 
 module King : SoldierLogic = struct
+  (** [potential_squares coords board_arr color] are all of the
+      potential moves for the king located at [coords] on the board
+      array [board_arr] with color [color]. A potential square is one
+      that is on the board and does not contain a piece of the same
+      color. *)
+  let potential_squares (x, y) board_arr color =
+    List.filter
+      (is_valid_square board_arr color)
+      [
+        (x + 1, y);
+        (x - 1, y);
+        (x, y + 1);
+        (x, y - 1);
+        (x + 1, y + 1);
+        (x + 1, y - 1);
+        (x - 1, y + 1);
+        (x - 1, y - 1);
+      ]
+
   let legal_moves (prop : properties) (coords : int * int) pin_checker :
       move list =
     if pin_checker prop coords then []
-    else raise (Failure "Unimplemented")
+    else
+      let board = board_to_array prop.board in
+      let not_attacked square =
+        not (is_attacked prop.enemy_moves square)
+      in
+      squares_to_moves coords
+        (List.filter not_attacked
+           (potential_squares coords board prop.color))
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
