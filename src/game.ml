@@ -131,15 +131,28 @@ module King : SoldierLogic = struct
         (x - 1, y - 1);
       ]
 
+  (** [castle_squares prop coords] is the list of squares to which the
+      king can currently castle as specified by [prop] and the king's
+      current position [coords]. If the king cannot castle kingside or
+      queenside, this is the empty list. *)
+  let castle_squares (prop : properties) (x, y) =
+    match (prop.kingside_castle, prop.queenside_castle) with
+    | true, true -> [ (x + 2, y); (x - 2, y) ]
+    | true, false -> [ (x + 2, y) ]
+    | false, true -> [ (x - 2, y) ]
+    | false, false -> []
+
   let legal_moves (prop : properties) (coords : int * int) _ : move list
       =
     let board = board_to_array prop.board in
+    let castle_append = castle_squares prop coords in
     let not_attacked square =
       not (is_attacked prop.enemy_moves square)
     in
     squares_to_moves coords
-      (List.filter not_attacked
-         (potential_squares coords board prop.color))
+      (castle_append
+      @ List.filter not_attacked
+          (potential_squares coords board prop.color))
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
