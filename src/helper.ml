@@ -8,6 +8,13 @@
     2d list to a 2d array.*)
 let board_to_array board = Array.of_list (List.map Array.of_list board)
 
+(** [array_to_board board_arr] converts the array representation of a
+    board to a list representation, where each column is now a list,
+    joined together in a larger list. In other words, this converts a 2d
+    array to a 2d list.*)
+let array_to_board board_arr =
+  Array.to_list (Array.map Array.to_list board_arr)
+
 (** [on_board (x, y)] is true if [x] and [y] are in 0..7 inclusive. *)
 let on_board (x, y) = x >= 0 && x <= 7 && y >= 0 && y <= 7
 
