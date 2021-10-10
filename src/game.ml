@@ -60,6 +60,11 @@ module Pawn : SoldierLogic = struct
 end
 
 module Knight : SoldierLogic = struct
+  (** [potential_squares coords board_arr color] are all of the
+      potential moves for the knight located at [coords] on the board
+      array [board_arr] with color [color]. A potential square is one
+      that is on the board and does not contain a piece of the same
+      color. *)
   let potential_squares (x, y) board_arr color =
     List.filter
       (is_valid_square board_arr color)
@@ -107,10 +112,47 @@ module Queen : SoldierLogic = struct
 end
 
 module King : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) pin_checker :
-      move list =
-    if pin_checker prop coords then []
-    else raise (Failure "Unimplemented")
+  (** [potential_squares coords board_arr color] are all of the
+      potential moves for the king located at [coords] on the board
+      array [board_arr] with color [color]. A potential square is one
+      that is on the board and does not contain a piece of the same
+      color. *)
+  let potential_squares (x, y) board_arr color =
+    List.filter
+      (is_valid_square board_arr color)
+      [
+        (x + 1, y);
+        (x - 1, y);
+        (x, y + 1);
+        (x, y - 1);
+        (x + 1, y + 1);
+        (x + 1, y - 1);
+        (x - 1, y + 1);
+        (x - 1, y - 1);
+      ]
+
+  (** [castle_squares prop coords] is the list of squares to which the
+      king can currently castle as specified by [prop] and the king's
+      current position [coords]. If the king cannot castle kingside or
+      queenside, this is the empty list. *)
+  let castle_squares (prop : properties) (x, y) =
+    match (prop.kingside_castle, prop.queenside_castle) with
+    | true, true -> [ (x + 2, y); (x - 2, y) ]
+    | true, false -> [ (x + 2, y) ]
+    | false, true -> [ (x - 2, y) ]
+    | false, false -> []
+
+  let legal_moves (prop : properties) (coords : int * int) _ : move list
+      =
+    let board = board_to_array prop.board in
+    let castle_append = castle_squares prop coords in
+    let not_attacked square =
+      not (is_attacked prop.enemy_moves square)
+    in
+    squares_to_moves coords
+      (castle_append
+      @ List.filter not_attacked
+          (potential_squares coords board prop.color))
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of

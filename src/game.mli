@@ -75,7 +75,10 @@ val legal_moves :
 (**[SoldierLogic] defines the interface for each piece to determine the
    legal moves for that piece. Requires: the piece at [coords] is of the
    correct soldier type and is of the same color as specified in
-   [properties].*)
+   [properties]. A legal move for a piece is one that obeys the rules
+   for the movement of that piece and does not put the king in check. If
+   [pin_checker] returns true for the piece, then that piece is
+   considered pinned and cannot move.*)
 module type SoldierLogic = sig
   val legal_moves :
     properties ->
