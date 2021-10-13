@@ -32,7 +32,16 @@ val init_state : Game.t -> Game.color -> t
     moving in place. *)
 
 val play_move : t -> Game.move -> t
-(** [play_move st move] is the state of the chess position with [move]
-    played. This can be called for moves by this player and received
-    moves from the opponent to update the current board and calculate
-    the new moves.*)
+(** [play_move st mv] is the state of the chess position with the player
+    of [st] playing [mv]. It is responsible for updating the board, last
+    move, king position, and if the A rook, H rook, or king have moved.
+    All other properties of the [game_state] are kept the same, and
+    [moves] is empty. [turn] is set to [false].*)
+
+val receive_move : t -> Game.move -> t
+(** [receive_move st mv] is the state of the chess position with [move]
+    played by the opponent of the player of [st]. It is responsible for
+    updating the board, last move, enemy moves, determining if the king
+    is in check, kingside and queenside castling rights, and the legal
+    moves of the new position. All other state variables are kept the
+    same. [turn] is set to [true].*)

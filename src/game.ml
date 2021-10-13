@@ -216,12 +216,12 @@ end
    that match the color defined in prop, then concatenating the results
    together. *)
 
-(** [moves_for_column prop (x, y) pin_checker column] is the list of all
-    legal moves for each piece in column number [x] that is of the same
-    color as defined in [prop], beginning at the [y]th element of the
-    column. If a piece is considered pinned by [pin_checker], then no
-    moves will be returned for that piece. Requires: [x] and [y] are in
-    0..7.*)
+(** [moves_for_column prop (x, y) pin_checker move_checker column] is
+    the list of all legal moves for each piece in column number [x] that
+    is of the same color as defined in [prop], beginning at the [y]th
+    element of the column. If a piece is considered pinned by
+    [pin_checker], then no moves will be returned for that piece.
+    Requires: [x] and [y] are in 0..7.*)
 let rec moves_for_column prop (x, y) pin_checker move_checker = function
   | [] -> []
   | None :: t ->
