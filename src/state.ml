@@ -37,7 +37,7 @@ let check_a_rook (oldx, oldy) = function
   | White -> oldx = 0 && oldy = 0
   | Black -> oldx = 0 && oldy = 7
 
-(** [check_a_rook coords color] is true if [coords] is the starting
+(** [check_h_rook coords color] is true if [coords] is the starting
     position of the rook on the H file depending on [color]. *)
 let check_h_rook (oldx, oldy) = function
   | White -> oldx = 7 && oldy = 0
