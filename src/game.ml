@@ -75,18 +75,52 @@ module Knight : SoldierLogic = struct
 end
 
 module Bishop : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let rec build_diag (x, y) board_arr dirx diry color =
+    if on_board (x, y) then []
+    else
+      match board_arr.(x).(y) with
+      | None ->
+          (x, y)
+          :: build_diag (x, y) board_arr (x + dirx) (y + diry) color
+      | Some (piece_color, _) when piece_color = color -> []
+      | Some (_, _) -> [ (x, y) ]
+
+  let legal_moves (prop : properties) (x, y) : move list =
+    let board = board_to_array prop.board in
+    let square_list =
+      build_diag (x + 1, y + 1) board 1 1 prop.color
+      @ build_diag (x - 1, y + 1) board (-1) 1 prop.color
+      @ build_diag (x + 1, y - 1) board 1 (-1) prop.color
+      @ build_diag (x - 1, y - 1) board (-1) (-1) prop.color
+    in
+    squares_to_moves (x, y) square_list
 end
 
 module Rook : SoldierLogic = struct
-  let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+  let rec build_row (x, y) board_arr dirx diry color =
+    if on_board (x, y) then []
+    else
+      match board_arr.(x).(y) with
+      | None ->
+          (x, y)
+          :: build_row (x, y) board_arr (x + dirx) (y + diry) color
+      | Some (piece_color, _) when piece_color = color -> []
+      | Some (_, _) -> [ (x, y) ]
+
+  let legal_moves (prop : properties) (x, y) : move list =
+    let board = board_to_array prop.board in
+    let square_list =
+      build_row (x + 1, y) board 1 0 prop.color
+      @ build_row (x - 1, y) board (-1) 0 prop.color
+      @ build_row (x, y + 1) board 0 1 prop.color
+      @ build_row (x, y - 1) board 0 (-1) prop.color
+    in
+    squares_to_moves (x, y) square_list
 end
 
 module Queen : SoldierLogic = struct
   let legal_moves (prop : properties) (coords : int * int) : move list =
-    raise (Failure "Unimplemented")
+    Bishop.legal_moves prop coords @ Rook.legal_moves prop coords
 end
 
 module King : SoldierLogic = struct
