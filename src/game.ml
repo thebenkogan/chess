@@ -29,69 +29,8 @@ type properties = {
   queenside_castle : bool;
 }
 
-(** [update_board bd mv] updates the board [bd] by moving the piece
-    according to [mv] by its new location. Requires: [mv] represents a
-    complete and legally valid game move *)
-let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
-    =
-  let board_arr = board_to_array bd in
-  let old_piece = board_arr.(old_x).(old_y) in
-  board_arr.(old_x).(old_y) <- None;
-  board_arr.(new_x).(new_y) <- old_piece;
-  let check_conditions =
-    (* Check for if pawn reaches either end *)
-    if
-      board_arr.(new_x).(new_y) = Some (White, Pawn)
-      && new_y = 7 && old_y < 7
-    then board_arr.(new_x).(new_y) <- Some (White, Queen)
-    else if
-      board_arr.(new_x).(new_y) = Some (Black, Pawn)
-      && new_y = 0 && old_y > 0
-    then board_arr.(new_x).(new_y) <- Some (Black, Queen);
-    (* Check for if en passant just occurred *)
-    if
-      old_piece = Some (White, Pawn)
-      && (new_x - old_x = 1 || new_x - old_x = -1)
-      && new_y - old_y = 1
-    then board_arr.(new_x + (new_x - old_x)).(new_y - 1) <- None
-    else if
-      old_piece = Some (Black, Pawn)
-      && (new_x - old_x = 1 || new_x - old_x = -1)
-      && new_y - old_y = -1
-    then board_arr.(new_x + (new_x - old_x)).(new_y + 1) <- None;
-    (* Check if castling just occurred *)
-    (* White King castling right *)
-    if
-      old_piece = Some (White, King)
-      && new_y = 0 && old_y = 0
-      && new_x - old_x = 2
-      && board_arr.(7).(0) = Some (White, Rook)
-    then board_arr.(5).(0) <- Some (White, Rook);
-    (* White King castling left *)
-    if
-      old_piece = Some (White, King)
-      && new_y = 0 && old_y = 0
-      && new_x - old_x = -2
-      && board_arr.(0).(0) = Some (White, Rook)
-    then board_arr.(3).(0) <- Some (White, Rook);
-    (* Black king castling right (from White's POV) *)
-    if
-      old_piece = Some (Black, King)
-      && new_y = 7 && old_y = 7
-      && new_x - old_x = 2
-      && board_arr.(7).(7) = Some (Black, Rook)
-    then board_arr.(5).(7) <- Some (Black, Rook);
-    (* Black king castling left (from White's POV) *)
-    if
-      old_piece = Some (Black, King)
-      && new_y = 7 && old_y = 7
-      && new_x - old_x = -2
-      && board_arr.(0).(7) = Some (Black, Rook)
-    then board_arr.(3).(7) <- Some (Black, Rook)
-  in
-  check_conditions;
-  let output_board = array_to_board board_arr in
-  output_board
+let update_board (bd : t) (mv : move) : t =
+  raise (Failure "Unimplemented")
 
 let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
   let targets = get_targets enemy_moves in
@@ -115,69 +54,13 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
-  let get_element_coord (coordinate : int * int) (index : int) : int =
-    match coordinate with
-    | x, _ when index = 0 -> x
-    | _, y when index = 1 -> y
-    | _ -> raise (Failure "Index out of bounds")
-
-  (** Returns true if the previous move is en passant-able (i.e. moved
-      two from the previous y-position), and that the current coordinate
-      position of the pawn can move diagonally due to en passant rule *)
-  let check_en_passant ((x, y) : int * int) (prop : properties) : bool =
-    let board_arr = board_to_array prop.board in
-    let piece = board_arr.(x).(y) in
-    let (old_x, old_y), (new_x, new_y) = prop.last_move in
-    let check_conditions =
-      (* Check for White Pawn en passant: *)
-      if piece = Some (White, Pawn) then
-        (* Ensure last element moved down by 2, is a Black Pawn, is to
-           left or right *)
-        if
-          new_y - old_y = -2
-          && board_arr.(new_x).(new_y) = Some (Black, Pawn)
-          && (new_x - x = 1 || new_x - x = -1)
-        then true
-        else false
-      else if
-        new_y - new_x = 2
-        && board_arr.(new_x).(new_y) = Some (Black, Pawn)
-        && (new_x - x = 1 || new_x - x = -1)
-      then true
-      else false
-    in
-    check_conditions
-
-  let is_valid_square_pawn
-      (board : piece option array array)
-      (color : color)
-      (x, y) : bool =
-    on_board (x, y) && not (same_color (x, y) board color)
-
-  let potential_squares (x, y) board_arr color last_move =
-    let piece = board_arr.(x).(y) in
-    if piece = Some (White, Pawn) then
-      List.filter
-        (is_valid_square board_arr color)
-        [ (x + 1, y + 1); (x - 1, y + 1); (x, y + 1) ]
-    else
-      List.filter
-        (is_valid_square board_arr color)
-        [ (x - 1, y - 1); (x + 1, y - 1); (x, y - 1) ]
-
   let legal_moves
       (prop : properties)
       (coords : int * int)
       pin_checker
       move_checker : move list =
     if pin_checker prop coords then []
-    else
-      let board_arr = board_to_array prop.board in
-      let moves =
-        squares_to_moves coords
-          (potential_squares coords board_arr prop.color prop.last_move)
-      in
-      moves
+    else raise (Failure "Unimplemented")
 end
 
 module Knight : SoldierLogic = struct
