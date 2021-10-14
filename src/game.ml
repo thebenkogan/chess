@@ -98,7 +98,7 @@ end
 
 module Rook : SoldierLogic = struct
   let rec build_row (x, y) board_arr dirx diry color =
-    if on_board (x, y) then []
+    if not (on_board (x, y)) then []
     else
       match board_arr.(x).(y) with
       | None ->
