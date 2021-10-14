@@ -1,3 +1,5 @@
+(*NOTE: ocamlformat is ignored for this file to reduce board sizes.*)
+
 (*This file will contain all of the boards to use in state and tests.*)
 
 open Game
