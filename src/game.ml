@@ -60,34 +60,18 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
       && new_y - old_y = -1
     then board_arr.(new_x + (new_x - old_x)).(new_y + 1) <- None;
     (* Check if castling just occurred *)
-    (* White King castling right *)
+    (* Rightside castle *)
     if
-      old_piece = Some (White, King)
-      && new_y = 0 && old_y = 0
+      (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = 2
-      && board_arr.(7).(0) = Some (White, Rook)
-    then board_arr.(5).(0) <- Some (White, Rook);
-    (* White King castling left *)
+    then board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
+    board_arr.(7).(new_y) <- None;
+    (* Leftside castle *)
     if
-      old_piece = Some (White, King)
-      && new_y = 0 && old_y = 0
+      (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = -2
-      && board_arr.(0).(0) = Some (White, Rook)
-    then board_arr.(3).(0) <- Some (White, Rook);
-    (* Black king castling right (from White's POV) *)
-    if
-      old_piece = Some (Black, King)
-      && new_y = 7 && old_y = 7
-      && new_x - old_x = 2
-      && board_arr.(7).(7) = Some (Black, Rook)
-    then board_arr.(5).(7) <- Some (Black, Rook);
-    (* Black king castling left (from White's POV) *)
-    if
-      old_piece = Some (Black, King)
-      && new_y = 7 && old_y = 7
-      && new_x - old_x = -2
-      && board_arr.(0).(7) = Some (Black, Rook)
-    then board_arr.(3).(7) <- Some (Black, Rook)
+    then board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
+    board_arr.(0).(new_y) <- None
   in
   check_conditions;
   let output_board = array_to_board board_arr in
