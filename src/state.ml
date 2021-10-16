@@ -1,5 +1,6 @@
 open Game
 open Helper
+open Boards
 
 type t = {
   game_state : Game.properties;
@@ -11,7 +12,28 @@ type t = {
 }
 
 let init_state (board : Game.t) (color : Game.color) : t =
-  raise (Failure "Unimplemented")
+  let init_properties =
+    {
+      board = starting_board;
+      color;
+      last_move = ((-1, -1), (-1, -1));
+      enemy_moves = [];
+      king_pos = (if color = White then (4, 0) else (4, 7));
+      king_in_check = false;
+      kingside_castle = false;
+      queenside_castle = false;
+    }
+  in
+  let init_moves = legal_moves init_properties in
+  let init_turn = color = White in
+  {
+    game_state = init_properties;
+    moves = init_moves;
+    turn = init_turn;
+    a_rook_moved = false;
+    h_rook_moved = false;
+    king_moved = false;
+  }
 
 (** [enemy_properties bd our_color] is the game properties for the
     opponent with the opposite color of [our_color] and board [bd]. The
