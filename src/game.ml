@@ -99,55 +99,177 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
-  let get_element_coord (coordinate : int * int) (index : int) : int =
-    match coordinate with
-    | x, _ when index = 0 -> x
-    | _, y when index = 1 -> y
-    | _ -> raise (Failure "Index out of bounds")
-
   (** Returns true if the previous move is en passant-able (i.e. moved
       two from the previous y-position), and that the current coordinate
       position of the pawn can move diagonally due to en passant rule *)
-  let check_en_passant ((x, y) : int * int) (prop : properties) : bool =
-    let board_arr = board_to_array prop.board in
-    let piece = board_arr.(x).(y) in
-    let (old_x, old_y), (new_x, new_y) = prop.last_move in
+
+  let check_en_passant_left
+      (curr_x, curr_y)
+      ((last_x_old, last_y_old), (last_x_new, last_y_new))
+      color
+      board =
+    let last_piece = board.(last_x_new).(last_y_new) in
+    let net_y = last_y_new - last_y_old in
+
+    if color = White then
+      if
+        (* Looking diagonally up-left *)
+        last_piece = Some (Black, Pawn)
+        && net_y = -2
+        && last_x_new - curr_x = -1
+        && board.(curr_x - 1).(curr_y + 1) = None
+      then true
+      else false
+    else if
+      (* Looking diagonally down-left *)
+      last_piece = Some (White, Pawn)
+      && net_y = 2
+      && last_x_new - curr_x = -1
+      && board.(curr_x - 1).(curr_y - 1) = None
+    then true
+    else false
+
+  let check_en_passant_right
+      (curr_x, curr_y)
+      ((last_x_old, last_y_old), (last_x_new, last_y_new))
+      color
+      board =
+    let last_piece = board.(last_x_new).(last_y_new) in
+    let net_y = last_y_new - last_y_old in
+
+    if color = White then
+      if
+        (* Looking diagonally up-right *)
+        last_piece = Some (Black, Pawn)
+        && net_y = -2
+        && last_x_new - curr_x = 1
+        && board.(curr_x - 1).(curr_y + 1) = None
+      then true
+      else false
+    else if
+      (* Looking diagonally down-right *)
+      last_piece = Some (White, Pawn)
+      && net_y = 2
+      && last_x_new - curr_x = 1
+      && board.(curr_x - 1).(curr_y - 1) = None
+    then true
+    else false
+
+  let is_valid_square_pawn
+      (curr_x, curr_y)
+      board
+      color
+      last_move
+      (pot_x, pot_y) : bool =
+    let net_x = pot_x - curr_x in
+    let net_y = pot_y - curr_y in
+    let left_en_passant_able =
+      check_en_passant_left (curr_x, curr_y) last_move color board
+    in
+    let right_en_passant_able =
+      check_en_passant_right (curr_x, curr_y) last_move color board
+    in
+    let basic_valid_square =
+      is_valid_square board color (pot_x, pot_y)
+    in
+
     let check_conditions =
-      (* Check for White Pawn en passant: *)
-      if piece = Some (White, Pawn) then
-        (* Ensure last element moved down by 2, is a Black Pawn, is to
-           left or right *)
+      if color = White then
         if
-          new_y - old_y = -2
-          && board_arr.(new_x).(new_y) = Some (Black, Pawn)
-          && (new_x - x = 1 || new_x - x = -1)
+          (* Go forward two *)
+          basic_valid_square && curr_y = 1 && net_y = 2 && net_x = 2
+          && board.(curr_x).(curr_y + 1) = None
+          && board.(curr_x).(curr_y + 2) = None
+        then true (* Go forward one *)
+        else if
+          basic_valid_square && net_y = 1 && net_x = 0
+          && board.(curr_x).(curr_y + 1) = None
+        then true (* Diagonal up-left -- no en passant *)
+        else if
+          basic_valid_square
+          && (not left_en_passant_able)
+          && net_y = 1 && net_x = -1
+          && board.(curr_x - 1).(curr_y + 1) != None
+        then true (* Diagonal up-left -- Yes en passant *)
+        else if
+          basic_valid_square && left_en_passant_able && net_y = 1
+          && net_x = -1
+          && board.(curr_x - 1).(curr_y + 1) = None
+        then true (* Diagonal up-right -- no en passant *)
+        else if
+          basic_valid_square
+          && (not right_en_passant_able)
+          && net_y = 1 && net_x = 1
+          && board.(curr_x + 1).(curr_y + 1) != None
+        then true (* Diagonal up-right -- Yes en passant *)
+        else if
+          basic_valid_square && right_en_passant_able && net_y = 1
+          && net_x = 1
+          && board.(curr_x + 1).(curr_y + 1) = None
         then true
-        else false
+        else false (* Check when color is Black *)
       else if
-        new_y - new_x = 2
-        && board_arr.(new_x).(new_y) = Some (Black, Pawn)
-        && (new_x - x = 1 || new_x - x = -1)
+        (* Go forward two *)
+        basic_valid_square && curr_y = 6 && net_y = -2 && net_x = 0
+        && board.(curr_x).(curr_y - 1) = None
+        && board.(curr_x).(curr_y - 2) = None
+      then true (* Go forward one *)
+      else if
+        basic_valid_square && net_y = -1 && net_x = 0
+        && board.(curr_x).(curr_y - 1) = None
+      then true (* Diagonal down-left -- no en passant *)
+      else if
+        basic_valid_square
+        && (not left_en_passant_able)
+        && net_y = -1 && net_x = -1
+        && board.(curr_x - 1).(curr_y - 1) != None
+      then true (* Diagonal down-left -- Yes en passant *)
+      else if
+        basic_valid_square && left_en_passant_able && net_y = -1
+        && net_x = -1
+        && board.(curr_x - 1).(curr_y - 1) = None
+      then true (* Diagonal down-right -- no en passant *)
+      else if
+        basic_valid_square
+        && (not right_en_passant_able)
+        && net_y = -1 && net_x = 1
+        && board.(curr_x + 1).(curr_y - 1) != None
+      then true (* Diagonal down-right -- Yes en passant *)
+      else if
+        basic_valid_square && right_en_passant_able && net_y = -1
+        && net_x = 1
+        && board.(curr_x + 1).(curr_y - 1) = None
       then true
       else false
     in
+
     check_conditions
 
-  let is_valid_square_pawn
-      (board : piece option array array)
+  (* =================================================== *)
+  let potential_squares
+      (curr_x, curr_y)
+      board_arr
       (color : color)
-      (x, y) : bool =
-    on_board (x, y) && not (same_color (x, y) board color)
-
-  let potential_squares (x, y) board_arr color last_move =
-    let piece = board_arr.(x).(y) in
-    if piece = Some (White, Pawn) then
+      last_move : (int * int) list =
+    (* White Pawn potential moves *)
+    if color = White then
       List.filter
-        (is_valid_square board_arr color)
-        [ (x + 1, y + 1); (x - 1, y + 1); (x, y + 1) ]
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        [
+          (curr_x, curr_y + 2);
+          (curr_x, curr_y + 1);
+          (curr_x + 1, curr_y + 1);
+          (curr_x - 1, curr_y + 1);
+        ] (* Black Pawn potential moves *)
     else
       List.filter
-        (is_valid_square board_arr color)
-        [ (x - 1, y - 1); (x + 1, y - 1); (x, y - 1) ]
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        [
+          (curr_x, curr_y + 2);
+          (curr_x, curr_y + 1);
+          (curr_x + 1, curr_y + 1);
+          (curr_x - 1, curr_y + 1);
+        ]
 
   let legal_moves
       (prop : properties)
