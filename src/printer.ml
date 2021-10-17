@@ -1,6 +1,8 @@
 open Game
 open Helper
 
+(** [get_piece_text color soldier] is the text version of the piece
+    specified by [color] and [soldier]. *)
 let get_piece_text color = function
   | Pawn -> if color = White then "♟︎" else "♙"
   | Knight -> if color = White then "♞" else "♘"
@@ -9,6 +11,8 @@ let get_piece_text color = function
   | Queen -> if color = White then "♛" else "♕"
   | King -> if color = White then "♚" else "♔"
 
+(** [print_board bd row] iterates through each row of [bd] starting at
+    row number [row] and descending towards white's starting position. *)
 let rec print_board bd row =
   if row = -1 then ()
   else (

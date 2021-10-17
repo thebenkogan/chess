@@ -260,19 +260,21 @@ let legal_moves
 
 (*Can only test this when legal_moves is complete.*)
 let pin_checker (prop : properties) (x, y) : bool =
-  let board_arr = board_to_array prop.board in
-  board_arr.(x).(y) <- None;
-  let new_board = array_to_board board_arr in
-  let enemy_color = if prop.color = White then Black else White in
-  is_attacked
-    (legal_moves
-       {
-         prop with
-         board = new_board;
-         color = enemy_color;
-         king_in_check = false;
-       })
-    prop.king_pos
+  if prop.king_in_check then false
+  else
+    let board_arr = board_to_array prop.board in
+    board_arr.(x).(y) <- None;
+    let new_board = array_to_board board_arr in
+    let enemy_color = if prop.color = White then Black else White in
+    is_attacked
+      (legal_moves
+         {
+           prop with
+           board = new_board;
+           color = enemy_color;
+           king_in_check = false;
+         })
+      prop.king_pos
 
 let move_checker (prop : properties) (mv : move) : bool =
   let new_board = update_board prop.board mv in
