@@ -101,12 +101,12 @@ end
 
 module Bishop : SoldierLogic = struct
   let rec build_diag (x, y) board_arr dirx diry color =
-    if on_board (x, y) then []
+    if not (on_board (x, y)) then []
     else
       match board_arr.(x).(y) with
       | None ->
           (x, y)
-          :: build_diag (x, y) board_arr (x + dirx) (y + diry) color
+          :: build_diag (x + dirx, y + diry) board_arr dirx diry color
       | Some (piece_color, _) when piece_color = color -> []
       | Some (_, _) -> [ (x, y) ]
 
@@ -133,7 +133,7 @@ module Rook : SoldierLogic = struct
       match board_arr.(x).(y) with
       | None ->
           (x, y)
-          :: build_row (x, y) board_arr (x + dirx) (y + diry) color
+          :: build_row (x + dirx, y + diry) board_arr dirx diry color
       | Some (piece_color, _) when piece_color = color -> []
       | Some (_, _) -> [ (x, y) ]
 
