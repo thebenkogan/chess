@@ -125,9 +125,7 @@ let receive_move (st : t) (mv : move) : t =
       kingside_castle = false (*TODO*);
     }
   in
-  let new_moves =
-    legal_moves ~pin_checker ~move_checker new_properties
-  in
+  let new_moves = legal_moves ~move_checker new_properties in
   {
     st with
     game_state = new_properties;

@@ -52,8 +52,7 @@ end
 module Pawn : SoldierLogic = struct
   let legal_moves (prop : properties) (coords : int * int) move_checker
       : move list =
-    if pin_checker prop coords then []
-    else raise (Failure "Unimplemented")
+    raise (Failure "Unimplemented")
 end
 
 module Knight : SoldierLogic = struct
@@ -78,54 +77,45 @@ module Knight : SoldierLogic = struct
 
   let legal_moves (prop : properties) (coords : int * int) move_checker
       : move list =
-    if pin_checker prop coords then []
-    else
-      let board = board_to_array prop.board in
-      let moves =
-        squares_to_moves coords
-          (potential_squares coords board prop.color)
-      in
-      if prop.king_in_check then List.filter (move_checker prop) moves
-      else moves
+    let board = board_to_array prop.board in
+    let moves =
+      squares_to_moves coords
+        (potential_squares coords board prop.color)
+    in
+    List.filter (move_checker prop) moves
 end
 
 module Bishop : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
-    if pin_checker prop (x, y) then []
-    else
-      let board = board_to_array prop.board in
-      let square_list =
-        build_line (x + 1, y + 1) board 1 1 prop.color
-        @ build_line (x - 1, y + 1) board (-1) 1 prop.color
-        @ build_line (x + 1, y - 1) board 1 (-1) prop.color
-        @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
-      in
-      let moves = squares_to_moves (x, y) square_list in
-      if prop.king_in_check then List.filter (move_checker prop) moves
-      else moves
+    let board = board_to_array prop.board in
+    let square_list =
+      build_line (x + 1, y + 1) board 1 1 prop.color
+      @ build_line (x - 1, y + 1) board (-1) 1 prop.color
+      @ build_line (x + 1, y - 1) board 1 (-1) prop.color
+      @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
+    in
+    let moves = squares_to_moves (x, y) square_list in
+    List.filter (move_checker prop) moves
 end
 
 module Rook : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
-    if pin_checker prop (x, y) then []
-    else
-      let board = board_to_array prop.board in
-      let square_list =
-        build_line (x + 1, y) board 1 0 prop.color
-        @ build_line (x - 1, y) board (-1) 0 prop.color
-        @ build_line (x, y + 1) board 0 1 prop.color
-        @ build_line (x, y - 1) board 0 (-1) prop.color
-      in
-      let moves = squares_to_moves (x, y) square_list in
-      if prop.king_in_check then List.filter (move_checker prop) moves
-      else moves
+    let board = board_to_array prop.board in
+    let square_list =
+      build_line (x + 1, y) board 1 0 prop.color
+      @ build_line (x - 1, y) board (-1) 0 prop.color
+      @ build_line (x, y + 1) board 0 1 prop.color
+      @ build_line (x, y - 1) board 0 (-1) prop.color
+    in
+    let moves = squares_to_moves (x, y) square_list in
+    List.filter (move_checker prop) moves
 end
 
 module Queen : SoldierLogic = struct
   let legal_moves (prop : properties) (coords : int * int) move_checker
       : move list =
-    Bishop.legal_moves prop coords pin_checker move_checker
-    @ Rook.legal_moves prop coords pin_checker move_checker
+    Bishop.legal_moves prop coords move_checker
+    @ Rook.legal_moves prop coords move_checker
 end
 
 module King : SoldierLogic = struct
@@ -181,12 +171,10 @@ end
    that match the color defined in prop, then concatenating the results
    together. *)
 
-(** [moves_for_column prop (x, y) pin_checker move_checker column] is
-    the list of all legal moves for each piece in column number [x] that
-    is of the same color as defined in [prop], beginning at the [y]th
-    element of the column. If a piece is considered pinned by
-    [pin_checker], then no moves will be returned for that piece.
-    Requires: [x] and [y] are in 0..7.*)
+(** [moves_for_column prop (x, y) move_checker column] is the list of
+    all legal moves for each piece in column number [x] that is of the
+    same color as defined in [prop], beginning at the [y]th element of
+    the column. Requires: [x] and [y] are in 0..7.*)
 let rec moves_for_column prop (x, y) move_checker = function
   | [] -> []
   | None :: t -> moves_for_column prop (x, y + 1) move_checker t
