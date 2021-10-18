@@ -39,8 +39,8 @@ let empty_with_piece piece : Game.t =
 let knight_board : Game.t = 
   [
     [ None; None; Some (White, Knight); None; None; None; None; None;];
-    [ None; None; None; None; Some (Black, Knight); None; None; None;];
-    [ None; Some (White, Knight); None; None; None; None; None; None;];
+    [ None; None; None; None; Some (Black, Rook); None; None; None;];
+    [ None; Some (White, Queen); None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
