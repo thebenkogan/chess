@@ -45,3 +45,15 @@ let squares_to_moves first squares =
 let rec get_targets = function
   | [] -> []
   | h :: t -> snd h :: get_targets t
+
+(** [build_line (x,y) board_arr dirx diry color] returns a list of valid
+    squares in a single direction that a soldier can move to. *)
+let rec build_line (x, y) board_arr dirx diry color =
+  if not (on_board (x, y)) then []
+  else
+    match board_arr.(x).(y) with
+    | None ->
+        (x, y)
+        :: build_line (x + dirx, y + diry) board_arr dirx diry color
+    | Some (piece_color, _) when piece_color = color -> []
+    | Some (_, _) -> [ (x, y) ]
