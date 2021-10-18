@@ -139,7 +139,6 @@ module Pawn : SoldierLogic = struct
 
     if color = White then
       if
-        (* Looking diagonally up-right *)
         last_piece = Some (Black, Pawn)
         && net_y = -2
         && last_x_new - curr_x = 1
@@ -147,7 +146,6 @@ module Pawn : SoldierLogic = struct
       then true
       else false
     else if
-      (* Looking diagonally down-right *)
       last_piece = Some (White, Pawn)
       && net_y = 2
       && last_x_new - curr_x = 1
@@ -283,7 +281,8 @@ module Pawn : SoldierLogic = struct
         squares_to_moves coords
           (potential_squares coords board_arr prop.color prop.last_move)
       in
-      moves
+      if prop.king_in_check then List.filter (move_checker prop) moves
+      else moves
 end
 
 module Knight : SoldierLogic = struct
