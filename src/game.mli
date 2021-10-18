@@ -81,31 +81,3 @@ val legal_moves :
     unpinned pieces that do not put the king in check. By default,
     [move_checker] will treat every move as not putting the king in
     check.*)
-
-(**[SoldierLogic] defines the interface for each piece to determine the
-   legal moves for that piece. Requires: the piece at [coords] is of the
-   correct soldier type and is of the same color as specified in
-   [properties]. A legal move for a piece is one that obeys the rules
-   for the movement of that piece and does not put the king in check. If
-   [pin_checker] returns true for the piece, then that piece is
-   considered pinned and cannot move.*)
-module type SoldierLogic = sig
-  val legal_moves :
-    properties ->
-    int * int ->
-    (properties -> int * int -> bool) ->
-    (properties -> move -> bool) ->
-    move list
-end
-
-module Pawn : SoldierLogic
-
-module Knight : SoldierLogic
-
-module Bishop : SoldierLogic
-
-module Rook : SoldierLogic
-
-module Queen : SoldierLogic
-
-module King : SoldierLogic

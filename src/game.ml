@@ -40,10 +40,13 @@ let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
  * SOLDIER LOGIC:
  **********************************************************************)
 
-(* When implementing this: insert everything specific to the piece's
-   logic in its module unexposed. If you suspect some definition will be
-   shared by all modules, pull it out of its module and define it in
-   this file. *)
+(**[SoldierLogic] defines the interface for each piece to determine the
+   legal moves for that piece. Requires: the piece at [coords] is of the
+   correct soldier type and is of the same color as specified in
+   [properties]. A legal move for a piece is one that obeys the rules
+   for the movement of that piece and does not put the king in check. If
+   [pin_checker] returns true for the piece, then that piece is
+   considered pinned and cannot move.*)
 module type SoldierLogic = sig
   val legal_moves :
     properties ->

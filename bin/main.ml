@@ -9,29 +9,6 @@ exception Malformed
 
 exception Illegal
 
-(** [pp_move mv] pretty-prints the move [mv] as it is read as a tuple. *)
-let pp_move mv =
-  let x1 = string_of_int (fst (fst mv)) in
-  let y1 = string_of_int (snd (fst mv)) in
-  let x2 = string_of_int (fst (snd mv)) in
-  let y2 = string_of_int (snd (snd mv)) in
-  "((" ^ x1 ^ ", " ^ y1 ^ "), (" ^ x2 ^ ", " ^ y2 ^ "))"
-
-(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
-    pretty-print each element of [lst]. TAKEN FROM A2.*)
-let pp_list pp_elt lst =
-  let pp_elts lst =
-    let rec loop n acc = function
-      | [] -> acc
-      | [ h ] -> acc ^ pp_elt h
-      | h1 :: (h2 :: t as t') ->
-          if n = 100 then acc ^ "..." (* stop printing long list *)
-          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
-    in
-    loop 0 "" lst
-  in
-  "[" ^ pp_elts lst ^ "]"
-
 (** [input_to_move str] converts [str] to a move. Requires: [str] is the
     string form of a valid move with the correct whitespace and
     parentheses. Format: ((x, y), (x, y)). Raises: [Malformed] if [str]
@@ -57,7 +34,7 @@ let input_to_move str : move =
     prompting the player, this prints out white's legal moves as a list.*)
 let rec play_game state black =
   pretty_print state.game_state.board;
-  print_endline ("\n" ^ pp_list pp_move state.moves);
+  print_endline ("\n" ^ pp_move_list state.moves);
   print_endline "\n Enter a move: ";
   match read_line () with
   | str -> begin

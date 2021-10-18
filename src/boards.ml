@@ -4,7 +4,7 @@
 
 open Game
 
-let starting_board : piece option list list =
+let starting_board : Game.t =
   [
     (*Column 1*)
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
@@ -22,4 +22,28 @@ let starting_board : piece option list list =
     [ Some (White, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
     (*Column 8*)
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+  ]
+
+let empty_with_piece piece : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; piece; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+
+let knight_board : Game.t = 
+  [
+    [ None; None; Some (White, Knight); None; None; None; None; None;];
+    [ None; None; None; None; Some (Black, Knight); None; None; None;];
+    [ None; Some (White, Knight); None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
   ]
