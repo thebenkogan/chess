@@ -48,7 +48,7 @@ let knight_board : Game.t =
     [ None; None; None; None; None; None; None; None;];
   ]
 
-let pin_checker_board1 : Game.t = 
+let move_checker_board1 : Game.t = 
   [
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
     [ None; Some (White, Pawn); None; Some (Black, Bishop); None; None; Some (Black, Pawn); Some (Black, Knight);];
@@ -60,7 +60,7 @@ let pin_checker_board1 : Game.t =
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ]
 
-let pin_checker_board2 : Game.t = 
+let move_checker_board2 : Game.t = 
   [
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
     [ None; Some (White, Pawn); None; Some (Black, Bishop); None; None; Some (Black, Pawn); Some (Black, Knight);];
@@ -72,7 +72,7 @@ let pin_checker_board2 : Game.t =
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ]
   
-let pin_checker_board3 : Game.t = 
+let move_checker_board3 : Game.t = 
   [
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
@@ -84,7 +84,7 @@ let pin_checker_board3 : Game.t =
     [ None; None; None; None; None; None; None; None;];
   ]  
 
-let pin_checker_board5 : Game.t = 
+let move_checker_board5 : Game.t = 
   [
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
     [ None; Some (White, Pawn); None; Some (Black, Bishop); None; None; Some (Black, Pawn); Some (Black, Knight);];

@@ -98,7 +98,7 @@ let knight_tests =
       (0, 2);
   ]
 
-let pin_checker_tests =
+let move_checker_tests =
   [
     legal_moves_test "King is in check, not pinned"
       {
