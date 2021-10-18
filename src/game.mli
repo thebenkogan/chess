@@ -57,7 +57,8 @@ val is_attacked : move list -> int * int -> bool
 val pin_checker : properties -> int * int -> bool
 (** [pin_checker prop coords] is true if the piece at [coords] is
     pinned. A piece is pinned if that color's king is attacked when the
-    piece is removed from the board. Requires: [coords] is on the board
+    piece is removed from the board. If the king of [prop] is currently
+    in check, this is always false. Requires: [coords] is on the board
     and is a piece of the color specified in [prop].*)
 
 val move_checker : properties -> move -> bool
