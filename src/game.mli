@@ -54,30 +54,16 @@ val is_attacked : move list -> int * int -> bool
     and contains either no piece or a piece of the opposite color to
     those for [enemy_moves].*)
 
-val pin_checker : properties -> int * int -> bool
-(** [pin_checker prop coords] is true if the piece at [coords] is
-    pinned. A piece is pinned if that color's king is attacked when the
-    piece is removed from the board. If the king of [prop] is currently
-    in check, this is always false. Requires: [coords] is on the board
-    and is a piece of the color specified in [prop].*)
-
 val move_checker : properties -> move -> bool
-(** [pin_checker mv] is true if [mv] does not put the king of the side
-    specificed by [prop] in check. Requires: [mv] is not a king move.*)
+(** [move_checker prop mv] is true if [mv] does not put the king of the
+    side specificed by [prop] in check. Requires: [mv] is not a king
+    move.*)
 
 val legal_moves :
-  ?pin_checker:(properties -> int * int -> bool) ->
-  ?move_checker:(properties -> move -> bool) ->
-  properties ->
-  move list
-(** [legal_moves pin_checker move_checker prop] is a list of legal moves
-    with [prop] providing context to the position and specifying the
-    color to output moves for. If [pin_checker] is provided, all pieces
-    will be checked to see if they are pinned with its logic, and if so,
-    will return no legal moves (a piece is pinned if it cannot move
-    because the same color king will be attacked). By default,
-    [pin_checker] will treat every piece as not pinned. If
-    [move_checker] is provided, it will return only the moves of
-    unpinned pieces that do not put the king in check. By default,
-    [move_checker] will treat every move as not putting the king in
-    check.*)
+  ?move_checker:(properties -> move -> bool) -> properties -> move list
+(** [legal_moves move_checker prop] is a list of legal moves with [prop]
+    providing context to the position and specifying the color to output
+    moves for. If [move_checker] is provided, it will return only the
+    moves of unpinned pieces that do not put the king in check. By
+    default, [move_checker] will treat every move as not putting the
+    king in check.*)
