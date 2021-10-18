@@ -98,6 +98,30 @@ let knight_tests =
       (0, 2);
   ]
 
+let pin_checker_tests =
+  [
+    legal_moves_test "King is in check, not pinned"
+      {
+        (set_properties pin_checker_board1 White) with
+        king_in_check = true;
+      }
+      [] (2, 2);
+    legal_moves_test "Knight pinned by Bishop"
+      (set_properties pin_checker_board2 White)
+      [] (2, 2);
+    legal_moves_test "Queen pinned by Rook"
+      (set_properties pin_checker_board2 Black)
+      [] (2, 2);
+    legal_moves_test "Pawn pinned by Queen"
+      (set_properties pin_checker_board2 White)
+      [] (2, 2);
+    legal_moves_test
+      "Bishop in line with Knight but King blocked, not pinned"
+      (set_properties pin_checker_board5 White)
+      [ (1, 0); (0, 3); (1, 4); (3, 4); (4, 3) ]
+      (2, 2);
+  ]
+
 let tests =
   "test suite for chess"
   >::: List.flatten [ is_attacked_tests; knight_tests ]
