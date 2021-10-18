@@ -90,6 +90,20 @@ let knight_tests =
       (0, 2);
   ]
 
+let king_tests =
+  [
+    legal_moves_test "Middle of empty board"
+      (set_properties (empty_with_piece (Some (White, King))) White)
+      [ (4, 4); (4, 3); (3, 2); (3, 4); (2, 3); (2, 2); (2, 4); (4, 2) ]
+      (3, 3);
+    legal_moves_test "Does not move to attacked squares"
+      {
+        (set_properties king_board Black) with
+        enemy_moves = king_board_enemy_moves;
+      }
+      [ (2, 6); (2, 7) ] (3, 7);
+  ]
+
 let move_checker_tests =
   [
     legal_moves_test
@@ -117,6 +131,12 @@ let move_checker_tests =
 
 let tests =
   "test suite for chess"
-  >::: List.flatten [ is_attacked_tests; knight_tests ]
+  >::: List.flatten
+         [
+           is_attacked_tests;
+           knight_tests;
+           king_tests;
+           move_checker_tests;
+         ]
 
 let _ = run_test_tt_main tests

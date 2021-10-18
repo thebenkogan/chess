@@ -3,6 +3,7 @@
 (*This file will contain all of the boards to use in state and tests.*)
 
 open Game
+open Helper
 
 let starting_board : Game.t =
   [
@@ -47,6 +48,20 @@ let knight_board : Game.t =
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
   ]
+
+let king_board : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; Some (White, Bishop);];
+    [ None; None; None; None; None; None; Some (Black, Queen); Some (Black, King);];
+    [ Some (White, Rook); None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+let king_board_enemy_moves : move list = 
+  squares_to_moves (4, 0) [(4, 1); (4, 2); (4, 3); (4, 4); (4, 5); (4, 6); (4, 7); ]   
 
 let move_checker_board1 : Game.t = 
   [
