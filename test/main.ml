@@ -6,6 +6,18 @@ open Helper
 open Boards
 open Printer
 
+(** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
+    they are equivalent set-like lists. That means checking two things.
+    First, they must both be {i set-like}, meaning that they do not
+    contain any duplicates. Second, they must contain the same elements,
+    though not necessarily in the same order. TAKEN FROM A2 *)
+let cmp_set_like_lists lst1 lst2 =
+  let uniq1 = List.sort_uniq compare lst1 in
+  let uniq2 = List.sort_uniq compare lst2 in
+  List.length lst1 = List.length uniq1
+  && List.length lst2 = List.length uniq2
+  && uniq1 = uniq2
+
 (** [set_properties bd c] is the game properties with board [bd] and
     color [c] used to test the king-independent movement of a piece.
     [last_move], [enemy_moves], and [king_pos] are all disregarded.
@@ -34,17 +46,18 @@ let is_attacked_test
   name >:: fun _ ->
   assert_equal expected_output (is_attacked enemy_moves coords)
 
-(** [is_subset lst1 lst2] is true if [lst1] is a subset of [lst2].
-    [lst1] is a subset if all of its elements are in [lst2] regardless
-    of multiplicity. If [lst1] is empty, this is true. *)
-let rec is_subset lst1 lst2 =
-  match lst1 with
-  | [] -> true
-  | h :: t -> List.mem h lst2 && is_subset t lst2
+(** [get_piece_moves piece_pos lst] is a list of all the moves in the
+    move list [lst] that start at [piece_pos]. *)
+let rec get_piece_moves piece_pos = function
+  | [] -> []
+  | h :: t ->
+      if fst h = piece_pos then [ h ] @ get_piece_moves piece_pos t
+      else get_piece_moves piece_pos t
 
 (** [legal_moves_test name prop ~pin_checker ~move_checker expected_output piece_pos]
     constructs an OUnit test named [name] that asserts that the moves
-    from [piece_pos] to [expected_output] is a subset of
+    from [piece_pos] to [expected_output] has set-like equaltiy with the
+    moves from [piece_pos] in
     [legal_moves ~pin_checker ~move_checker prop]. [pin_checker]
     defaults to always returning false, and [move_checker] defaults to
     always returning true. *)
@@ -56,9 +69,13 @@ let legal_moves_test
     (expected_output : (int * int) list)
     (piece_pos : int * int) : test =
   let expected_moves = squares_to_moves piece_pos expected_output in
+  let output =
+    get_piece_moves piece_pos
+      (legal_moves ~pin_checker:pc ~move_checker:mc prop)
+  in
   name >:: fun _ ->
-  assert_equal ~cmp:is_subset ~printer:pp_move_list expected_moves
-    (legal_moves ~pin_checker:pc ~move_checker:mc prop)
+  assert_equal ~cmp:cmp_set_like_lists ~printer:pp_move_list
+    expected_moves output
 
 let is_attacked_tests =
   [
