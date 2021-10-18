@@ -46,14 +46,6 @@ let is_attacked_test
   name >:: fun _ ->
   assert_equal expected_output (is_attacked enemy_moves coords)
 
-(** [get_piece_moves piece_pos lst] is a list of all the moves in the
-    move list [lst] that start at [piece_pos]. *)
-let rec get_piece_moves piece_pos = function
-  | [] -> []
-  | h :: t ->
-      if fst h = piece_pos then [ h ] @ get_piece_moves piece_pos t
-      else get_piece_moves piece_pos t
-
 (** [legal_moves_test name prop ~pin_checker ~move_checker expected_output piece_pos]
     constructs an OUnit test named [name] that asserts that the moves
     from [piece_pos] to [expected_output] has set-like equaltiy with the
