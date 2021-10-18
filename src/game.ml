@@ -46,19 +46,12 @@ let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
    this file. *)
 module type SoldierLogic = sig
   val legal_moves :
-    properties ->
-    int * int ->
-    (properties -> int * int -> bool) ->
-    (properties -> move -> bool) ->
-    move list
+    properties -> int * int -> (properties -> move -> bool) -> move list
 end
 
 module Pawn : SoldierLogic = struct
-  let legal_moves
-      (prop : properties)
-      (coords : int * int)
-      pin_checker
-      move_checker : move list =
+  let legal_moves (prop : properties) (coords : int * int) move_checker
+      : move list =
     if pin_checker prop coords then []
     else raise (Failure "Unimplemented")
 end
@@ -83,11 +76,8 @@ module Knight : SoldierLogic = struct
         (x - 1, y - 2);
       ]
 
-  let legal_moves
-      (prop : properties)
-      (coords : int * int)
-      pin_checker
-      move_checker : move list =
+  let legal_moves (prop : properties) (coords : int * int) move_checker
+      : move list =
     if pin_checker prop coords then []
     else
       let board = board_to_array prop.board in
@@ -100,8 +90,7 @@ module Knight : SoldierLogic = struct
 end
 
 module Bishop : SoldierLogic = struct
-  let legal_moves (prop : properties) (x, y) pin_checker move_checker :
-      move list =
+  let legal_moves (prop : properties) (x, y) move_checker : move list =
     if pin_checker prop (x, y) then []
     else
       let board = board_to_array prop.board in
@@ -117,8 +106,7 @@ module Bishop : SoldierLogic = struct
 end
 
 module Rook : SoldierLogic = struct
-  let legal_moves (prop : properties) (x, y) pin_checker move_checker :
-      move list =
+  let legal_moves (prop : properties) (x, y) move_checker : move list =
     if pin_checker prop (x, y) then []
     else
       let board = board_to_array prop.board in
@@ -134,11 +122,8 @@ module Rook : SoldierLogic = struct
 end
 
 module Queen : SoldierLogic = struct
-  let legal_moves
-      (prop : properties)
-      (coords : int * int)
-      pin_checker
-      move_checker : move list =
+  let legal_moves (prop : properties) (coords : int * int) move_checker
+      : move list =
     Bishop.legal_moves prop coords pin_checker move_checker
     @ Rook.legal_moves prop coords pin_checker move_checker
 end
@@ -174,8 +159,8 @@ module King : SoldierLogic = struct
     | false, true -> [ (x - 2, y) ]
     | false, false -> []
 
-  let legal_moves (prop : properties) (coords : int * int) _ _ :
-      move list =
+  let legal_moves (prop : properties) (coords : int * int) _ : move list
+      =
     let board = board_to_array prop.board in
     let castle_append = castle_squares prop coords in
     let not_attacked square =
@@ -202,59 +187,32 @@ end
     element of the column. If a piece is considered pinned by
     [pin_checker], then no moves will be returned for that piece.
     Requires: [x] and [y] are in 0..7.*)
-let rec moves_for_column prop (x, y) pin_checker move_checker = function
+let rec moves_for_column prop (x, y) move_checker = function
   | [] -> []
-  | None :: t ->
-      moves_for_column prop (x, y + 1) pin_checker move_checker t
+  | None :: t -> moves_for_column prop (x, y + 1) move_checker t
   | Some (color, soldier) :: t ->
       if color <> prop.color then
-        moves_for_column prop (x, y + 1) pin_checker move_checker t
+        moves_for_column prop (x, y + 1) move_checker t
       else
         begin
           begin
             match soldier with
-            | Pawn ->
-                Pawn.legal_moves prop (x, y) pin_checker move_checker
-            | Knight ->
-                Knight.legal_moves prop (x, y) pin_checker move_checker
-            | Bishop ->
-                Bishop.legal_moves prop (x, y) pin_checker move_checker
-            | Rook ->
-                Rook.legal_moves prop (x, y) pin_checker move_checker
-            | Queen ->
-                Queen.legal_moves prop (x, y) pin_checker move_checker
-            | King ->
-                King.legal_moves prop (x, y) pin_checker move_checker
+            | Pawn -> Pawn.legal_moves prop (x, y) move_checker
+            | Knight -> Knight.legal_moves prop (x, y) move_checker
+            | Bishop -> Bishop.legal_moves prop (x, y) move_checker
+            | Rook -> Rook.legal_moves prop (x, y) move_checker
+            | Queen -> Queen.legal_moves prop (x, y) move_checker
+            | King -> King.legal_moves prop (x, y) move_checker
           end
-          @ moves_for_column prop (x, y + 1) pin_checker move_checker t
+          @ moves_for_column prop (x, y + 1) move_checker t
         end
 
-let legal_moves
-    ?pin_checker:(pc = fun _ _ -> false)
-    ?move_checker:(mc = fun _ _ -> true)
-    (prop : properties) =
+let legal_moves ?move_checker:(mc = fun _ _ -> true) (prop : properties)
+    =
   let column_handler (lst, col_num) column =
-    (lst @ moves_for_column prop (col_num, 0) pc mc column, col_num + 1)
+    (lst @ moves_for_column prop (col_num, 0) mc column, col_num + 1)
   in
   fst (List.fold_left column_handler ([], 0) prop.board)
-
-(*Can only test this when legal_moves is complete.*)
-let pin_checker (prop : properties) (x, y) : bool =
-  if prop.king_in_check then false
-  else
-    let board_arr = board_to_array prop.board in
-    board_arr.(x).(y) <- None;
-    let new_board = array_to_board board_arr in
-    let enemy_color = if prop.color = White then Black else White in
-    is_attacked
-      (legal_moves
-         {
-           prop with
-           board = new_board;
-           color = enemy_color;
-           king_in_check = false;
-         })
-      prop.king_pos
 
 let move_checker (prop : properties) (mv : move) : bool =
   let new_board = update_board prop.board mv in
