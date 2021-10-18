@@ -100,26 +100,27 @@ let knight_tests =
 
 let move_checker_tests =
   [
-    legal_moves_test "King is in check, not pinned"
-      {
-        (set_properties pin_checker_board1 White) with
-        king_in_check = true;
-      }
-      [] (2, 2);
-    legal_moves_test "Knight pinned by Bishop"
-      (set_properties pin_checker_board2 White)
-      [] (2, 2);
-    legal_moves_test "Queen pinned by Rook"
-      (set_properties pin_checker_board2 Black)
-      [] (2, 2);
-    legal_moves_test "Pawn pinned by Queen"
-      (set_properties pin_checker_board2 White)
-      [] (2, 2);
     legal_moves_test
       "Bishop in line with Knight but King blocked, not pinned"
-      (set_properties pin_checker_board5 White)
+      (set_properties move_checker_board1 White)
       [ (1, 0); (0, 3); (1, 4); (3, 4); (4, 3) ]
       (2, 2);
+    legal_moves_test "Knight pinned by Bishop"
+      (set_properties move_checker_board2 White)
+      [] (2, 2);
+    legal_moves_test "Queen pinned by Rook, can move in line of Rook"
+      (set_properties move_checker_board3 Black)
+      [ (3, 0); (3, 1); (3, 2); (3, 3); (3, 4); (3, 5) ]
+      (3, 6);
+    legal_moves_test "King in check, no blocks or moves"
+      (set_properties move_checker_board4 Black)
+      [] (7, 1);
+    legal_moves_test "King in check, pinned piece cannot block"
+      (set_properties move_checker_board5 White)
+      [] (2, 2);
+    legal_moves_test "King in check, one move to block check"
+      (set_properties move_checker_board6 Black)
+      [ (3, 5) ] (7, 1);
   ]
 
 let tests =

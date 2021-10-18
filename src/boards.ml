@@ -52,11 +52,11 @@ let move_checker_board1 : Game.t =
   [
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
     [ None; Some (White, Pawn); None; Some (Black, Bishop); None; None; Some (Black, Pawn); Some (Black, Knight);];
-    [ Some (White, Bishop); Some (White, Pawn); Some (White, Knight)(*not pinned, in check*); None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
-    [ Some (White, Queen); None; None; Some (White, Pawn); None; None; Some (Black, Pawn); Some (Black, Queen);];
+    [ Some (White, Bishop); Some (White, Pawn); Some (White, Knight)(*not pinned*); None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    [ Some (White, Queen); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
     [ Some (White, King); Some (White, Pawn); None; None; None; Some (Black, Pawn); None; Some (Black, King);];
     [ Some (White, Bishop); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
-    [ Some (White, Knight); Some (Black, Knight); None; None; None; None; Some (Black, Pawn); None;];
+    [ Some (White, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ]
 
@@ -82,16 +82,40 @@ let move_checker_board3 : Game.t =
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
-  ]  
-
+  ]
+  
+let move_checker_board4 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; None;];
+    [ Some (White, Rook); None; None; None; Some (Black, King); None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; Some (Black, Bishop); None; None; None; None; None; None;];
+  ]
+  
 let move_checker_board5 : Game.t = 
   [
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
     [ None; Some (White, Pawn); None; Some (Black, Bishop); None; None; Some (Black, Pawn); Some (Black, Knight);];
-    [ Some (White, Bishop); Some (White, Pawn); Some (White, Knight)(*not pinned*); None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
-    [ Some (White, Queen); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
-    [ Some (White, King); Some (White, Pawn); None; None; None; Some (Black, Pawn); None; Some (Black, King);];
+    [ Some (White, Bishop); Some (White, Pawn); Some (White, Knight)(*pinned*); None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    [ Some (White, Queen); None; None; Some (White, Pawn); None; None; Some (Black, Pawn); Some (Black, Queen);];
+    [ Some (White, King); None; None; None; None; Some (Black, Rook); None; Some (Black, King);];
     [ Some (White, Bishop); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
     [ Some (White, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
-  ]
+  ] 
+  
+let move_checker_board6 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; None;];
+    [ Some (White, Rook); None; None; None; None; None; Some (Black, King); None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; Some (Black, Bishop); None; None; None; None; None; None;];
+  ]  
