@@ -78,6 +78,7 @@ let main () =
   print_string "> ";
   match read_line () with
   | _ ->
+      Random.self_init ();
       play_game
         (init_state starting_board White)
         (init_state starting_board Black)

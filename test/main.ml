@@ -56,14 +56,12 @@ let is_attacked_test
 let legal_moves_test
     (name : string)
     (prop : properties)
-    ?pin_checker:(pc = fun _ _ -> false)
     ?move_checker:(mc = fun _ _ -> true)
     (expected_output : (int * int) list)
     (piece_pos : int * int) : test =
   let expected_moves = squares_to_moves piece_pos expected_output in
   let output =
-    get_piece_moves piece_pos
-      (legal_moves ~pin_checker:pc ~move_checker:mc prop)
+    get_piece_moves piece_pos (legal_moves ~move_checker:mc prop)
   in
   name >:: fun _ ->
   assert_equal ~cmp:cmp_set_like_lists ~printer:pp_move_list
@@ -109,24 +107,26 @@ let move_checker_tests =
     legal_moves_test
       "Bishop in line with Knight but King blocked, not pinned"
       (set_properties move_checker_board1 White)
+      ~move_checker
       [ (1, 0); (0, 3); (1, 4); (3, 4); (4, 3) ]
       (2, 2);
     legal_moves_test "Knight pinned by Bishop"
       (set_properties move_checker_board2 White)
-      [] (2, 2);
+      ~move_checker [] (2, 2);
     legal_moves_test "Queen pinned by Rook, can move in line of Rook"
       (set_properties move_checker_board3 Black)
+      ~move_checker
       [ (3, 0); (3, 1); (3, 2); (3, 3); (3, 4); (3, 5) ]
       (3, 6);
     legal_moves_test "King in check, no blocks or moves"
       (set_properties move_checker_board4 Black)
-      [] (7, 1);
+      ~move_checker [] (7, 1);
     legal_moves_test "King in check, pinned piece cannot block"
       (set_properties move_checker_board5 White)
-      [] (2, 2);
+      ~move_checker [] (2, 2);
     legal_moves_test "King in check, one move to block check"
       (set_properties move_checker_board6 Black)
-      [ (3, 5) ] (7, 1);
+      ~move_checker [ (3, 5) ] (7, 1);
   ]
 
 let tests =
