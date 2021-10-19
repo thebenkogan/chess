@@ -57,3 +57,11 @@ let rec build_line (x, y) board_arr dirx diry color =
         :: build_line (x + dirx, y + diry) board_arr dirx diry color
     | Some (piece_color, _) when piece_color = color -> []
     | Some (_, _) -> [ (x, y) ]
+
+(** [get_piece_moves piece_pos lst] is a list of all the moves in the
+    move list [lst] that start at [piece_pos]. *)
+let rec get_piece_moves piece_pos = function
+  | [] -> []
+  | h :: t ->
+      if fst h = piece_pos then [ h ] @ get_piece_moves piece_pos t
+      else get_piece_moves piece_pos t
