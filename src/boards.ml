@@ -134,3 +134,36 @@ let move_checker_board6 : Game.t =
     [ None; None; None; None; None; None; None; None;];
     [ None; Some (Black, Bishop); None; None; None; None; None; None;];
   ]  
+let bishop_board : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, Bishop); None; None; None; None; None; None; None;];
+    [ None; Some (Black, Bishop); None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+  let rook_board : Game.t = 
+    [
+      [ Some (White, Rook); None; Some (Black, Rook); None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+    ]
+  let queen_board : Game.t = 
+    [
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ Some (White, Queen); None; Some (Black, Queen); None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+      [ None; None; None; None; None; None; None; None;];
+    ]
