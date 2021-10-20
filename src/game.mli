@@ -32,8 +32,12 @@ type properties = {
   color : color;
   (*The last move played on this board.*)
   last_move : move;
-  (*The opponent's legal moves in the current position.*)
+  (*The opponent's legal moves in the current position, including to
+    same color squares.*)
   enemy_moves : move list;
+  (*True if this is finding the moves of the opponent, meaning squares
+    with same color pieces are now legal.*)
+  enemy_find : bool;
   (*The current position of this color's king.*)
   king_pos : int * int;
   (*True if the king is attacked in the current position.*)
@@ -45,7 +49,8 @@ type properties = {
 }
 
 val update_board : t -> move -> t
-(** [update_board board move] is the board with [move] played.*)
+(** [update_board board move] is the board with [move] played. Requires:
+    [mv] represents a complete and legally valid game move. *)
 
 val is_attacked : move list -> int * int -> bool
 (** [is_attacked enemy_moves coords] is true if the square at [coords]

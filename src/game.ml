@@ -23,15 +23,13 @@ type properties = {
   color : color;
   last_move : move;
   enemy_moves : move list;
+  enemy_find : bool;
   king_pos : int * int;
   king_in_check : bool;
   kingside_castle : bool;
   queenside_castle : bool;
 }
 
-(** [update_board bd mv] updates the board [bd] by moving the piece
-    according to [mv] by its new location. Requires: [mv] represents a
-    complete and legally valid game move *)
 let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     =
   let board_arr = board_to_array bd in
@@ -48,9 +46,9 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     else if
       board_arr.(new_x).(new_y) = Some (Black, Pawn)
       && new_y = 0 && old_y > 0
-    then board_arr.(new_x).(new_y) <- Some (Black, Queen);
-    (* Check for if en passant just occurred *)
-    if
+    then board_arr.(new_x).(new_y) <- Some (Black, Queen)
+      (* Check for if en passant just occurred *)
+    else if
       old_piece = Some (White, Pawn)
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = 1
@@ -61,20 +59,28 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = -1
       && prev_at_loc = None
-    then board_arr.(new_x).(new_y + 1) <- None;
-    (* Check if castling just occurred *)
-    (* Rightside castle *)
-    if
+    then board_arr.(new_x).(new_y + 1) <- None
+      (* Check if castling just occurred *)
+      (* Rightside castle *)
+    else if
       (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = 2
-    then board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
-    board_arr.(7).(new_y) <- None;
-    (* Leftside castle *)
-    if
+    then
+      let move_right =
+        board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
+        board_arr.(7).(new_y) <- None
+      in
+      move_right (* Leftside castle *)
+    else if
       (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = -2
-    then board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
-    board_arr.(0).(new_y) <- None
+    then
+      let move_left =
+        board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
+        board_arr.(0).(new_y) <- None
+      in
+      move_left
+    else ()
   in
   check_conditions;
   let output_board = array_to_board board_arr in
@@ -105,28 +111,38 @@ module Pawn : SoldierLogic = struct
       (curr_x, curr_y)
       (((last_x_old, last_y_old), (last_x_new, last_y_new)) : move)
       color
-      (board : (color * 'a) option array array) =
-    let last_piece = board.(last_x_new).(last_y_new) in
-    let curr_piece = board.(curr_x).(curr_y) in
-    let net_y = last_y_new - last_y_old in
-    let en_passant_able : bool = net_y = 2 || net_y = -2 in
-
-    if en_passant_able && color = White then
-      [ (last_x_new, last_y_new + 1) ]
-    else if en_passant_able && color = Black then
-      [ (last_x_new, last_y_new - 1) ]
-    else []
+      board =
+    (* Check if disregarded last move *)
+    if last_x_old = -1 then []
+    else
+      let enemy_color = if color = White then Black else White in
+      let last_piece = board.(last_x_new).(last_y_new) in
+      let curr_piece = board.(curr_x).(curr_y) in
+      let net_x = last_x_new - curr_x in
+      let net_y = last_y_new - last_y_old in
+      let en_passant_able : bool =
+        (net_y = 2 || net_y = -2)
+        && (net_x = 1 || net_x = -1)
+        && different_color last_piece curr_piece
+        && last_piece = Some (enemy_color, Pawn)
+      in
+      if en_passant_able && color = White then
+        [ (last_x_new, last_y_new + 1) ]
+      else if en_passant_able && color = Black then
+        [ (last_x_new, last_y_new - 1) ]
+      else []
 
   let is_valid_square_pawn
       (curr_x, curr_y)
       board
       color
       last_move
+      ef
       (pot_x, pot_y) : bool =
     let net_x = pot_x - curr_x in
     let net_y = pot_y - curr_y in
     let basic_valid_square =
-      is_valid_square board color (pot_x, pot_y)
+      is_valid_square board color ef (pot_x, pot_y)
     in
 
     let check_conditions =
@@ -136,17 +152,20 @@ module Pawn : SoldierLogic = struct
           curr_y = 1 && net_y = 2 && net_x = 0
           && board.(curr_x).(curr_y + 1) = None
           && board.(curr_x).(curr_y + 2) = None
+          && not ef
         then true (* Go forward one *)
         else if
-          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
+          net_y = 1 && net_x = 0
+          && board.(curr_x).(curr_y + 1) = None
+          && not ef
         then true (* Diagonal up-left *)
         else if
-          board.(curr_x - 1).(curr_y + 1) != None
-          && net_y = 1 && net_x = -1
+          net_y = 1 && net_x = -1
+          && (board.(curr_x - 1).(curr_y + 1) != None || ef)
         then true (* Diagonal up-right *)
         else if
-          board.(curr_x + 1).(curr_y + 1) != None
-          && net_y = 1 && net_x = 1
+          net_y = 1 && net_x = 1
+          && (board.(curr_x + 1).(curr_y + 1) != None || ef)
         then true
         else false (* Check when color is Black *)
       else if basic_valid_square && color = Black then
@@ -155,17 +174,20 @@ module Pawn : SoldierLogic = struct
           curr_y = 6 && net_y = -2 && net_x = 0
           && board.(curr_x).(curr_y - 1) = None
           && board.(curr_x).(curr_y - 2) = None
+          && not ef
         then true (* Go forward one *)
         else if
-          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
+          net_y = -1 && net_x = 0
+          && board.(curr_x).(curr_y - 1) = None
+          && not ef
         then true (* Diagonal down-left -- no en passant *)
         else if
-          board.(curr_x - 1).(curr_y - 1) != None
-          && net_y = -1 && net_x = -1
+          net_y = -1 && net_x = -1
+          && (board.(curr_x - 1).(curr_y - 1) != None || ef)
         then true (* Diagonal down-right *)
         else if
-          board.(curr_x + 1).(curr_y - 1) != None
-          && net_y = -1 && net_x = 1
+          net_y = -1 && net_x = 1
+          && (board.(curr_x + 1).(curr_y - 1) != None || ef)
         then true
         else false
       else false
@@ -178,7 +200,8 @@ module Pawn : SoldierLogic = struct
       (curr_x, curr_y)
       board_arr
       (color : color)
-      (last_move : move) =
+      (last_move : move)
+      ef =
     let squares =
       if color = White then
         [
@@ -195,12 +218,13 @@ module Pawn : SoldierLogic = struct
           (curr_x - 1, curr_y - 1);
         ]
     in
-    let run_filter =
+    let valid_moves =
       List.filter
-        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move
+           ef)
         squares
     in
-    run_filter
+    valid_moves
     @ check_en_passant (curr_x, curr_y) last_move color board_arr
 
   let legal_moves (prop : properties) (coords : int * int) move_checker
@@ -208,7 +232,8 @@ module Pawn : SoldierLogic = struct
     let board_arr = board_to_array prop.board in
     let moves =
       squares_to_moves coords
-        (potential_squares coords board_arr prop.color prop.last_move)
+        (potential_squares coords board_arr prop.color prop.last_move
+           prop.enemy_find)
     in
     List.filter (move_checker prop) moves
 end
@@ -219,9 +244,9 @@ module Knight : SoldierLogic = struct
       array [board_arr] with color [color]. A potential square is one
       that is on the board and does not contain a piece of the same
       color. *)
-  let potential_squares (x, y) board_arr color =
+  let potential_squares (x, y) board_arr color ef =
     List.filter
-      (is_valid_square board_arr color)
+      (is_valid_square board_arr color ef)
       [
         (x + 2, y + 1);
         (x + 2, y - 1);
@@ -238,7 +263,7 @@ module Knight : SoldierLogic = struct
     let board = board_to_array prop.board in
     let moves =
       squares_to_moves coords
-        (potential_squares coords board prop.color)
+        (potential_squares coords board prop.color prop.enemy_find)
     in
     List.filter (move_checker prop) moves
 end
@@ -282,9 +307,9 @@ module King : SoldierLogic = struct
       array [board_arr] with color [color]. A potential square is one
       that is on the board and does not contain a piece of the same
       color. *)
-  let potential_squares (x, y) board_arr color =
+  let potential_squares (x, y) board_arr color ef =
     List.filter
-      (is_valid_square board_arr color)
+      (is_valid_square board_arr color ef)
       [
         (x + 1, y);
         (x - 1, y);
@@ -317,7 +342,7 @@ module King : SoldierLogic = struct
     squares_to_moves coords
       (castle_append
       @ List.filter not_attacked
-          (potential_squares coords board prop.color))
+          (potential_squares coords board prop.color prop.enemy_find))
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of

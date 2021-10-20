@@ -18,21 +18,32 @@ let array_to_board board_arr =
 (** [on_board (x, y)] is true if [x] and [y] are in 0..7 inclusive. *)
 let on_board (x, y) = x >= 0 && x <= 7 && y >= 0 && y <= 7
 
-(** [same_color (x, y) board color] is true if the piece at [(x, y)] is
-    the same color as [color]. Requires: [(x, y)] is a coordinate on the
-    board. *)
-let same_color (x, y) board color =
-  match board.(x).(y) with
-  | None -> false
-  | Some (piece_color, _) -> piece_color = color
+(** [same_color (x, y) board color ef] is true if the piece at [(x, y)]
+    is the same color as [color]. Requires: [(x, y)] is a coordinate on
+    the board. If [ef] is true, then this is always false.*)
+let same_color (x, y) board color ef =
+  if ef then false
+  else
+    match board.(x).(y) with
+    | None -> false
+    | Some (piece_color, _) -> piece_color = color
 
-(** [is_valid_square coords board color] is true if [coords] is a valid
-    square that a piece can move to. A square is considered valid if it
-    is on the board and the piece existing at [coords] is not the same
-    color as [color]. Requires: [board] is the array version of the
-    board. *)
-let is_valid_square board color coords =
-  on_board coords && not (same_color coords board color)
+(** [is_valid_square coords board color ef] is true if [coords] is a
+    valid square that a piece can move to. A square is considered valid
+    if it is on the board and the piece existing at [coords] is not the
+    same color as [color]. If [ef] is true, then squares containing
+    pieces of the same color are valid. Requires: [board] is the array
+    version of the board. *)
+let is_valid_square board color ef coords =
+  on_board coords && not (same_color coords board color ef)
+
+(** [different_color p1 p2] is true if [p1] and [p2] are of different
+    colors. False if they are the same color, or if one or both are
+    None. Requires: [p1] and [p2] are pieces.*)
+let different_color p1 p2 =
+  match (p1, p2) with
+  | Some (c1, _), Some (c2, _) when c1 <> c2 -> true
+  | _ -> false
 
 (** [squares_to_moves squares first] returns a list of moves starting at
     [start] and targeting each square in [squares].*)

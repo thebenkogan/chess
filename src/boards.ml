@@ -154,25 +154,46 @@ let bishop_board : Game.t =
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
   ]
-  let rook_board : Game.t = 
-    [
-      [ Some (White, Rook); None; Some (Black, Rook); None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-    ]
-  let queen_board : Game.t = 
-    [
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ Some (White, Queen); None; Some (Black, Queen); None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-      [ None; None; None; None; None; None; None; None;];
-    ]
+
+let bishop_empty_board_coords = [
+  (0, 0); (1, 1); (2, 2); (4, 4); (5, 5); (6, 6); (7, 7); (0, 6); (1, 5);
+  (2, 4); (4, 2); (5, 1); (6, 0);
+]
+let rook_board : Game.t = 
+  [
+    [ Some (White, Rook); None; Some (Black, Rook); None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+
+let rook_empty_board_coords = [
+  (3, 0); (3, 1); (3, 2); (3, 4); (3, 5); (3, 6); (3, 7); (0, 3); (1, 3); 
+  (2, 4); (4, 5); (5, 6); (6, 7);
+]
+let queen_board : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, Queen); None; Some (Black, Queen); None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+
+let queen_empty_board_coords = [
+  (0, 0); (1, 1); (2, 2); (4, 4); (5, 5); (6, 6); (7, 7); (0, 6); (1, 5);
+  (2, 4); (4, 2); (5, 1); (6, 0); (3, 0); (3, 1); (3, 2); (3, 4); (3, 5);
+  (3, 6); (3, 7); (0, 3); (1, 3); (2, 4); (4, 5); (5, 6); (6, 7);
+]
+
+let queen_path_interference_coords = [
+  (0, 0); (0, 1); (0, 2); (0, 4); (0, 5); (0, 6); (0, 7); (1, 2); (1, 3);
+  (1, 4); (2, 1); (2, 3); (2, 5); (3, 0); (3, 6); (4, 7);
+]
