@@ -102,6 +102,10 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
+  type en_passant_direction =
+    | Left
+    | Right
+
   let check_en_passant_left
       (curr_x, curr_y)
       ((last_x_old, last_y_old), (last_x_new, last_y_new))
@@ -111,16 +115,15 @@ module Pawn : SoldierLogic = struct
     let net_y = last_y_new - last_y_old in
 
     if color = White then
+      (* Looking diagonally up-left *)
       if
-        (* Looking diagonally up-left *)
         last_piece = Some (Black, Pawn)
         && net_y = -2
         && last_x_new - curr_x = -1
         && board.(curr_x - 1).(curr_y + 1) = None
       then true
-      else false
+      else false (* Looking diagonally down-left *)
     else if
-      (* Looking diagonally down-left *)
       last_piece = Some (White, Pawn)
       && net_y = 2
       && last_x_new - curr_x = -1
@@ -151,6 +154,11 @@ module Pawn : SoldierLogic = struct
       && board.(curr_x - 1).(curr_y - 1) = None
     then true
     else false
+  (* let check_en_passant (curr_x, curr_y) ((last_x_old, last_y_old),
+     (last_x_new, last_y_new)) color board direction = let last_piece =
+     board.(last_x_new).(last_y_new) *)
+
+  (* Test *)
 
   let is_valid_square_pawn
       (curr_x, curr_y)
@@ -171,72 +179,64 @@ module Pawn : SoldierLogic = struct
     in
 
     let check_conditions =
-      if color = White then
+      if color = White && basic_valid_square then
         if
           (* Go forward two *)
-          basic_valid_square && curr_y = 1 && net_y = 2 && net_x = 2
+          curr_y = 1 && net_y = 2 && net_x = 0
           && board.(curr_x).(curr_y + 1) = None
           && board.(curr_x).(curr_y + 2) = None
         then true (* Go forward one *)
         else if
-          basic_valid_square && net_y = 1 && net_x = 0
-          && board.(curr_x).(curr_y + 1) = None
+          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
         then true (* Diagonal up-left -- no en passant *)
         else if
-          basic_valid_square
-          && (not left_en_passant_able)
+          (not left_en_passant_able)
           && net_y = 1 && net_x = -1
           && board.(curr_x - 1).(curr_y + 1) != None
         then true (* Diagonal up-left -- Yes en passant *)
         else if
-          basic_valid_square && left_en_passant_able && net_y = 1
-          && net_x = -1
+          left_en_passant_able && net_y = 1 && net_x = -1
           && board.(curr_x - 1).(curr_y + 1) = None
         then true (* Diagonal up-right -- no en passant *)
         else if
-          basic_valid_square
-          && (not right_en_passant_able)
+          (not right_en_passant_able)
           && net_y = 1 && net_x = 1
           && board.(curr_x + 1).(curr_y + 1) != None
         then true (* Diagonal up-right -- Yes en passant *)
         else if
-          basic_valid_square && right_en_passant_able && net_y = 1
-          && net_x = 1
+          right_en_passant_able && net_y = 1 && net_x = 1
           && board.(curr_x + 1).(curr_y + 1) = None
         then true
         else false (* Check when color is Black *)
-      else if
-        (* Go forward two *)
-        basic_valid_square && curr_y = 6 && net_y = -2 && net_x = 0
-        && board.(curr_x).(curr_y - 1) = None
-        && board.(curr_x).(curr_y - 2) = None
-      then true (* Go forward one *)
-      else if
-        basic_valid_square && net_y = -1 && net_x = 0
-        && board.(curr_x).(curr_y - 1) = None
-      then true (* Diagonal down-left -- no en passant *)
-      else if
-        basic_valid_square
-        && (not left_en_passant_able)
-        && net_y = -1 && net_x = -1
-        && board.(curr_x - 1).(curr_y - 1) != None
-      then true (* Diagonal down-left -- Yes en passant *)
-      else if
-        basic_valid_square && left_en_passant_able && net_y = -1
-        && net_x = -1
-        && board.(curr_x - 1).(curr_y - 1) = None
-      then true (* Diagonal down-right -- no en passant *)
-      else if
-        basic_valid_square
-        && (not right_en_passant_able)
-        && net_y = -1 && net_x = 1
-        && board.(curr_x + 1).(curr_y - 1) != None
-      then true (* Diagonal down-right -- Yes en passant *)
-      else if
-        basic_valid_square && right_en_passant_able && net_y = -1
-        && net_x = 1
-        && board.(curr_x + 1).(curr_y - 1) = None
-      then true
+      else if basic_valid_square then
+        if
+          (* Go forward two *)
+          curr_y = 6 && net_y = -2 && net_x = 0
+          && board.(curr_x).(curr_y - 1) = None
+          && board.(curr_x).(curr_y - 2) = None
+        then true (* Go forward one *)
+        else if
+          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
+        then true (* Diagonal down-left -- no en passant *)
+        else if
+          (not left_en_passant_able)
+          && net_y = -1 && net_x = -1
+          && board.(curr_x - 1).(curr_y - 1) != None
+        then true (* Diagonal down-left -- Yes en passant *)
+        else if
+          left_en_passant_able && net_y = -1 && net_x = -1
+          && board.(curr_x - 1).(curr_y - 1) = None
+        then true (* Diagonal down-right -- no en passant *)
+        else if
+          (not right_en_passant_able)
+          && net_y = -1 && net_x = 1
+          && board.(curr_x + 1).(curr_y - 1) != None
+        then true (* Diagonal down-right -- Yes en passant *)
+        else if
+          right_en_passant_able && net_y = -1 && net_x = 1
+          && board.(curr_x + 1).(curr_y - 1) = None
+        then true
+        else false
       else false
     in
 
@@ -248,25 +248,28 @@ module Pawn : SoldierLogic = struct
       board_arr
       (color : color)
       last_move : (int * int) list =
-    (* White Pawn potential moves *)
-    if color = White then
-      List.filter
-        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+    let squares =
+      if color = White then
         [
           (curr_x, curr_y + 2);
           (curr_x, curr_y + 1);
           (curr_x + 1, curr_y + 1);
           (curr_x - 1, curr_y + 1);
-        ] (* Black Pawn potential moves *)
-    else
-      List.filter
-        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        ]
+      else
         [
           (curr_x, curr_y - 2);
           (curr_x, curr_y - 1);
           (curr_x + 1, curr_y - 1);
           (curr_x - 1, curr_y - 1);
         ]
+    in
+    let run_filter =
+      List.filter
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        squares
+    in
+    run_filter
 
   let legal_moves
       (prop : properties)
@@ -451,24 +454,17 @@ let rec moves_for_column prop (x, y) pin_checker move_checker = function
       if color <> prop.color then
         moves_for_column prop (x, y + 1) pin_checker move_checker t
       else
-        begin
-          begin
-            match soldier with
-            | Pawn ->
-                Pawn.legal_moves prop (x, y) pin_checker move_checker
-            | Knight ->
-                Knight.legal_moves prop (x, y) pin_checker move_checker
-            | Bishop ->
-                Bishop.legal_moves prop (x, y) pin_checker move_checker
-            | Rook ->
-                Rook.legal_moves prop (x, y) pin_checker move_checker
-            | Queen ->
-                Queen.legal_moves prop (x, y) pin_checker move_checker
-            | King ->
-                King.legal_moves prop (x, y) pin_checker move_checker
-          end
-          @ moves_for_column prop (x, y + 1) pin_checker move_checker t
-        end
+        (match soldier with
+        | Pawn -> Pawn.legal_moves prop (x, y) pin_checker move_checker
+        | Knight ->
+            Knight.legal_moves prop (x, y) pin_checker move_checker
+        | Bishop ->
+            Bishop.legal_moves prop (x, y) pin_checker move_checker
+        | Rook -> Rook.legal_moves prop (x, y) pin_checker move_checker
+        | Queen ->
+            Queen.legal_moves prop (x, y) pin_checker move_checker
+        | King -> King.legal_moves prop (x, y) pin_checker move_checker)
+        @ moves_for_column prop (x, y + 1) pin_checker move_checker t
 
 let legal_moves
     ?pin_checker:(pc = fun _ _ -> false)
