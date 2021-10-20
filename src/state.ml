@@ -24,7 +24,9 @@ let init_state (board : Game.t) (color : Game.color) : t =
       queenside_castle = false;
     }
   in
-  let init_moves = legal_moves init_properties in
+  let init_moves =
+    if color = White then legal_moves init_properties else []
+  in
   let init_turn = color = White in
   {
     game_state = init_properties;
