@@ -96,6 +96,9 @@ let main () =
     "Both x and y are 0-based and are relative to the bottom left of\n\
      the board. Example for starting position of white king: (4, 0).\n";
 
+  print_endline
+    "A list of your legal moves will be displayed for every position.\n";
+
   print_endline "Enter \"quit\" to stop playing.\n\n";
   print_endline "Enter any key to start.\n";
   print_string "> ";
