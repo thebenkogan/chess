@@ -46,9 +46,9 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     else if
       board_arr.(new_x).(new_y) = Some (Black, Pawn)
       && new_y = 0 && old_y > 0
-    then board_arr.(new_x).(new_y) <- Some (Black, Queen);
-    (* Check for if en passant just occurred *)
-    if
+    then board_arr.(new_x).(new_y) <- Some (Black, Queen)
+      (* Check for if en passant just occurred *)
+    else if
       old_piece = Some (White, Pawn)
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = 1
@@ -59,20 +59,28 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = -1
       && prev_at_loc = None
-    then board_arr.(new_x).(new_y + 1) <- None;
-    (* Check if castling just occurred *)
-    (* Rightside castle *)
-    if
+    then board_arr.(new_x).(new_y + 1) <- None
+      (* Check if castling just occurred *)
+      (* Rightside castle *)
+    else if
       (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = 2
-    then board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
-    board_arr.(7).(new_y) <- None;
-    (* Leftside castle *)
-    if
+    then
+      let move_right =
+        board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
+        board_arr.(7).(new_y) <- None
+      in
+      move_right (* Leftside castle *)
+    else if
       (old_piece = Some (White, King) || old_piece = Some (Black, King))
       && new_x - old_x = -2
-    then board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
-    board_arr.(0).(new_y) <- None
+    then
+      let move_left =
+        board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
+        board_arr.(0).(new_y) <- None
+      in
+      move_left
+    else ()
   in
   check_conditions;
   let output_board = array_to_board board_arr in
@@ -144,17 +152,20 @@ module Pawn : SoldierLogic = struct
           curr_y = 1 && net_y = 2 && net_x = 0
           && board.(curr_x).(curr_y + 1) = None
           && board.(curr_x).(curr_y + 2) = None
+          && not ef
         then true (* Go forward one *)
         else if
-          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
+          net_y = 1 && net_x = 0
+          && board.(curr_x).(curr_y + 1) = None
+          && not ef
         then true (* Diagonal up-left *)
         else if
           net_y = 1 && net_x = -1
-          && board.(curr_x - 1).(curr_y + 1) != None
+          && (board.(curr_x - 1).(curr_y + 1) != None || ef)
         then true (* Diagonal up-right *)
         else if
           net_y = 1 && net_x = 1
-          && board.(curr_x + 1).(curr_y + 1) != None
+          && (board.(curr_x + 1).(curr_y + 1) != None || ef)
         then true
         else false (* Check when color is Black *)
       else if basic_valid_square && color = Black then
@@ -163,17 +174,20 @@ module Pawn : SoldierLogic = struct
           curr_y = 6 && net_y = -2 && net_x = 0
           && board.(curr_x).(curr_y - 1) = None
           && board.(curr_x).(curr_y - 2) = None
+          && not ef
         then true (* Go forward one *)
         else if
-          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
+          net_y = -1 && net_x = 0
+          && board.(curr_x).(curr_y - 1) = None
+          && not ef
         then true (* Diagonal down-left -- no en passant *)
         else if
           net_y = -1 && net_x = -1
-          && board.(curr_x - 1).(curr_y - 1) != None
+          && (board.(curr_x - 1).(curr_y - 1) != None || ef)
         then true (* Diagonal down-right *)
         else if
           net_y = -1 && net_x = 1
-          && board.(curr_x + 1).(curr_y - 1) != None
+          && (board.(curr_x + 1).(curr_y - 1) != None || ef)
         then true
         else false
       else false
