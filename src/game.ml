@@ -35,6 +35,7 @@ type properties = {
 let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     =
   let board_arr = board_to_array bd in
+  let prev_at_loc = board_arr.(new_x).(new_y) in
   let old_piece = board_arr.(old_x).(old_y) in
   board_arr.(old_x).(old_y) <- None;
   board_arr.(new_x).(new_y) <- old_piece;
@@ -53,12 +54,14 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
       old_piece = Some (White, Pawn)
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = 1
-    then board_arr.(new_x + (new_x - old_x)).(new_y - 1) <- None
+      && prev_at_loc = None
+    then board_arr.(new_x).(new_y - 1) <- None
     else if
       old_piece = Some (Black, Pawn)
       && (new_x - old_x = 1 || new_x - old_x = -1)
       && new_y - old_y = -1
-    then board_arr.(new_x + (new_x - old_x)).(new_y + 1) <- None;
+      && prev_at_loc = None
+    then board_arr.(new_x).(new_y + 1) <- None;
     (* Check if castling just occurred *)
     (* Rightside castle *)
     if
@@ -99,10 +102,6 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
-  (** Returns true if the previous move is en passant-able (i.e. moved
-      two from the previous y-position), and that the current coordinate
-      position of the pawn can move diagonally due to en passant rule *)
-
   let check_en_passant_left
       (curr_x, curr_y)
       ((last_x_old, last_y_old), (last_x_new, last_y_new))
@@ -263,10 +262,10 @@ module Pawn : SoldierLogic = struct
       List.filter
         (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
         [
-          (curr_x, curr_y + 2);
-          (curr_x, curr_y + 1);
-          (curr_x + 1, curr_y + 1);
-          (curr_x - 1, curr_y + 1);
+          (curr_x, curr_y - 2);
+          (curr_x, curr_y - 1);
+          (curr_x + 1, curr_y - 1);
+          (curr_x - 1, curr_y - 1);
         ]
 
   let legal_moves
