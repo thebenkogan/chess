@@ -67,6 +67,17 @@ let legal_moves_test
   assert_equal ~cmp:cmp_set_like_lists ~printer:pp_move_list
     expected_moves output
 
+(** [state_test name enemy_moves coords expected_output] constructs an
+    OUnit test named [name] that asserts the quality of
+    [expected_output] with [init_state board color]. *)
+let state_test
+    (name : string)
+    (board : Game.t)
+    (color : Game.color)
+    (expected_output : State.t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (init_state board color)
+
 let is_attacked_tests =
   [
     is_attacked_test "Not attacked" [ ((7, 6), (3, 4)) ] (2, 3) false;
@@ -127,6 +138,40 @@ let move_checker_tests =
     legal_moves_test "King in check, one move to block check"
       (set_properties move_checker_board6 Black)
       ~move_checker [ (3, 5) ] (7, 1);
+  ]
+
+let init_properties color =
+  {
+    board = starting_board;
+    color;
+    last_move = ((-1, -1), (-1, -1));
+    enemy_moves = [];
+    king_pos = (if color = White then (4, 0) else (4, 7));
+    king_in_check = false;
+    kingside_castle = false;
+    queenside_castle = false;
+  }
+
+let state_tests =
+  [
+    state_test "Initialize for white" starting_board White
+      {
+        game_state = init_properties White;
+        moves = starting_board_init_moves;
+        turn = true;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      };
+    state_test "Initialize for black" starting_board Black
+      {
+        game_state = init_properties Black;
+        moves = [];
+        turn = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      };
   ]
 
 let tests =

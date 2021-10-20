@@ -25,11 +25,8 @@ type t = {
 val init_state : Game.t -> Game.color -> t
 (** [init_state board color] is the initial state of the game starting
     with the chess position given by [board] for [color]'s pieces. This
-    state includes the legal starting moves for [color] and the initial
-    conditions. Need to think about this. To get the initial legal
-    moves, either pass in a specified last move of the game if not at
-    the beginning, or pass in a null move otherwise, such as a pawn
-    moving in place. *)
+    state includes the legal starting moves if [color] is white and the
+    initial conditions. If [color] is black, there are no legal moves. *)
 
 val play_move : t -> Game.move -> t
 (** [play_move st mv] is the state of the chess position with the player

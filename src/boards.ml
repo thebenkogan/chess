@@ -1,6 +1,6 @@
 (*NOTE: ocamlformat is ignored for this file to reduce board sizes.*)
 
-(*This file will contain all of the boards to use in state and tests.*)
+(*This file will contain all of the boards/data to use in state and tests.*)
 
 open Game
 open Helper
@@ -24,6 +24,15 @@ let starting_board : Game.t =
     (*Column 8*)
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ]
+
+let starting_board_init_moves : move list = 
+  [
+  ((1, 0), (2, 2));
+  ((1, 0), (0, 2));
+  ((6, 0), (7, 2));
+  ((6, 0), (5, 2));
+  (*add more here for pawns*)
+]
 
 let empty_with_piece piece : Game.t = 
   [
