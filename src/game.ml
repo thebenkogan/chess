@@ -102,63 +102,21 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
-  type en_passant_direction =
-    | Left
-    | Right
-
-  let check_en_passant_left
+  let check_en_passant
       (curr_x, curr_y)
-      ((last_x_old, last_y_old), (last_x_new, last_y_new))
+      (((last_x_old, last_y_old), (last_x_new, last_y_new)) : move)
       color
-      board =
+      (board : (color * 'a) option array array) =
     let last_piece = board.(last_x_new).(last_y_new) in
+    let curr_piece = board.(curr_x).(curr_y) in
     let net_y = last_y_new - last_y_old in
+    let en_passant_able : bool = net_y = 2 || net_y = -2 in
 
-    if color = White then
-      (* Looking diagonally up-left *)
-      if
-        last_piece = Some (Black, Pawn)
-        && net_y = -2
-        && last_x_new - curr_x = -1
-        && board.(curr_x - 1).(curr_y + 1) = None
-      then true
-      else false (* Looking diagonally down-left *)
-    else if
-      last_piece = Some (White, Pawn)
-      && net_y = 2
-      && last_x_new - curr_x = -1
-      && board.(curr_x - 1).(curr_y - 1) = None
-    then true
-    else false
-
-  let check_en_passant_right
-      (curr_x, curr_y)
-      ((last_x_old, last_y_old), (last_x_new, last_y_new))
-      color
-      board =
-    let last_piece = board.(last_x_new).(last_y_new) in
-    let net_y = last_y_new - last_y_old in
-
-    if color = White then
-      if
-        last_piece = Some (Black, Pawn)
-        && net_y = -2
-        && last_x_new - curr_x = 1
-        && board.(curr_x - 1).(curr_y + 1) = None
-      then true
-      else false
-    else if
-      last_piece = Some (White, Pawn)
-      && net_y = 2
-      && last_x_new - curr_x = 1
-      && board.(curr_x - 1).(curr_y - 1) = None
-    then true
-    else false
-  (* let check_en_passant (curr_x, curr_y) ((last_x_old, last_y_old),
-     (last_x_new, last_y_new)) color board direction = let last_piece =
-     board.(last_x_new).(last_y_new) *)
-
-  (* Test *)
+    if en_passant_able && color = White then
+      [ (last_x_new, last_y_new + 1) ]
+    else if en_passant_able && color = Black then
+      [ (last_x_new, last_y_new - 1) ]
+    else []
 
   let is_valid_square_pawn
       (curr_x, curr_y)
@@ -168,12 +126,6 @@ module Pawn : SoldierLogic = struct
       (pot_x, pot_y) : bool =
     let net_x = pot_x - curr_x in
     let net_y = pot_y - curr_y in
-    let left_en_passant_able =
-      check_en_passant_left (curr_x, curr_y) last_move color board
-    in
-    let right_en_passant_able =
-      check_en_passant_right (curr_x, curr_y) last_move color board
-    in
     let basic_valid_square =
       is_valid_square board color (pot_x, pot_y)
     in
@@ -190,17 +142,15 @@ module Pawn : SoldierLogic = struct
           net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
         then true (* Diagonal up-left *)
         else if
-          (left_en_passant_able
-          || board.(curr_x - 1).(curr_y + 1) != None)
+          board.(curr_x - 1).(curr_y + 1) != None
           && net_y = 1 && net_x = -1
         then true (* Diagonal up-right *)
         else if
-          (right_en_passant_able
-          || board.(curr_x + 1).(curr_y + 1) != None)
+          board.(curr_x + 1).(curr_y + 1) != None
           && net_y = 1 && net_x = 1
         then true
         else false (* Check when color is Black *)
-      else if basic_valid_square then
+      else if basic_valid_square && color = Black then
         if
           (* Go forward two *)
           curr_y = 6 && net_y = -2 && net_x = 0
@@ -211,13 +161,11 @@ module Pawn : SoldierLogic = struct
           net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
         then true (* Diagonal down-left -- no en passant *)
         else if
-          (left_en_passant_able
-          || board.(curr_x - 1).(curr_y - 1) != None)
+          board.(curr_x - 1).(curr_y - 1) != None
           && net_y = -1 && net_x = -1
         then true (* Diagonal down-right *)
         else if
-          (right_en_passant_able
-          || board.(curr_x + 1).(curr_y - 1) != None)
+          board.(curr_x + 1).(curr_y - 1) != None
           && net_y = -1 && net_x = 1
         then true
         else false
@@ -231,7 +179,7 @@ module Pawn : SoldierLogic = struct
       (curr_x, curr_y)
       board_arr
       (color : color)
-      last_move : (int * int) list =
+      (last_move : move) =
     let squares =
       if color = White then
         [
@@ -254,6 +202,7 @@ module Pawn : SoldierLogic = struct
         squares
     in
     run_filter
+    @ check_en_passant (curr_x, curr_y) last_move color board_arr
 
   let legal_moves
       (prop : properties)
