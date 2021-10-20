@@ -29,8 +29,56 @@ type properties = {
   queenside_castle : bool;
 }
 
-let update_board (bd : t) (mv : move) : t =
-  raise (Failure "Unimplemented")
+(** [update_board bd mv] updates the board [bd] by moving the piece
+    according to [mv] by its new location. Requires: [mv] represents a
+    complete and legally valid game move *)
+let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
+    =
+  let board_arr = board_to_array bd in
+  let prev_at_loc = board_arr.(new_x).(new_y) in
+  let old_piece = board_arr.(old_x).(old_y) in
+  board_arr.(old_x).(old_y) <- None;
+  board_arr.(new_x).(new_y) <- old_piece;
+  let check_conditions =
+    (* Check for if pawn reaches either end *)
+    if
+      board_arr.(new_x).(new_y) = Some (White, Pawn)
+      && new_y = 7 && old_y < 7
+    then board_arr.(new_x).(new_y) <- Some (White, Queen)
+    else if
+      board_arr.(new_x).(new_y) = Some (Black, Pawn)
+      && new_y = 0 && old_y > 0
+    then board_arr.(new_x).(new_y) <- Some (Black, Queen);
+    (* Check for if en passant just occurred *)
+    if
+      old_piece = Some (White, Pawn)
+      && (new_x - old_x = 1 || new_x - old_x = -1)
+      && new_y - old_y = 1
+      && prev_at_loc = None
+    then board_arr.(new_x).(new_y - 1) <- None
+    else if
+      old_piece = Some (Black, Pawn)
+      && (new_x - old_x = 1 || new_x - old_x = -1)
+      && new_y - old_y = -1
+      && prev_at_loc = None
+    then board_arr.(new_x).(new_y + 1) <- None;
+    (* Check if castling just occurred *)
+    (* Rightside castle *)
+    if
+      (old_piece = Some (White, King) || old_piece = Some (Black, King))
+      && new_x - old_x = 2
+    then board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
+    board_arr.(7).(new_y) <- None;
+    (* Leftside castle *)
+    if
+      (old_piece = Some (White, King) || old_piece = Some (Black, King))
+      && new_x - old_x = -2
+    then board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
+    board_arr.(0).(new_y) <- None
+  in
+  check_conditions;
+  let output_board = array_to_board board_arr in
+  output_board
 
 let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
   let targets = get_targets enemy_moves in
@@ -53,9 +101,116 @@ module type SoldierLogic = sig
 end
 
 module Pawn : SoldierLogic = struct
+  let check_en_passant
+      (curr_x, curr_y)
+      (((last_x_old, last_y_old), (last_x_new, last_y_new)) : move)
+      color
+      (board : (color * 'a) option array array) =
+    let last_piece = board.(last_x_new).(last_y_new) in
+    let curr_piece = board.(curr_x).(curr_y) in
+    let net_y = last_y_new - last_y_old in
+    let en_passant_able : bool = net_y = 2 || net_y = -2 in
+
+    if en_passant_able && color = White then
+      [ (last_x_new, last_y_new + 1) ]
+    else if en_passant_able && color = Black then
+      [ (last_x_new, last_y_new - 1) ]
+    else []
+
+  let is_valid_square_pawn
+      (curr_x, curr_y)
+      board
+      color
+      last_move
+      (pot_x, pot_y) : bool =
+    let net_x = pot_x - curr_x in
+    let net_y = pot_y - curr_y in
+    let basic_valid_square =
+      is_valid_square board color (pot_x, pot_y)
+    in
+
+    let check_conditions =
+      if color = White && basic_valid_square then
+        if
+          (* Go forward two *)
+          curr_y = 1 && net_y = 2 && net_x = 0
+          && board.(curr_x).(curr_y + 1) = None
+          && board.(curr_x).(curr_y + 2) = None
+        then true (* Go forward one *)
+        else if
+          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
+        then true (* Diagonal up-left *)
+        else if
+          board.(curr_x - 1).(curr_y + 1) != None
+          && net_y = 1 && net_x = -1
+        then true (* Diagonal up-right *)
+        else if
+          board.(curr_x + 1).(curr_y + 1) != None
+          && net_y = 1 && net_x = 1
+        then true
+        else false (* Check when color is Black *)
+      else if basic_valid_square && color = Black then
+        if
+          (* Go forward two *)
+          curr_y = 6 && net_y = -2 && net_x = 0
+          && board.(curr_x).(curr_y - 1) = None
+          && board.(curr_x).(curr_y - 2) = None
+        then true (* Go forward one *)
+        else if
+          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
+        then true (* Diagonal down-left -- no en passant *)
+        else if
+          board.(curr_x - 1).(curr_y - 1) != None
+          && net_y = -1 && net_x = -1
+        then true (* Diagonal down-right *)
+        else if
+          board.(curr_x + 1).(curr_y - 1) != None
+          && net_y = -1 && net_x = 1
+        then true
+        else false
+      else false
+    in
+
+    check_conditions
+
+  (* =================================================== *)
+  let potential_squares
+      (curr_x, curr_y)
+      board_arr
+      (color : color)
+      (last_move : move) =
+    let squares =
+      if color = White then
+        [
+          (curr_x, curr_y + 2);
+          (curr_x, curr_y + 1);
+          (curr_x + 1, curr_y + 1);
+          (curr_x - 1, curr_y + 1);
+        ]
+      else
+        [
+          (curr_x, curr_y - 2);
+          (curr_x, curr_y - 1);
+          (curr_x + 1, curr_y - 1);
+          (curr_x - 1, curr_y - 1);
+        ]
+    in
+    let run_filter =
+      List.filter
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        squares
+    in
+    run_filter
+    @ check_en_passant (curr_x, curr_y) last_move color board_arr
+
   let legal_moves (prop : properties) (coords : int * int) move_checker
       : move list =
-    raise (Failure "Unimplemented")
+    let board_arr = board_to_array prop.board in
+    let moves =
+      squares_to_moves coords
+        (potential_squares coords board_arr prop.color prop.last_move)
+    in
+    List.filter (move_checker prop) moves
 end
 
 module Knight : SoldierLogic = struct
