@@ -188,24 +188,16 @@ module Pawn : SoldierLogic = struct
         then true (* Go forward one *)
         else if
           net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
-        then true (* Diagonal up-left -- no en passant *)
+        then true (* Diagonal up-left *)
         else if
-          (not left_en_passant_able)
+          (left_en_passant_able
+          || board.(curr_x - 1).(curr_y + 1) != None)
           && net_y = 1 && net_x = -1
-          && board.(curr_x - 1).(curr_y + 1) != None
-        then true (* Diagonal up-left -- Yes en passant *)
+        then true (* Diagonal up-right *)
         else if
-          left_en_passant_able && net_y = 1 && net_x = -1
-          && board.(curr_x - 1).(curr_y + 1) = None
-        then true (* Diagonal up-right -- no en passant *)
-        else if
-          (not right_en_passant_able)
+          (right_en_passant_able
+          || board.(curr_x + 1).(curr_y + 1) != None)
           && net_y = 1 && net_x = 1
-          && board.(curr_x + 1).(curr_y + 1) != None
-        then true (* Diagonal up-right -- Yes en passant *)
-        else if
-          right_en_passant_able && net_y = 1 && net_x = 1
-          && board.(curr_x + 1).(curr_y + 1) = None
         then true
         else false (* Check when color is Black *)
       else if basic_valid_square then
@@ -219,22 +211,14 @@ module Pawn : SoldierLogic = struct
           net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
         then true (* Diagonal down-left -- no en passant *)
         else if
-          (not left_en_passant_able)
+          (left_en_passant_able
+          || board.(curr_x - 1).(curr_y - 1) != None)
           && net_y = -1 && net_x = -1
-          && board.(curr_x - 1).(curr_y - 1) != None
-        then true (* Diagonal down-left -- Yes en passant *)
+        then true (* Diagonal down-right *)
         else if
-          left_en_passant_able && net_y = -1 && net_x = -1
-          && board.(curr_x - 1).(curr_y - 1) = None
-        then true (* Diagonal down-right -- no en passant *)
-        else if
-          (not right_en_passant_able)
+          (right_en_passant_able
+          || board.(curr_x + 1).(curr_y - 1) != None)
           && net_y = -1 && net_x = 1
-          && board.(curr_x + 1).(curr_y - 1) != None
-        then true (* Diagonal down-right -- Yes en passant *)
-        else if
-          right_en_passant_able && net_y = -1 && net_x = 1
-          && board.(curr_x + 1).(curr_y - 1) = None
         then true
         else false
       else false
