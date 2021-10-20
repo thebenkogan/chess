@@ -198,7 +198,7 @@ let bishop_tests =
 
 let rook_tests =
   [
-    legal_moves_test "Middle of empty board"
+    legal_moves_test "Middle of empty board rook"
       (set_properties
          (empty_with_piece (Some (White, Rook)))
          White (-1, -1))
@@ -208,23 +208,12 @@ let rook_tests =
       [] (0, 0);
     legal_moves_test "Rook check path interference"
       (set_properties rook_board White (-1, -1))
-      [
-        (0, 1);
-        (0, 2);
-        (0, 3);
-        (0, 4);
-        (0, 5);
-        (0, 6);
-        (0, 7);
-        (1, 0);
-        (1, 2);
-      ]
-      (0, 0);
+      rook_path_interference_coords (0, 0);
   ]
 
 let queen_tests =
   [
-    legal_moves_test "Middle of empty board"
+    legal_moves_test "Middle of empty board queen"
       (set_properties
          (empty_with_piece (Some (White, Queen)))
          White (-1, -1))
@@ -233,8 +222,8 @@ let queen_tests =
       (set_properties starting_board White (-1, -1))
       [] (3, 0);
     legal_moves_test "Queen check path interference"
-      (set_properties rook_board White (-1, -1))
-      queen_path_interference_coords (0, 3);
+      (set_properties queen_board White (-1, -1))
+      queen_path_interference_coords (3, 0);
   ]
 
 let tests =
