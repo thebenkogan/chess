@@ -178,22 +178,7 @@ let bishop_tests =
   [
     legal_moves_test "Middle of empty board"
       (set_properties (empty_with_piece (Some (White, Bishop))) White)
-      [
-        (0, 0);
-        (1, 1);
-        (2, 2);
-        (4, 4);
-        (5, 5);
-        (6, 6);
-        (7, 7);
-        (0, 6);
-        (1, 5);
-        (2, 4);
-        (4, 2);
-        (5, 1);
-        (6, 0);
-      ]
-      (3, 3);
+      bishop_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
       (set_properties starting_board White)
       [] (2, 0);
@@ -207,22 +192,7 @@ let rook_tests =
   [
     legal_moves_test "Middle of empty board"
       (set_properties (empty_with_piece (Some (White, Rook))) White)
-      [
-        (3, 0);
-        (3, 1);
-        (3, 2);
-        (3, 4);
-        (3, 5);
-        (3, 6);
-        (3, 7);
-        (0, 3);
-        (1, 3);
-        (2, 4);
-        (4, 5);
-        (5, 6);
-        (6, 7);
-      ]
-      (3, 3);
+      rook_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
       (set_properties starting_board White)
       [] (0, 0);
@@ -246,59 +216,13 @@ let queen_tests =
   [
     legal_moves_test "Middle of empty board"
       (set_properties (empty_with_piece (Some (White, Queen))) White)
-      [
-        (0, 0);
-        (1, 1);
-        (2, 2);
-        (4, 4);
-        (5, 5);
-        (6, 6);
-        (7, 7);
-        (0, 6);
-        (1, 5);
-        (2, 4);
-        (4, 2);
-        (5, 1);
-        (6, 0);
-        (3, 0);
-        (3, 1);
-        (3, 2);
-        (3, 4);
-        (3, 5);
-        (3, 6);
-        (3, 7);
-        (0, 3);
-        (1, 3);
-        (2, 4);
-        (4, 5);
-        (5, 6);
-        (6, 7);
-      ]
-      (3, 3);
+      queen_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
       (set_properties starting_board White)
       [] (3, 0);
     legal_moves_test "Queen check path interference"
       (set_properties rook_board White)
-      [
-        (0, 0);
-        (0, 1);
-        (0, 2);
-        (0, 4);
-        (0, 5);
-        (0, 6);
-        (0, 7);
-        (1, 2);
-        (1, 3);
-        (1, 4);
-        (2, 1);
-        (2, 3);
-        (2, 5);
-        (3, 0);
-        (3, 6);
-        (4, 7);
-      ]
-      (0, 3);
+      queen_path_interference_coords (0, 3);
   ]
 
 let tests =
@@ -308,6 +232,9 @@ let tests =
            is_attacked_tests;
            knight_tests;
            king_tests;
+           knight_tests;
+           rook_tests;
+           queen_tests;
            move_checker_tests;
          ]
 

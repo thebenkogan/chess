@@ -34,6 +34,14 @@ let same_color (x, y) board color =
 let is_valid_square board color coords =
   on_board coords && not (same_color coords board color)
 
+(** [different_color p1 p2] is true if [p1] and [p2] are of different
+    colors. False if they are the same color, or if one or both are
+    None. Requires: [p1] and [p2] are pieces.*)
+let different_color p1 p2 =
+  match (p1, p2) with
+  | Some (c1, _), Some (c2, _) when c1 <> c2 -> true
+  | _ -> false
+
 (** [squares_to_moves squares first] returns a list of moves starting at
     [start] and targeting each square in [squares].*)
 let squares_to_moves first squares =

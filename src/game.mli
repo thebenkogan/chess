@@ -45,7 +45,8 @@ type properties = {
 }
 
 val update_board : t -> move -> t
-(** [update_board board move] is the board with [move] played.*)
+(** [update_board board move] is the board with [move] played. Requires:
+    [mv] represents a complete and legally valid game move. *)
 
 val is_attacked : move list -> int * int -> bool
 (** [is_attacked enemy_moves coords] is true if the square at [coords]

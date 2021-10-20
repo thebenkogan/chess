@@ -29,9 +29,6 @@ type properties = {
   queenside_castle : bool;
 }
 
-(** [update_board bd mv] updates the board [bd] by moving the piece
-    according to [mv] by its new location. Requires: [mv] represents a
-    complete and legally valid game move *)
 let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     =
   let board_arr = board_to_array bd in
@@ -105,12 +102,18 @@ module Pawn : SoldierLogic = struct
       (curr_x, curr_y)
       (((last_x_old, last_y_old), (last_x_new, last_y_new)) : move)
       color
-      (board : (color * 'a) option array array) =
+      board =
+    let enemy_color = if color = White then Black else White in
     let last_piece = board.(last_x_new).(last_y_new) in
     let curr_piece = board.(curr_x).(curr_y) in
+    let net_x = last_x_new - curr_x in
     let net_y = last_y_new - last_y_old in
-    let en_passant_able : bool = net_y = 2 || net_y = -2 in
-
+    let en_passant_able : bool =
+      (net_y = 2 || net_y = -2)
+      && (net_x = 1 || net_x = -1)
+      && different_color last_piece curr_piece
+      && last_piece = Some (enemy_color, Pawn)
+    in
     if en_passant_able && color = White then
       [ (last_x_new, last_y_new + 1) ]
     else if en_passant_able && color = Black then
@@ -195,12 +198,12 @@ module Pawn : SoldierLogic = struct
           (curr_x - 1, curr_y - 1);
         ]
     in
-    let run_filter =
+    let valid_moves =
       List.filter
         (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
         squares
     in
-    run_filter
+    valid_moves
     @ check_en_passant (curr_x, curr_y) last_move color board_arr
 
   let legal_moves (prop : properties) (coords : int * int) move_checker
