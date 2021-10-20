@@ -18,6 +18,7 @@ let init_state (board : Game.t) (color : Game.color) : t =
       color;
       last_move = ((-1, -1), (-1, -1));
       enemy_moves = [];
+      enemy_find = false;
       king_pos = (if color = White then (4, 0) else (4, 7));
       king_in_check = false;
       kingside_castle = false;
@@ -49,6 +50,7 @@ let enemy_properties bd our_color =
     color = (if our_color = White then Black else White);
     last_move = ((-1, -1), (-1, -1));
     enemy_moves = [];
+    enemy_find = true;
     king_pos = (-1, -1);
     king_in_check = false;
     queenside_castle = false;
