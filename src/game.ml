@@ -271,11 +271,12 @@ end
 module Bishop : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
     let board = board_to_array prop.board in
+    let ef = prop.enemy_find in
     let square_list =
-      build_line (x + 1, y + 1) board 1 1 prop.color
-      @ build_line (x - 1, y + 1) board (-1) 1 prop.color
-      @ build_line (x + 1, y - 1) board 1 (-1) prop.color
-      @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
+      build_line (x + 1, y + 1) board 1 1 prop.color ef
+      @ build_line (x - 1, y + 1) board (-1) 1 prop.color ef
+      @ build_line (x + 1, y - 1) board 1 (-1) prop.color ef
+      @ build_line (x - 1, y - 1) board (-1) (-1) prop.color ef
     in
     let moves = squares_to_moves (x, y) square_list in
     List.filter (move_checker prop) moves
@@ -284,11 +285,12 @@ end
 module Rook : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
     let board = board_to_array prop.board in
+    let ef = prop.enemy_find in
     let square_list =
-      build_line (x + 1, y) board 1 0 prop.color
-      @ build_line (x - 1, y) board (-1) 0 prop.color
-      @ build_line (x, y + 1) board 0 1 prop.color
-      @ build_line (x, y - 1) board 0 (-1) prop.color
+      build_line (x + 1, y) board 1 0 prop.color ef
+      @ build_line (x - 1, y) board (-1) 0 prop.color ef
+      @ build_line (x, y + 1) board 0 1 prop.color ef
+      @ build_line (x, y - 1) board 0 (-1) prop.color ef
     in
     let moves = squares_to_moves (x, y) square_list in
     List.filter (move_checker prop) moves
