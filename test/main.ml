@@ -79,6 +79,13 @@ let state_test
   name >:: fun _ ->
   assert_equal expected_output (init_state board color)
 
+let update_board_test
+    (name : string)
+    (bd : t)
+    (move : move)
+    (expected_output : t) : test =
+  name >:: fun _ -> assert_equal expected_output (update_board bd move)
+
 let is_attacked_tests =
   [
     is_attacked_test "Not attacked" [ ((7, 6), (3, 4)) ] (2, 3) false;
@@ -241,10 +248,19 @@ let pawn_tests =
       [ (2, 2); (2, 3) ] (2, 1);
   ]
 
+let update_board_tests =
+  [
+    update_board_test "Simple pawn forward one from starting board"
+      starting_board
+      ((1, 1), (1, 2))
+      starting_board_update1;
+  ]
+
 let tests =
   "test suite for chess"
   >::: List.flatten
          [
+           update_board_tests;
            pawn_tests;
            is_attacked_tests;
            knight_tests;
