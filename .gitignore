@@ -1,0 +1,20 @@
+# assignment
+chess.zip
+
+# ocaml
+*.cmo
+*.cma
+*.cmi
+*.out
+*.cmx
+*.native
+*.byte
+_build
+.vscode
+.ocamlinit
+
+# temporary files
+*.swp
+*~
+\#*\#
+.DS_Store
