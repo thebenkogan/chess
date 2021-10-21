@@ -254,6 +254,10 @@ let update_board_tests =
       starting_board
       ((1, 1), (1, 2))
       starting_board_update1;
+    update_board_test "Simple pawn forward two from starting board"
+      starting_board
+      ((1, 1), (1, 3))
+      starting_board_update2;
   ]
 
 let tests =
