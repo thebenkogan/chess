@@ -226,10 +226,26 @@ let queen_tests =
       queen_path_interference_coords (3, 0);
   ]
 
+let pawn_tests =
+  [
+    legal_moves_test "Middle of empty board pawn"
+      (set_properties
+         (empty_with_piece (Some (White, Pawn)))
+         White (-1, -1))
+      [ (3, 4) ] (3, 3);
+    legal_moves_test "Forward from standard board"
+      (set_properties starting_board White (-1, -1))
+      [ (5, 2); (5, 3) ] (5, 1);
+    legal_moves_test "Forward from standard board other position"
+      (set_properties starting_board White (-1, -1))
+      [ (2, 2); (2, 3) ] (2, 1);
+  ]
+
 let tests =
   "test suite for chess"
   >::: List.flatten
          [
+           pawn_tests;
            is_attacked_tests;
            knight_tests;
            king_tests;
