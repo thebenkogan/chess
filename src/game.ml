@@ -117,13 +117,12 @@ module Pawn : SoldierLogic = struct
     else
       let enemy_color = if color = White then Black else White in
       let last_piece = board.(last_x_new).(last_y_new) in
-      let curr_piece = board.(curr_x).(curr_y) in
       let net_x = last_x_new - curr_x in
       let net_y = last_y_new - last_y_old in
       let en_passant_able : bool =
         (net_y = 2 || net_y = -2)
+        && last_y_new = curr_y
         && (net_x = 1 || net_x = -1)
-        && different_color last_piece curr_piece
         && last_piece = Some (enemy_color, Pawn)
       in
       if en_passant_able && color = White then
