@@ -36,6 +36,23 @@ let set_properties bd c king_pos =
     queenside_castle = false;
   }
 
+let set_properties_pawn
+    bd
+    c
+    king_pos
+    (prev_move : (int * int) * (int * int)) =
+  {
+    board = bd;
+    color = c;
+    last_move = prev_move;
+    enemy_moves = [];
+    enemy_find = false;
+    king_pos;
+    king_in_check = false;
+    kingside_castle = false;
+    queenside_castle = false;
+  }
+
 (** [is_attacked_test name enemy_moves coords expected_output]
     constructs an OUnit test named [name] that asserts the quality of
     [expected_output] with [is_attacked enemy_moves coords]. *)
@@ -248,6 +265,10 @@ let pawn_tests =
       [ (2, 2); (2, 3) ] (2, 1);
     legal_moves_test "Basic capture"
       (set_properties starting_board_pawn1 White (-1, -1))
+      [ (2, 5); (1, 5) ] (2, 4);
+    legal_moves_test "En passant move"
+      (set_properties_pawn starting_board_pawn2 White (-1, -1)
+         ((1, 6), (1, 4)))
       [ (2, 5); (1, 5) ] (2, 4);
   ]
 
