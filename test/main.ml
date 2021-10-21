@@ -246,6 +246,9 @@ let pawn_tests =
     legal_moves_test "Forward from standard board other position"
       (set_properties starting_board White (-1, -1))
       [ (2, 2); (2, 3) ] (2, 1);
+    legal_moves_test "Basic capture"
+      (set_properties starting_board_pawn1 White (-1, -1))
+      [ (2, 5); (1, 5) ] (2, 4);
   ]
 
 let update_board_tests =
