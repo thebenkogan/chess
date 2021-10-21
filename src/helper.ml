@@ -57,8 +57,13 @@ let rec get_targets = function
   | [] -> []
   | h :: t -> snd h :: get_targets t
 
-(** [build_line (x,y) board_arr dirx diry color] returns a list of valid
-    squares in a single direction that a soldier can move to. *)
+(** [build_line (x,y) board_arr dirx diry color ef] returns a list of
+    valid squares in a single direction that a soldier can move to. If
+    moving in that direction hits a wall, the last square is before the
+    wall. If it hits a same color piece, then the last square is before
+    that piece. If it hits a different color piece, then that piece is
+    the last square. If [ef] is true, then same color pieces will be
+    included in the last square.*)
 let rec build_line (x, y) board_arr dirx diry color ef =
   if not (on_board (x, y)) then []
   else
