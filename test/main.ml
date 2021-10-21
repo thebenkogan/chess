@@ -21,13 +21,35 @@ let cmp_set_like_lists lst1 lst2 =
 (** [set_properties bd c] is the game properties with board [bd] and
     color [c] used to test the king-independent movement of a piece.
     [last_move], [enemy_moves], and [king_pos] are all disregarded.
-    [king_in_check], [kingside_castle], and [quueenside_castle] are
+    [king_in_check], [kingside_castle], and [queenside_castle] are
     false. *)
 let set_properties bd c king_pos =
   {
     board = bd;
     color = c;
     last_move = ((-1, -1), (-1, -1));
+    enemy_moves = [];
+    enemy_find = false;
+    king_pos;
+    king_in_check = false;
+    kingside_castle = false;
+    queenside_castle = false;
+  }
+
+(** [set_properties bd c prev_move] is the game properties for Pawn
+    pieces with board [bd] and color [c] used to test the
+    king-independent movement of a piece. [enemy_moves], and [king_pos]
+    are all disregarded. [king_in_check], [kingside_castle], and
+    [queenside_castle] are false. *)
+let set_properties_pawn
+    bd
+    c
+    king_pos
+    (prev_move : (int * int) * (int * int)) =
+  {
+    board = bd;
+    color = c;
+    last_move = prev_move;
     enemy_moves = [];
     enemy_find = false;
     king_pos;
@@ -78,6 +100,13 @@ let state_test
     (expected_output : State.t) : test =
   name >:: fun _ ->
   assert_equal expected_output (init_state board color)
+
+let update_board_test
+    (name : string)
+    (bd : t)
+    (move : move)
+    (expected_output : t) : test =
+  name >:: fun _ -> assert_equal expected_output (update_board bd move)
 
 let is_attacked_tests =
   [
@@ -226,10 +255,46 @@ let queen_tests =
       queen_path_interference_coords (3, 0);
   ]
 
+let pawn_tests =
+  [
+    legal_moves_test "Middle of empty board pawn"
+      (set_properties
+         (empty_with_piece (Some (White, Pawn)))
+         White (-1, -1))
+      [ (3, 4) ] (3, 3);
+    legal_moves_test "Forward from standard board"
+      (set_properties starting_board White (-1, -1))
+      [ (5, 2); (5, 3) ] (5, 1);
+    legal_moves_test "Forward from standard board other position"
+      (set_properties starting_board White (-1, -1))
+      [ (2, 2); (2, 3) ] (2, 1);
+    legal_moves_test "Basic capture"
+      (set_properties starting_board_pawn1 White (-1, -1))
+      [ (2, 5); (1, 5) ] (2, 4);
+    legal_moves_test "En passant move"
+      (set_properties_pawn starting_board_pawn2 White (-1, -1)
+         ((1, 6), (1, 4)))
+      [ (2, 5); (1, 5) ] (2, 4);
+  ]
+
+let update_board_tests =
+  [
+    update_board_test "Simple pawn forward one from starting board"
+      starting_board
+      ((1, 1), (1, 2))
+      starting_board_update1;
+    update_board_test "Simple pawn forward two from starting board"
+      starting_board
+      ((1, 1), (1, 3))
+      starting_board_update2;
+  ]
+
 let tests =
   "test suite for chess"
   >::: List.flatten
          [
+           update_board_tests;
+           pawn_tests;
            is_attacked_tests;
            knight_tests;
            king_tests;
