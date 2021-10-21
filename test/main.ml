@@ -21,7 +21,7 @@ let cmp_set_like_lists lst1 lst2 =
 (** [set_properties bd c] is the game properties with board [bd] and
     color [c] used to test the king-independent movement of a piece.
     [last_move], [enemy_moves], and [king_pos] are all disregarded.
-    [king_in_check], [kingside_castle], and [quueenside_castle] are
+    [king_in_check], [kingside_castle], and [queenside_castle] are
     false. *)
 let set_properties bd c king_pos =
   {
@@ -36,6 +36,11 @@ let set_properties bd c king_pos =
     queenside_castle = false;
   }
 
+(** [set_properties bd c prev_move] is the game properties for Pawn
+    pieces with board [bd] and color [c] used to test the
+    king-independent movement of a piece. [enemy_moves], and [king_pos]
+    are all disregarded. [king_in_check], [kingside_castle], and
+    [queenside_castle] are false. *)
 let set_properties_pawn
     bd
     c
