@@ -1,6 +1,6 @@
-# Install Instructions
+# How to install and play Chess game 
 
-## Dependencies (with opam install)
+## Dependencies (run with opam install)
 ANSITerminal
 
 ## Terminal Fonts

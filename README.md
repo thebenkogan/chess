@@ -1,4 +1,4 @@
-# OCaml Chess
+# Peer-to-Peer OCaml Chess
 
 Final Project for CS 3110, Fall 2021.
 
