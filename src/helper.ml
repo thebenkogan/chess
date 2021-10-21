@@ -21,12 +21,10 @@ let on_board (x, y) = x >= 0 && x <= 7 && y >= 0 && y <= 7
 (** [same_color (x, y) board color ef] is true if the piece at [(x, y)]
     is the same color as [color]. Requires: [(x, y)] is a coordinate on
     the board. If [ef] is true, then this is always false.*)
-let same_color (x, y) board color ef =
-  if ef then false
-  else
-    match board.(x).(y) with
-    | None -> false
-    | Some (piece_color, _) -> piece_color = color
+let same_color (x, y) board color =
+  match board.(x).(y) with
+  | None -> false
+  | Some (piece_color, _) -> piece_color = color
 
 (** [is_valid_square coords board color ef] is true if [coords] is a
     valid square that a piece can move to. A square is considered valid
@@ -34,8 +32,8 @@ let same_color (x, y) board color ef =
     same color as [color]. If [ef] is true, then squares containing
     pieces of the same color are valid. Requires: [board] is the array
     version of the board. *)
-let is_valid_square board color ef coords =
-  on_board coords && not (same_color coords board color ef)
+let is_valid_square board color coords =
+  on_board coords && not (same_color coords board color)
 
 (** [squares_to_moves squares first] returns a list of moves starting at
     [start] and targeting each square in [squares].*)
@@ -56,15 +54,14 @@ let rec get_targets = function
     that piece. If it hits a different color piece, then that piece is
     the last square. If [ef] is true, then same color pieces will be
     included in the last square.*)
-let rec build_line (x, y) board_arr dirx diry color ef =
+let rec build_line (x, y) board_arr dirx diry color =
   if not (on_board (x, y)) then []
   else
     match board_arr.(x).(y) with
     | None ->
         (x, y)
-        :: build_line (x + dirx, y + diry) board_arr dirx diry color ef
-    | Some (piece_color, _) when piece_color = color ->
-        if ef then [ (x, y) ] else []
+        :: build_line (x + dirx, y + diry) board_arr dirx diry color
+    | Some (piece_color, _) when piece_color = color -> []
     | Some (_, _) -> [ (x, y) ]
 
 (** [get_piece_moves piece_pos lst] is a list of all the moves in the

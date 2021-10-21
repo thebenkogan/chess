@@ -22,10 +22,7 @@ type properties = {
   board : t;
   color : color;
   last_move : move;
-  enemy_moves : move list;
-  enemy_find : bool;
   king_pos : int * int;
-  king_in_check : bool;
   kingside_castle : bool;
   queenside_castle : bool;
 }
@@ -98,9 +95,7 @@ let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
    legal moves for that piece. Requires: the piece at [coords] is of the
    correct soldier type and is of the same color as specified in
    [properties]. A legal move for a piece is one that obeys the rules
-   for the movement of that piece and does not put the king in check. If
-   [pin_checker] returns true for the piece, then that piece is
-   considered pinned and cannot move.*)
+   for the movement of that piece and does not put the king in check.*)
 module type SoldierLogic = sig
   val legal_moves :
     properties -> int * int -> (properties -> move -> bool) -> move list
@@ -136,12 +131,11 @@ module Pawn : SoldierLogic = struct
       board
       color
       last_move
-      ef
       (pot_x, pot_y) : bool =
     let net_x = pot_x - curr_x in
     let net_y = pot_y - curr_y in
     let basic_valid_square =
-      is_valid_square board color ef (pot_x, pot_y)
+      is_valid_square board color (pot_x, pot_y)
     in
 
     let check_conditions =
@@ -151,20 +145,17 @@ module Pawn : SoldierLogic = struct
           curr_y = 1 && net_y = 2 && net_x = 0
           && board.(curr_x).(curr_y + 1) = None
           && board.(curr_x).(curr_y + 2) = None
-          && not ef
         then true (* Go forward one *)
         else if
-          net_y = 1 && net_x = 0
-          && board.(curr_x).(curr_y + 1) = None
-          && not ef
+          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
         then true (* Diagonal up-left *)
         else if
           net_y = 1 && net_x = -1
-          && (board.(curr_x - 1).(curr_y + 1) != None || ef)
+          && board.(curr_x - 1).(curr_y + 1) != None
         then true (* Diagonal up-right *)
         else if
           net_y = 1 && net_x = 1
-          && (board.(curr_x + 1).(curr_y + 1) != None || ef)
+          && board.(curr_x + 1).(curr_y + 1) != None
         then true
         else false (* Check when color is Black *)
       else if basic_valid_square && color = Black then
@@ -173,20 +164,17 @@ module Pawn : SoldierLogic = struct
           curr_y = 6 && net_y = -2 && net_x = 0
           && board.(curr_x).(curr_y - 1) = None
           && board.(curr_x).(curr_y - 2) = None
-          && not ef
         then true (* Go forward one *)
         else if
-          net_y = -1 && net_x = 0
-          && board.(curr_x).(curr_y - 1) = None
-          && not ef
+          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
         then true (* Diagonal down-left -- no en passant *)
         else if
           net_y = -1 && net_x = -1
-          && (board.(curr_x - 1).(curr_y - 1) != None || ef)
+          && board.(curr_x - 1).(curr_y - 1) != None
         then true (* Diagonal down-right *)
         else if
           net_y = -1 && net_x = 1
-          && (board.(curr_x + 1).(curr_y - 1) != None || ef)
+          && board.(curr_x + 1).(curr_y - 1) != None
         then true
         else false
       else false
@@ -199,8 +187,7 @@ module Pawn : SoldierLogic = struct
       (curr_x, curr_y)
       board_arr
       (color : color)
-      (last_move : move)
-      ef =
+      (last_move : move) =
     let squares =
       if color = White then
         [
@@ -219,8 +206,7 @@ module Pawn : SoldierLogic = struct
     in
     let valid_moves =
       List.filter
-        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move
-           ef)
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
         squares
     in
     valid_moves
@@ -231,8 +217,7 @@ module Pawn : SoldierLogic = struct
     let board_arr = board_to_array prop.board in
     let moves =
       squares_to_moves coords
-        (potential_squares coords board_arr prop.color prop.last_move
-           prop.enemy_find)
+        (potential_squares coords board_arr prop.color prop.last_move)
     in
     List.filter (move_checker prop) moves
 end
@@ -243,9 +228,9 @@ module Knight : SoldierLogic = struct
       array [board_arr] with color [color]. A potential square is one
       that is on the board and does not contain a piece of the same
       color. *)
-  let potential_squares (x, y) board_arr color ef =
+  let potential_squares (x, y) board_arr color =
     List.filter
-      (is_valid_square board_arr color ef)
+      (is_valid_square board_arr color)
       [
         (x + 2, y + 1);
         (x + 2, y - 1);
@@ -262,7 +247,7 @@ module Knight : SoldierLogic = struct
     let board = board_to_array prop.board in
     let moves =
       squares_to_moves coords
-        (potential_squares coords board prop.color prop.enemy_find)
+        (potential_squares coords board prop.color)
     in
     List.filter (move_checker prop) moves
 end
@@ -270,12 +255,11 @@ end
 module Bishop : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
     let board = board_to_array prop.board in
-    let ef = prop.enemy_find in
     let square_list =
-      build_line (x + 1, y + 1) board 1 1 prop.color ef
-      @ build_line (x - 1, y + 1) board (-1) 1 prop.color ef
-      @ build_line (x + 1, y - 1) board 1 (-1) prop.color ef
-      @ build_line (x - 1, y - 1) board (-1) (-1) prop.color ef
+      build_line (x + 1, y + 1) board 1 1 prop.color
+      @ build_line (x - 1, y + 1) board (-1) 1 prop.color
+      @ build_line (x + 1, y - 1) board 1 (-1) prop.color
+      @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
     in
     let moves = squares_to_moves (x, y) square_list in
     List.filter (move_checker prop) moves
@@ -284,12 +268,11 @@ end
 module Rook : SoldierLogic = struct
   let legal_moves (prop : properties) (x, y) move_checker : move list =
     let board = board_to_array prop.board in
-    let ef = prop.enemy_find in
     let square_list =
-      build_line (x + 1, y) board 1 0 prop.color ef
-      @ build_line (x - 1, y) board (-1) 0 prop.color ef
-      @ build_line (x, y + 1) board 0 1 prop.color ef
-      @ build_line (x, y - 1) board 0 (-1) prop.color ef
+      build_line (x + 1, y) board 1 0 prop.color
+      @ build_line (x - 1, y) board (-1) 0 prop.color
+      @ build_line (x, y + 1) board 0 1 prop.color
+      @ build_line (x, y - 1) board 0 (-1) prop.color
     in
     let moves = squares_to_moves (x, y) square_list in
     List.filter (move_checker prop) moves
@@ -308,9 +291,9 @@ module King : SoldierLogic = struct
       array [board_arr] with color [color]. A potential square is one
       that is on the board and does not contain a piece of the same
       color. *)
-  let potential_squares (x, y) board_arr color ef =
+  let potential_squares (x, y) board_arr color =
     List.filter
-      (is_valid_square board_arr color ef)
+      (is_valid_square board_arr color)
       [
         (x + 1, y);
         (x - 1, y);
@@ -333,17 +316,17 @@ module King : SoldierLogic = struct
     | false, true -> [ (x - 2, y) ]
     | false, false -> []
 
-  let legal_moves (prop : properties) (coords : int * int) _ : move list
-      =
+  let legal_moves (prop : properties) (coords : int * int) move_checker
+      : move list =
     let board = board_to_array prop.board in
-    let castle_append = castle_squares prop coords in
-    let not_attacked square =
-      not (is_attacked prop.enemy_moves square)
+    let castle_append =
+      squares_to_moves coords (castle_squares prop coords)
     in
-    squares_to_moves coords
-      (castle_append
-      @ List.filter not_attacked
-          (potential_squares coords board prop.color prop.enemy_find))
+    let moves =
+      squares_to_moves coords
+        (potential_squares coords board prop.color)
+    in
+    List.filter (move_checker prop) moves @ castle_append
 end
 
 (* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
@@ -386,16 +369,17 @@ let legal_moves ?move_checker:(mc = fun _ _ -> true) (prop : properties)
   in
   fst (List.fold_left column_handler ([], 0) prop.board)
 
-let move_checker (prop : properties) (mv : move) : bool =
+let move_checker (prop : properties) (((x1, y1), (x2, y2)) : move) :
+    bool =
+  let mv = ((x1, y1), (x2, y2)) in
+  let piece = (board_to_array prop.board).(x1).(y1) in
+  let king_pos =
+    if piece = Some (prop.color, King) then (x2, y2) else prop.king_pos
+  in
   let new_board = update_board prop.board mv in
   let enemy_color = if prop.color = White then Black else White in
   not
     (is_attacked
        (legal_moves
-          {
-            prop with
-            board = new_board;
-            color = enemy_color;
-            king_in_check = false;
-          })
-       prop.king_pos)
+          { prop with board = new_board; color = enemy_color })
+       king_pos)

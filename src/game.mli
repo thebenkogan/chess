@@ -32,16 +32,8 @@ type properties = {
   color : color;
   (*The last move played on this board.*)
   last_move : move;
-  (*The opponent's legal moves in the current position, including to
-    same color squares.*)
-  enemy_moves : move list;
-  (*True if this is finding the moves of the opponent, meaning squares
-    with same color pieces are now legal.*)
-  enemy_find : bool;
   (*The current position of this color's king.*)
   king_pos : int * int;
-  (*True if the king is attacked in the current position.*)
-  king_in_check : bool;
   (*True if the king can castle kingside in the current position.*)
   kingside_castle : bool;
   (*True if the king can castle queenside in the current position.*)

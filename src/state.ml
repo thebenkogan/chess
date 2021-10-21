@@ -5,7 +5,9 @@ open Boards
 type t = {
   game_state : Game.properties;
   moves : Game.move list;
+  enemy_moves : Game.move list;
   turn : bool;
+  king_in_check : bool;
   a_rook_moved : bool;
   h_rook_moved : bool;
   king_moved : bool;
@@ -17,10 +19,7 @@ let init_state (board : Game.t) (color : Game.color) : t =
       board = starting_board;
       color;
       last_move = ((-1, -1), (-1, -1));
-      enemy_moves = [];
-      enemy_find = false;
       king_pos = (if color = White then (4, 0) else (4, 7));
-      king_in_check = false;
       kingside_castle = false;
       queenside_castle = false;
     }
@@ -32,7 +31,9 @@ let init_state (board : Game.t) (color : Game.color) : t =
   {
     game_state = init_properties;
     moves = init_moves;
+    enemy_moves = [];
     turn = init_turn;
+    king_in_check = false;
     a_rook_moved = false;
     h_rook_moved = false;
     king_moved = false;
@@ -42,17 +43,14 @@ let init_state (board : Game.t) (color : Game.color) : t =
     opponent with the opposite color of [our_color] and board [bd]. The
     [last_move] and [king_pos] are populated with [(-1, -1)], which
     signify that they should be disregarded. [enemy_moves] is the empty
-    list to allow free range of the enemy king. [king_in_check],
-    [queenside_castle], and [kingside_castle] are all false.*)
+    list to allow free range of the enemy king. [queenside_castle] and
+    [kingside_castle] are all false.*)
 let enemy_properties bd our_color =
   {
     board = bd;
     color = (if our_color = White then Black else White);
     last_move = ((-1, -1), (-1, -1));
-    enemy_moves = [];
-    enemy_find = true;
     king_pos = (-1, -1);
-    king_in_check = false;
     queenside_castle = false;
     kingside_castle = false;
   }
@@ -105,6 +103,8 @@ let play_move (st : t) ((oldx, oldy), (newx, newy)) : t =
   {
     game_state = new_properties;
     moves = [];
+    enemy_moves = [];
+    king_in_check = false;
     a_rook_moved = new_a_rook_moved;
     h_rook_moved = new_h_rook_moved;
     king_moved = new_king_moved;
@@ -123,8 +123,6 @@ let receive_move (st : t) (mv : move) : t =
       st.game_state with
       board = new_board;
       last_move = mv;
-      enemy_moves = new_enemy_moves;
-      king_in_check = new_king_in_check;
       queenside_castle = false (*TODO*);
       kingside_castle = false (*TODO*);
     }
@@ -134,5 +132,7 @@ let receive_move (st : t) (mv : move) : t =
     st with
     game_state = new_properties;
     moves = new_moves;
+    enemy_moves = new_enemy_moves;
     turn = true;
+    king_in_check = new_king_in_check;
   }
