@@ -26,13 +26,11 @@ let starting_board : Game.t =
   ]
 
 let starting_board_init_moves : move list = 
-  [
-  ((1, 0), (2, 2));
-  ((1, 0), (0, 2));
-  ((6, 0), (7, 2));
-  ((6, 0), (5, 2));
-  (*add more here for pawns*)
-]
+  [((0, 1), (0, 3)); ((0, 1), (0, 2)); ((1, 0), (2, 2)); ((1, 0), (0, 2)); 
+  ((1, 1), (1, 3)); ((1, 1), (1, 2)); ((2, 1), (2, 3)); ((2, 1), (2, 2)); 
+  ((3, 1), (3, 3)); ((3, 1), (3, 2)); ((4, 1), (4, 3)); ((4, 1), (4, 2)); 
+  ((5, 1), (5, 3)); ((5, 1), (5, 2)); ((6, 0), (7, 2)); ((6, 0), (5, 2)); 
+  ((6, 1), (6, 3)); ((6, 1), (6, 2)); ((7, 1), (7, 3)); ((7, 1), (7, 2))]
 
 let empty_with_piece piece : Game.t = 
   [
@@ -58,7 +56,7 @@ let knight_board : Game.t =
     [ None; None; None; None; None; None; None; None;];
   ]
 
-let king_board : Game.t = 
+let king_board1 : Game.t = 
   [
     [ None; None; None; None; None; None; None; None;];
     [ None; None; None; None; None; None; None; None;];
@@ -71,6 +69,42 @@ let king_board : Game.t =
   ]
 let king_board_enemy_moves : move list = 
   squares_to_moves (4, 0) [(4, 1); (4, 2); (4, 3); (4, 4); (4, 5); (4, 6); (4, 7); ]   
+
+let king_board2 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, Rook); None; None; None; None; Some (Black, King); None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+  
+let king_board3 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; Some (White, Pawn); None; Some (Black, King); None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
+
+let king_board4 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ Some (White, King); None; None; None; None; None; None; None;];
+    [ None; None; None; None; Some (White, Rook); None; None; None;];
+    [ None; None; None; None; None; Some (Black, King); None; None;];
+    [ None; None; Some (White, Bishop); None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+  ]
 
 let move_checker_board1 : Game.t = 
   [

@@ -25,8 +25,7 @@ let input_to_move str : move =
 
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
     is in checkmate if it has no legal moves and its king is in check. *)
-let is_checkmate st =
-  List.length st.moves = 0 && st.game_state.king_in_check
+let is_checkmate st = List.length st.moves = 0 && st.king_in_check
 
 (** [play_game state black result] prompts the player and handles
     white's [state] in the current game. If [result] specifies a color,
@@ -43,10 +42,10 @@ let rec play_game state black result =
   pretty_print state.game_state.board;
   match result with
   | Some White ->
-      print_endline "\n Checkmate! You win.";
+      print_endline "\nCheckmate! You win.";
       exit 0
   | Some Black ->
-      print_endline "\n Checkmate! You Lose.";
+      print_endline "\nCheckmate! You Lose.";
       exit 0
   | None -> (
       print_endline ("\n" ^ pp_move_list state.moves);
