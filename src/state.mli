@@ -2,18 +2,24 @@
 
     This module represents the state of a game of chess as it is being
     played, including the player's current chess position, their legal
-    moves, the properties of their position, and functions that update
-    their state upon a new move from this player or their opponent. *)
+    moves, the pseudo-legal enemy moves, the properties of their
+    position, and functions that update their state upon a new move from
+    this player or their opponent. *)
 
 type t = {
   (*The board with all of the pieces and properties.*)
   game_state : Game.properties;
   (*The legal moves on the pieces in the board for this color.*)
   moves : Game.move list;
+  (*The pseudo-legal moves of the opponent in the current position (king
+    independent).*)
+  enemy_moves : Game.move list;
   (*Players can only make a move if turn is true? After a move is
     played, we set this to false, and back to true when we receive a
     move from the opponent.*)
   turn : bool;
+  (*True if the king is attacked in the current position.*)
+  king_in_check : bool;
   (*True if the starting rook on the A file has moved.*)
   a_rook_moved : bool;
   (*True if the starting rook on the H file has moved.*)

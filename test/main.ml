@@ -18,25 +18,22 @@ let cmp_set_like_lists lst1 lst2 =
   && List.length lst2 = List.length uniq2
   && uniq1 = uniq2
 
-(** [set_properties bd c] is the game properties with board [bd] and
-    color [c] used to test the king-independent movement of a piece.
-    [last_move], [enemy_moves], and [king_pos] are all disregarded.
-    [king_in_check], [kingside_castle], and [queenside_castle] are
-    false. *)
+(** [set_properties bd c king_pos] is the game properties with board
+    [bd] and color [c] used to test the king-independent movement of a
+    piece. [last_move], [enemy_moves], and [king_pos] are all
+    disregarded. [king_in_check], [kingside_castle], and
+    [queenside_castle] are false. *)
 let set_properties bd c king_pos =
   {
     board = bd;
     color = c;
     last_move = ((-1, -1), (-1, -1));
-    enemy_moves = [];
-    enemy_find = false;
     king_pos;
-    king_in_check = false;
     kingside_castle = false;
     queenside_castle = false;
   }
 
-(** [set_properties bd c prev_move] is the game properties for Pawn
+(** [set_properties_pawn bd c prev_move] is the game properties for Pawn
     pieces with board [bd] and color [c] used to test the
     king-independent movement of a piece. [enemy_moves], and [king_pos]
     are all disregarded. [king_in_check], [kingside_castle], and
@@ -50,10 +47,7 @@ let set_properties_pawn
     board = bd;
     color = c;
     last_move = prev_move;
-    enemy_moves = [];
-    enemy_find = false;
     king_pos;
-    king_in_check = false;
     kingside_castle = false;
     queenside_castle = false;
   }
@@ -69,13 +63,11 @@ let is_attacked_test
   name >:: fun _ ->
   assert_equal expected_output (is_attacked enemy_moves coords)
 
-(** [legal_moves_test name prop ~pin_checker ~move_checker expected_output piece_pos]
+(** [legal_moves_test name prop ~move_checker expected_output piece_pos]
     constructs an OUnit test named [name] that asserts that the moves
     from [piece_pos] to [expected_output] has set-like equaltiy with the
-    moves from [piece_pos] in
-    [legal_moves ~pin_checker ~move_checker prop]. [pin_checker]
-    defaults to always returning false, and [move_checker] defaults to
-    always returning true. *)
+    moves from [piece_pos] in [legal_moves ~move_checker prop].
+    [move_checker] defaults to always returning true. *)
 let legal_moves_test
     (name : string)
     (prop : properties)
@@ -140,11 +132,23 @@ let king_tests =
       [ (4, 4); (4, 3); (3, 2); (3, 4); (2, 3); (2, 2); (2, 4); (4, 2) ]
       (3, 3);
     legal_moves_test "Does not move to attacked squares"
-      {
-        (set_properties king_board Black (-1, -1)) with
-        enemy_moves = king_board_enemy_moves;
-      }
-      [ (2, 6); (2, 7) ] (3, 7);
+      (set_properties king_board1 Black (3, 7))
+      ~move_checker [ (2, 6); (2, 7) ] (3, 7);
+    legal_moves_test "Does not move to attacked squares in line"
+      (set_properties king_board2 Black (4, 5))
+      ~move_checker
+      [ (3, 5); (3, 4); (3, 6); (5, 5); (5, 6); (5, 4) ]
+      (4, 5);
+    legal_moves_test "Can move in front of pawn, not corners"
+      (set_properties king_board3 Black (4, 5))
+      ~move_checker
+      [ (4, 4); (4, 6); (3, 6); (5, 6); (3, 5); (5, 5) ]
+      (4, 5);
+    legal_moves_test "Cannot take protected piece"
+      (set_properties king_board4 Black (4, 5))
+      ~move_checker
+      [ (4, 6); (5, 6); (5, 5) ]
+      (4, 5);
   ]
 
 let move_checker_tests =
@@ -179,10 +183,7 @@ let init_properties color =
     board = starting_board;
     color;
     last_move = ((-1, -1), (-1, -1));
-    enemy_moves = [];
-    enemy_find = false;
     king_pos = (if color = White then (4, 0) else (4, 7));
-    king_in_check = false;
     kingside_castle = false;
     queenside_castle = false;
   }
@@ -193,7 +194,9 @@ let state_tests =
       {
         game_state = init_properties White;
         moves = starting_board_init_moves;
+        enemy_moves = [];
         turn = true;
+        king_in_check = false;
         a_rook_moved = false;
         h_rook_moved = false;
         king_moved = false;
@@ -202,7 +205,9 @@ let state_tests =
       {
         game_state = init_properties Black;
         moves = [];
+        enemy_moves = [];
         turn = false;
+        king_in_check = false;
         a_rook_moved = false;
         h_rook_moved = false;
         king_moved = false;
@@ -302,6 +307,7 @@ let tests =
            rook_tests;
            queen_tests;
            move_checker_tests;
+           state_tests;
          ]
 
 let _ = run_test_tt_main tests
