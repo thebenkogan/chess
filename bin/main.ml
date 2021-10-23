@@ -4,6 +4,7 @@ open Game
 open Boards
 open Helper
 open Printer
+open Gui
 
 exception Malformed
 
@@ -83,6 +84,7 @@ let rec play_game state black result =
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
 let main () =
+  draw_stuff ();
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\n\
      Welcome to OCaml Chess!\n\
