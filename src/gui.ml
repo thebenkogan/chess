@@ -3,7 +3,7 @@ open Images
 open Game
 open Helper
 
-let img = Images.load "imgs/black_bishop.png" []
+let imgs = ref ([] : image list)
 
 let load_imgs () =
   List.map Graphic_image.of_image
@@ -75,10 +75,11 @@ let draw_position bd imgs =
 let draw_game bd =
   clear_graph ();
   draw_board ();
-  let imgs = load_imgs () in
-  draw_position bd imgs
+  draw_position bd !imgs
 
 let init_gui () =
   open_graph "";
   resize_window windowlength windowlength;
-  set_line_width 2
+  set_line_width 2;
+  let loaded_imgs = load_imgs () in
+  imgs := loaded_imgs
