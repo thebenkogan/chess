@@ -81,5 +81,4 @@ let draw_game bd =
 let init_gui () =
   open_graph "";
   resize_window windowlength windowlength;
-  set_line_width 2;
-  draw_board ()
+  set_line_width 2
