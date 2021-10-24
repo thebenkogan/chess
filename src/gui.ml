@@ -26,6 +26,24 @@ let windowlength = 600
 
 let step = windowlength / 8
 
+let click_to_coord (x, y) =
+  let check_bounds = function
+    | n when n > 7 -> 7
+    | n when n < 0 -> 0
+    | n -> n
+  in
+  let newx = check_bounds (x / step) in
+  let newy = check_bounds (y / step) in
+  (newx, newy)
+
+let get_next_click_pos () =
+  let click = Graphics.wait_next_event [ Button_down ] in
+  (click.mouse_x, click.mouse_y)
+
+let wait_click_square () =
+  let pos = get_next_click_pos () in
+  click_to_coord pos
+
 let rec draw_rows row =
   if row = 8 then ()
   else
@@ -75,7 +93,12 @@ let draw_position bd imgs =
 let draw_game bd =
   clear_graph ();
   draw_board ();
-  draw_position bd !imgs
+  draw_position bd !imgs;
+  print_endline "\nClick first coord: ";
+  let x1, y1 = wait_click_square () in
+  print_endline "\nClick second coord: ";
+  let x2, y2 = wait_click_square () in
+  ((x1, y1), (x2, y2))
 
 let init_gui () =
   open_graph "";

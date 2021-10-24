@@ -40,7 +40,6 @@ let is_checkmate st = List.length st.moves = 0 && st.king_in_check
     Before prompting the player, this prints out white's legal moves as
     a list.*)
 let rec play_game state black result =
-  pretty_print state.game_state.board;
   match result with
   | Some White ->
       print_endline "\nCheckmate! You win.";
@@ -49,38 +48,31 @@ let rec play_game state black result =
       print_endline "\nCheckmate! You Lose.";
       exit 0
   | None -> (
-      draw_game state.game_state.board;
-      print_endline ("\n" ^ pp_move_list state.moves);
-      print_endline "\nEnter a move: ";
-      match read_line () with
-      | "quit" -> exit 0
-      | str -> begin
-          try
-            let move = input_to_move str in
-            if not (List.mem move state.moves) then raise Illegal
-            else
-              let next_state = play_move state move in
-              let next_black = receive_move black move in
-              if is_checkmate next_black then
-                play_game next_state next_black (Some White)
-              else
-                let black_move =
-                  List.nth next_black.moves
-                    (Random.int (List.length next_black.moves))
-                in
-                let update_black = play_move next_black black_move in
-                let update_state = receive_move next_state black_move in
-                if is_checkmate update_state then
-                  play_game update_state update_black (Some Black)
-                else play_game update_state update_black None
-          with
-          | Malformed ->
-              print_endline "\nThat's not a move. Try again.";
-              play_game state black None
-          | Illegal ->
-              print_endline "\nIllegal move. Try again.";
-              play_game state black None
-        end)
+      let move = draw_game state.game_state.board in
+      try
+        if not (List.mem move state.moves) then raise Illegal
+        else
+          let next_state = play_move state move in
+          let next_black = receive_move black move in
+          if is_checkmate next_black then
+            play_game next_state next_black (Some White)
+          else
+            let black_move =
+              List.nth next_black.moves
+                (Random.int (List.length next_black.moves))
+            in
+            let update_black = play_move next_black black_move in
+            let update_state = receive_move next_state black_move in
+            if is_checkmate update_state then
+              play_game update_state update_black (Some Black)
+            else play_game update_state update_black None
+      with
+      | Malformed ->
+          print_endline "\nThat's not a move. Try again.";
+          play_game state black None
+      | Illegal ->
+          print_endline "\nIllegal move. Try again.";
+          play_game state black None)
 
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
