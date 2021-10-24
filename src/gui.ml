@@ -3,10 +3,6 @@ open Images
 open Game
 open Helper
 
-let light = rgb 236 217 177
-
-let dark = rgb 174 137 94
-
 let img = Images.load "imgs/black_bishop.png" []
 
 let load_imgs () =
@@ -30,20 +26,17 @@ let windowlength = 600
 
 let step = windowlength / 8
 
-let rec draw_rows row start =
+let rec draw_rows row =
   if row = 8 then ()
   else
-    let rec draw_row index alt =
-      let color = if alt then light else dark in
-      set_color color;
+    let rec draw_row index =
       draw_rect (index * step) (row * step) step step;
-      fill_rect (index * step) (row * step) step step;
-      if index = 7 then () else draw_row (index + 1) (not alt)
+      if index = 7 then () else draw_row (index + 1)
     in
-    draw_row 0 start;
-    draw_rows (row + 1) (not start)
+    draw_row 0;
+    draw_rows (row + 1)
 
-let draw_board () = draw_rows 0 false
+let draw_board () = draw_rows 0
 
 let get_piece_img imgs color soldier =
   let index =
@@ -66,8 +59,8 @@ let rec draw_position_rows bd imgs row =
       | Some (color, soldier) ->
           let img = get_piece_img imgs color soldier in
           draw_image img
-            ((index * step) + (step / 4))
-            ((row * step) + (step / 4)));
+            ((index * step) + ((step - 60) / 2))
+            ((row * step) + ((step - 60) / 2)));
       if index = 7 then () else draw_position_row (index + 1);
       ()
     in
@@ -82,6 +75,7 @@ let draw_position bd imgs =
 let draw_game bd =
   open_graph "";
   resize_window windowlength windowlength;
+  set_line_width 2;
   draw_board ();
   let imgs = load_imgs () in
   draw_position bd imgs
