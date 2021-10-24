@@ -79,6 +79,6 @@ let draw_game bd =
 
 let init_gui () =
   open_graph "";
-  resize_window windowlength windowlength;
+  resize_window windowlength (windowlength + 2);
   set_line_width 2;
   imgs := load_imgs ()
