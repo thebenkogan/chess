@@ -49,6 +49,7 @@ let rec play_game state black result =
       print_endline "\nCheckmate! You Lose.";
       exit 0
   | None -> (
+      draw_game state.game_state.board;
       print_endline ("\n" ^ pp_move_list state.moves);
       print_endline "\nEnter a move: ";
       match read_line () with
@@ -84,7 +85,6 @@ let rec play_game state black result =
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
 let main () =
-  draw_game starting_board;
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\n\
      Welcome to OCaml Chess!\n\
@@ -105,6 +105,7 @@ let main () =
   print_string "> ";
   match read_line () with
   | _ ->
+      init_gui ();
       Random.self_init ();
       play_game
         (init_state starting_board White)

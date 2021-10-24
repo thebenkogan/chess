@@ -73,9 +73,13 @@ let draw_position bd imgs =
   draw_position_rows bd imgs 0
 
 let draw_game bd =
-  open_graph "";
-  resize_window windowlength windowlength;
-  set_line_width 2;
+  clear_graph ();
   draw_board ();
   let imgs = load_imgs () in
   draw_position bd imgs
+
+let init_gui () =
+  open_graph "";
+  resize_window windowlength windowlength;
+  set_line_width 2;
+  draw_board ()
