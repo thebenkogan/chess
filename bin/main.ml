@@ -84,7 +84,7 @@ let rec play_game state black result =
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
 let main () =
-  draw_stuff ();
+  draw_game starting_board;
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\n\
      Welcome to OCaml Chess!\n\
