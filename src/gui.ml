@@ -81,5 +81,4 @@ let init_gui () =
   open_graph "";
   resize_window windowlength windowlength;
   set_line_width 2;
-  let loaded_imgs = load_imgs () in
-  imgs := loaded_imgs
+  imgs := load_imgs ()
