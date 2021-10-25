@@ -3,8 +3,11 @@ open Images
 open Game
 open Helper
 
+(** [imgs] is the currently loaded images of the game. *)
 let imgs = ref ([] : image list)
 
+(** [load_imgs ()] loads all chess piece images in ../imgs and returns
+    them in a list. Requires: the Graphics window is open. *)
 let load_imgs () =
   List.map Graphic_image.of_image
     [
@@ -22,11 +25,19 @@ let load_imgs () =
       Images.load "imgs/black_king.png" [];
     ]
 
-let windowlength = 600
+(** [window_length] is the height and width of the game window in
+    pixels. *)
+let window_length = 600
 
-let step = windowlength / 8
+(** [step] is the height and width of each square on the chessboard,
+    allowing for 8 squares in the x and y direction. *)
+let step = window_length / 8
 
-let click_to_coord (x, y) =
+(** [click_to_coord coord] is the chess coordinate from the click
+    position [coord]. If the click is registered outside the legal chess
+    coordinates, then this is the closest chess coordinate to that
+    position.*)
+let click_to_coord ((x, y) : int * int) =
   let check_bounds = function
     | n when n > 7 -> 7
     | n when n < 0 -> 0
@@ -36,15 +47,24 @@ let click_to_coord (x, y) =
   let newy = check_bounds (y / step) in
   (newx, newy)
 
+(** [get_next_click_pos ()] waits for the user to click on the Graphics
+    window and then returns the clicked x, y position relative to the
+    bottom left of the window in pixels. *)
 let get_next_click_pos () =
   let click = Graphics.wait_next_event [ Button_down ] in
   (click.mouse_x, click.mouse_y)
 
+(** [wait_click_square ()] waits for the user to click on the Graphics
+    window and then returns the chess coordinate associated with the
+    clicked position.*)
 let wait_click_square () =
   let pos = get_next_click_pos () in
   click_to_coord pos
 
-let rec draw_rows row =
+(** [draw_rows row] draws the outlines of each square on the chess
+    board, starting at row number [row] and moving up the board.
+    Requires: [row] is in 0..7. *)
+let rec draw_rows (row : int) =
   if row = 8 then ()
   else
     let rec draw_row index =
@@ -54,9 +74,17 @@ let rec draw_rows row =
     draw_row 0;
     draw_rows (row + 1)
 
+(** [draw_board ()] draws the outline of each square on the chess board. *)
 let draw_board () = draw_rows 0
 
-let get_piece_img imgs color soldier =
+(** [get_piece_img imgs color soldier] is the image of [imgs] associated
+    with the piece of color [color] and type [soldier]. Requires: [imgs]
+    lists all white piece images, then black piece images, in the order:
+    pawn, knight, bishop, rook, queen, king.*)
+let get_piece_img
+    (imgs : image list)
+    (color : Game.color)
+    (soldier : Game.soldier) =
   let index =
     match soldier with
     | Pawn -> if color = White then 0 else 6
@@ -68,7 +96,15 @@ let get_piece_img imgs color soldier =
   in
   List.nth imgs index
 
-let rec draw_position_rows bd imgs row =
+(** [draw_position_rows bd imgs row] draws the pieces of each row of
+    [bd], starting at row number [row] and moving up the board.
+    Requires: [row] is in 0..7, [bd] is a valid chess board, and [imgs]
+    lists all white piece images, then black piece images, in the order:
+    pawn, knight, bishop, rook, queen, king.*)
+let rec draw_position_rows
+    (bd : piece option array array)
+    (imgs : image list)
+    (row : int) =
   if row = 8 then ()
   else
     let rec draw_position_row index =
@@ -86,11 +122,15 @@ let rec draw_position_rows bd imgs row =
     draw_position_rows bd imgs (row + 1);
     ()
 
-let draw_position bd imgs =
+(** [draw_position_rows bd imgs row] draws the pieces of each row of
+    [bd]. Requires: [bd] is a valid chess board and [imgs] lists all
+    white piece images, then black piece images, in the order: pawn,
+    knight, bishop, rook, queen, king.*)
+let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
-let draw_game bd =
+let draw_game (bd : Game.t) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
@@ -102,6 +142,6 @@ let draw_game bd =
 
 let init_gui () =
   open_graph "";
-  resize_window windowlength (windowlength + 2);
+  resize_window window_length (window_length + 2);
   set_line_width 2;
   imgs := load_imgs ()

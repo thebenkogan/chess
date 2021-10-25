@@ -6,39 +6,21 @@ open Helper
 open Printer
 open Gui
 
-exception Malformed
-
 exception Illegal
-
-(** [input_to_move str] converts [str] to a move. Requires: [str] is the
-    string form of a valid move with the correct whitespace and
-    parentheses. Format: ((x, y), (x, y)). Raises: [Malformed] if [str]
-    does not follow this format. *)
-let input_to_move str : move =
-  try
-    let char_to_int c = int_of_string (Char.escaped c) in
-    let curr_x = char_to_int (String.get str 2) in
-    let curr_y = char_to_int (String.get str 5) in
-    let new_x = char_to_int (String.get str 10) in
-    let new_y = char_to_int (String.get str 13) in
-    ((curr_x, curr_y), (new_x, new_y))
-  with _ -> raise Malformed
 
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
     is in checkmate if it has no legal moves and its king is in check. *)
 let is_checkmate st = List.length st.moves = 0 && st.king_in_check
 
-(** [play_game state black result] prompts the player and handles
-    white's [state] in the current game. If [result] specifies a color,
+(** [play_game state black result] draws the current state of the game
+    onto the Graphics window and handles white's [state] in the current
+    game by receiving a clicked move. If [result] specifies a color,
     then that color wins by checkmate. After the player inputs a move,
     this checks if the move is legal. If illegal, this repeats with no
     new inputs. If legal, the move is played, and then this chooses a
     random move based off of black's state after updating [black] with
     the new move. This then repeats with the new states for white and
-    black. If the player enters "quit", this will exit the program. If
-    the input is not recognized, this will repeat with no new inputs.
-    Before prompting the player, this prints out white's legal moves as
-    a list.*)
+    black.*)
 let rec play_game state black result =
   match result with
   | Some White ->
@@ -66,13 +48,9 @@ let rec play_game state black result =
             if is_checkmate update_state then
               play_game update_state update_black (Some Black)
             else play_game update_state update_black None
-      with
-      | Malformed ->
-          print_endline "\nThat's not a move. Try again.";
-          play_game state black None
-      | Illegal ->
-          print_endline "\nIllegal move. Try again.";
-          play_game state black None)
+      with Illegal ->
+        print_endline "\nIllegal move. Try again.";
+        play_game state black None)
 
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
