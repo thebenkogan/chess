@@ -7,5 +7,6 @@ val draw_game : Game.t -> Game.move
 
 val init_gui : unit -> unit
 (** [init_gui ()] initializes the Graphics GUI by opening a window of
-    height and width [window_length], sets the line width to 2 pixels,
-    and loads the chess piece images into [imgs]. *)
+    height and width [window_length], writes the title of the window,
+    sets the line width to 2 pixels, and loads the chess piece images
+    into [imgs]. *)

@@ -143,5 +143,6 @@ let draw_game (bd : Game.t) =
 let init_gui () =
   open_graph "";
   resize_window window_length (window_length + 2);
+  set_window_title "OCaml Chess";
   set_line_width 2;
   imgs := load_imgs ()
