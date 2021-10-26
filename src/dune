@@ -1,3 +1,4 @@
 (library
  (name chess)
- (public_name Chess))
+ (public_name Chess)
+ (libraries graphics camlimages.graphics camlimages.all_formats))
