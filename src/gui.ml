@@ -3,8 +3,10 @@ open Images
 open Game
 open Helper
 
+(** [light] is the color of light squares on the board. *)
 let light = rgb 236 217 177
 
+(** [dark] is the color of dark squares on the board. *)
 let dark = rgb 174 137 94
 
 (** [imgs] is the currently loaded images of the game. *)
