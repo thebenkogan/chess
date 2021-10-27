@@ -32,18 +32,18 @@ let load_imgs () =
   List.map make_transparent
     (List.map Graphic_image.of_image
        [
-         Images.load "imgs/white_pawn.png" [];
-         Images.load "imgs/white_knight.png" [];
-         Images.load "imgs/white_bishop.png" [];
-         Images.load "imgs/white_rook.png" [];
-         Images.load "imgs/white_queen.png" [];
-         Images.load "imgs/white_king.png" [];
-         Images.load "imgs/black_pawn.png" [];
-         Images.load "imgs/black_knight.png" [];
-         Images.load "imgs/black_bishop.png" [];
-         Images.load "imgs/black_rook.png" [];
-         Images.load "imgs/black_queen.png" [];
-         Images.load "imgs/black_king.png" [];
+         Png.load "imgs/white_pawn.png" [];
+         Png.load "imgs/white_knight.png" [];
+         Png.load "imgs/white_bishop.png" [];
+         Png.load "imgs/white_rook.png" [];
+         Png.load "imgs/white_queen.png" [];
+         Png.load "imgs/white_king.png" [];
+         Png.load "imgs/black_pawn.png" [];
+         Png.load "imgs/black_knight.png" [];
+         Png.load "imgs/black_bishop.png" [];
+         Png.load "imgs/black_rook.png" [];
+         Png.load "imgs/black_queen.png" [];
+         Png.load "imgs/black_king.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -166,7 +166,7 @@ let draw_game (bd : Game.t) =
 
 let init_gui () =
   open_graph "";
-  resize_window window_length (window_length + 2);
+  resize_window window_length window_length;
   set_window_title "OCaml Chess";
   set_line_width 2;
   imgs := load_imgs ()
