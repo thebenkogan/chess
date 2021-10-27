@@ -158,9 +158,7 @@ let draw_game (bd : Game.t) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
-  print_endline "\nClick first coord: ";
   let x1, y1 = wait_click_square () in
-  print_endline "\nClick second coord: ";
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
 
