@@ -3,27 +3,46 @@ open Images
 open Game
 open Helper
 
+let light = rgb 236 217 177
+
+let dark = rgb 174 137 94
+
 (** [imgs] is the currently loaded images of the game. *)
 let imgs = ref ([] : image list)
+
+(** [make_transparent img] makes any blue color in [img] transparent
+    (Graphics.transp). Graphics does not allow loading transparent
+    images directly so this must be done manually. Assumes each image in
+    [imgs] has blue background that is intended to be transparent. *)
+let make_transparent img =
+  let image = dump_image img in
+  for i = 0 to Array.length image - 1 do
+    for j = 0 to Array.length image.(i) - 1 do
+      if image.(i).(j) = blue then image.(i).(j) <- transp
+      else image.(i).(j) <- image.(i).(j)
+    done
+  done;
+  make_image image
 
 (** [load_imgs ()] loads all chess piece images in ../imgs and returns
     them in a list. Requires: the Graphics window is open. *)
 let load_imgs () =
-  List.map Graphic_image.of_image
-    [
-      Images.load "imgs/white_pawn.png" [];
-      Images.load "imgs/white_knight.png" [];
-      Images.load "imgs/white_bishop.png" [];
-      Images.load "imgs/white_rook.png" [];
-      Images.load "imgs/white_queen.png" [];
-      Images.load "imgs/white_king.png" [];
-      Images.load "imgs/black_pawn.png" [];
-      Images.load "imgs/black_knight.png" [];
-      Images.load "imgs/black_bishop.png" [];
-      Images.load "imgs/black_rook.png" [];
-      Images.load "imgs/black_queen.png" [];
-      Images.load "imgs/black_king.png" [];
-    ]
+  List.map make_transparent
+    (List.map Graphic_image.of_image
+       [
+         Images.load "imgs/white_pawn.png" [];
+         Images.load "imgs/white_knight.png" [];
+         Images.load "imgs/white_bishop.png" [];
+         Images.load "imgs/white_rook.png" [];
+         Images.load "imgs/white_queen.png" [];
+         Images.load "imgs/white_king.png" [];
+         Images.load "imgs/black_pawn.png" [];
+         Images.load "imgs/black_knight.png" [];
+         Images.load "imgs/black_bishop.png" [];
+         Images.load "imgs/black_rook.png" [];
+         Images.load "imgs/black_queen.png" [];
+         Images.load "imgs/black_king.png" [];
+       ])
 
 (** [window_length] is the height and width of the game window in
     pixels. *)
@@ -64,18 +83,21 @@ let wait_click_square () =
 (** [draw_rows row] draws the outlines of each square on the chess
     board, starting at row number [row] and moving up the board.
     Requires: [row] is in 0..7. *)
-let rec draw_rows (row : int) =
+let rec draw_rows row start =
   if row = 8 then ()
   else
-    let rec draw_row index =
+    let rec draw_row index alt =
+      let color = if alt then light else dark in
+      set_color color;
       draw_rect (index * step) (row * step) step step;
-      if index = 7 then () else draw_row (index + 1)
+      fill_rect (index * step) (row * step) step step;
+      if index = 7 then () else draw_row (index + 1) (not alt)
     in
-    draw_row 0;
-    draw_rows (row + 1)
+    draw_row 0 start;
+    draw_rows (row + 1) (not start)
 
 (** [draw_board ()] draws the outline of each square on the chess board. *)
-let draw_board () = draw_rows 0
+let draw_board () = draw_rows 0 false
 
 (** [get_piece_img imgs color soldier] is the image of [imgs] associated
     with the piece of color [color] and type [soldier]. Requires: [imgs]
