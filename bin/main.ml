@@ -60,27 +60,14 @@ let main () =
      Welcome to OCaml Chess!\n\
      You will play with the white pieces against our random-move engine.\n";
   print_endline
-    "You can play a move by entering the starting and ending\n\
-     coordinate of the piece you want to play with the format:\n";
-  print_endline "((current x, current y), (new x, new y))\n";
-  print_endline
-    "Both x and y are 0-based and are relative to the bottom left of\n\
-     the board. Example for starting position of white king: (4, 0).\n";
-
-  print_endline
-    "A list of your legal moves will be displayed for every position.\n";
-
-  print_endline "Enter \"quit\" to stop playing.\n\n";
-  print_endline "Enter any key to start.\n";
-  print_string "> ";
-  match read_line () with
-  | _ ->
-      init_gui ();
-      Random.self_init ();
-      play_game
-        (init_state starting_board White)
-        (init_state starting_board Black)
-        None
+    "\n\
+     You can play a move by clicking on a piece and its target square.";
+  init_gui ();
+  Random.self_init ();
+  play_game
+    (init_state starting_board White)
+    (init_state starting_board Black)
+    None
 
 (* Execute the game engine. *)
 let () = main ()
