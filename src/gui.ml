@@ -155,18 +155,55 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
-let get_potential_squares (piece : piece option) currX currY =
-  raise (Failure "Unimplemented")
+let get_potential_squares
+    (bd : Game.t)
+    (piece : piece)
+    (soldier_type : soldier)
+    currX
+    currY =
+  ()
+
+let draw_potential_circles
+    (board : Game.t)
+    (imgs : image list)
+    (currX : int)
+    (currY : int)
+    (soldier_type : soldier) =
+  let potential_circles = [] in
+  let rec draw_circle potential_circles =
+    match potential_circles with
+    | [] -> ()
+    | h :: t ->
+        draw_image (List.nth imgs 12) 0 0;
+        draw_circle t
+  in
+  draw_circle potential_circles
+
+(** [get_soldier_type piece] is the type of the soldier. Requries:
+    [piece] is not None *)
+let get_soldier_type (piece : piece option) : soldier =
+  match piece with
+  | Some (_, Pawn) -> Pawn
+  | Some (_, Knight) -> Knight
+  | Some (_, Bishop) -> Bishop
+  | Some (_, Rook) -> Rook
+  | Some (_, Queen) -> Queen
+  | _ -> King
 
 (** [draw circles bd imgs] draws grey circles based on the potential
     moves of the clicked square. *)
 let draw_circles (bd : Game.t) (imgs : image list) currX currY =
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
-  if piece = None then () else draw_image (List.nth imgs 12) 0 0
+  if piece = None then ()
+  else
+    let soldier_type = get_soldier_type piece in
+    draw_potential_circles bd imgs currX currY soldier_type
 
 (* let draw_circles (bd : Game.t) (imgs : image list) = draw_image
    (List.nth imgs 12) 0 0 *)
+
+(* draw_image (List.nth imgs 12) 0 0 *)
 
 let draw_game (bd : Game.t) =
   clear_graph ();
