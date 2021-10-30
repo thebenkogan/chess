@@ -169,12 +169,15 @@ let draw_potential_circles
     (currX : int)
     (currY : int)
     (soldier_type : soldier) =
-  let potential_circles = [] in
+  let potential_circles : move list = [ ((0, 0), (0, 1)) ] in
+  (* FINISH THIS LINE THEN DONE *)
   let rec draw_circle potential_circles =
     match potential_circles with
     | [] -> ()
-    | h :: t ->
-        draw_image (List.nth imgs 12) 0 0;
+    | ((a, b), (c, d)) :: t ->
+        draw_image (List.nth imgs 12)
+          ((c * step) + ((step - 60) / 2))
+          ((d * step) + ((step - 60) / 2));
         draw_circle t
   in
   draw_circle potential_circles
@@ -197,13 +200,9 @@ let draw_circles (bd : Game.t) (imgs : image list) currX currY =
   let piece = board.(currX).(currY) in
   if piece = None then ()
   else
-    let soldier_type = get_soldier_type piece in
-    draw_potential_circles bd imgs currX currY soldier_type
-
-(* let draw_circles (bd : Game.t) (imgs : image list) = draw_image
-   (List.nth imgs 12) 0 0 *)
-
-(* draw_image (List.nth imgs 12) 0 0 *)
+    (* let soldier_type = get_soldier_type piece in
+       draw_potential_circles bd imgs currX currY soldier_type *)
+    draw_image (List.nth imgs 12) 0 0
 
 let draw_game (bd : Game.t) =
   clear_graph ();
