@@ -44,6 +44,7 @@ let load_imgs () =
          Png.load "imgs/black_rook.png" [];
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
+         Png.load "imgs/grey_square.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -129,7 +130,7 @@ let rec draw_position_rows
     (bd : piece option array array)
     (imgs : image list)
     (row : int) =
-  if row = 8 then ()
+  if row = 8 then () (* Stops drawing on board *)
   else
     let rec draw_position_row index =
       (match bd.(index).(row) with
