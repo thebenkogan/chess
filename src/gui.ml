@@ -155,10 +155,18 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
+let get_potential_squares (piece : piece option) currX currY =
+  raise (Failure "Unimplemented")
+
 (** [draw circles bd imgs] draws grey circles based on the potential
     moves of the clicked square. *)
-let draw_circles (bd : Game.t) (imgs : image list) =
-  draw_image (List.nth imgs 12) 0 0
+let draw_circles (bd : Game.t) (imgs : image list) currX currY =
+  let board = board_to_array bd in
+  let piece = board.(currX).(currY) in
+  if piece = None then () else draw_image (List.nth imgs 12) 0 0
+
+(* let draw_circles (bd : Game.t) (imgs : image list) = draw_image
+   (List.nth imgs 12) 0 0 *)
 
 let draw_game (bd : Game.t) =
   clear_graph ();
@@ -166,7 +174,7 @@ let draw_game (bd : Game.t) =
   draw_position bd !imgs;
   (* draw_circles bd !imgs; *)
   let x1, y1 = wait_click_square () in
-  let draw_potential = draw_circles bd !imgs in
+  let draw_potential = draw_circles bd !imgs x1 y1 in
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
