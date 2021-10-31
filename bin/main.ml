@@ -30,7 +30,7 @@ let rec play_game state black result =
       print_endline "\nCheckmate! You Lose.";
       exit 0
   | None -> (
-      let move = draw_game state.game_state.board in
+      let move = draw_game state.game_state.board state.moves in
       try
         if not (List.mem move state.moves) then raise Illegal
         else

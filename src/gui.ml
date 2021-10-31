@@ -155,62 +155,52 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
-let get_potential_squares
-    (bd : Game.t)
-    (piece : piece)
-    (soldier_type : soldier)
-    currX
-    currY =
-  ()
+let rec get_potential_squares (move_list : move list) currX currY :
+    (int * int) list =
+  match move_list with
+  | [] -> []
+  | ((a, b), (c, d)) :: t when currX = a && currY = b ->
+      (c, d) :: get_potential_squares t currX currY
+  | _ -> []
 
 let draw_potential_circles
-    (board : Game.t)
+    (move_list : move list)
     (imgs : image list)
-    (currX : int)
-    (currY : int)
-    (soldier_type : soldier) =
-  let potential_circles : move list = [ ((0, 0), (0, 1)) ] in
-  (* FINISH THIS LINE THEN DONE *)
-  let rec draw_circle potential_circles =
-    match potential_circles with
+    currX
+    currY =
+  let potential_moves = get_potential_squares move_list currX currY in
+  let rec draw_circle (potential_moves : (int * int) list) =
+    match potential_moves with
     | [] -> ()
-    | ((a, b), (c, d)) :: t ->
+    | (a, b) :: t ->
         draw_image (List.nth imgs 12)
-          ((c * step) + ((step - 60) / 2))
-          ((d * step) + ((step - 60) / 2));
+          ((a * step) + ((step - 60) / 2))
+          ((b * step) + ((step - 60) / 2));
         draw_circle t
   in
-  draw_circle potential_circles
-
-(** [get_soldier_type piece] is the type of the soldier. Requries:
-    [piece] is not None *)
-let get_soldier_type (piece : piece option) : soldier =
-  match piece with
-  | Some (_, Pawn) -> Pawn
-  | Some (_, Knight) -> Knight
-  | Some (_, Bishop) -> Bishop
-  | Some (_, Rook) -> Rook
-  | Some (_, Queen) -> Queen
-  | _ -> King
+  draw_circle potential_moves
 
 (** [draw circles bd imgs] draws grey circles based on the potential
     moves of the clicked square. *)
-let draw_circles (bd : Game.t) (imgs : image list) currX currY =
+let draw_circles
+    (bd : Game.t)
+    (imgs : image list)
+    currX
+    currY
+    (move_list : move list) =
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
-  if piece = None then ()
-  else
-    (* let soldier_type = get_soldier_type piece in
-       draw_potential_circles bd imgs currX currY soldier_type *)
-    draw_image (List.nth imgs 12) 0 0
+  if piece = None then () else print_int currX;
+  draw_potential_circles move_list imgs currX currY
+(* draw_image (List.nth imgs 12) 0 0 *)
 
-let draw_game (bd : Game.t) =
+let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
   (* draw_circles bd !imgs; *)
   let x1, y1 = wait_click_square () in
-  let draw_potential = draw_circles bd !imgs x1 y1 in
+  let draw_potential = draw_circles bd !imgs x1 y1 move_list in
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
