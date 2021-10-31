@@ -34,14 +34,14 @@ val init_state : Game.t -> Game.color -> t
     state includes the legal starting moves if [color] is white and the
     initial conditions. If [color] is black, there are no legal moves. *)
 
-val play_move : t -> Game.move -> t
+val play_move : ?promote_piece:Game.soldier -> t -> Game.move -> t
 (** [play_move st mv] is the state of the chess position with the player
     of [st] playing [mv]. It is responsible for updating the board, last
     move, king position, and if the A rook, H rook, or king have moved.
     All other properties of the [game_state] are kept the same, and
     [moves] is empty. [turn] is set to [false].*)
 
-val receive_move : t -> Game.move -> t
+val receive_move : ?promote_piece:Game.soldier -> t -> Game.move -> t
 (** [receive_move st mv] is the state of the chess position with [move]
     played by the opponent of the player of [st]. It is responsible for
     updating the board, last move, enemy moves, determining if the king

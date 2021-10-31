@@ -82,6 +82,19 @@ let wait_click_square () =
   let pos = get_next_click_pos () in
   click_to_coord pos
 
+(** [wait_click_promotion ()] waits for the user to click on the
+    Graphics window and then returns the selected piece on the pawn
+    promotion screen. If the player does not click on a piece, this will
+    prompt the player again.*)
+let rec wait_click_promotion () =
+  let pos = get_next_click_pos () in
+  match click_to_coord pos with
+  | 2, 4 -> Knight
+  | 3, 4 -> Bishop
+  | 4, 4 -> Rook
+  | 5, 4 -> Queen
+  | _ -> wait_click_promotion ()
+
 (** [draw_rows row] draws the outlines of each square on the chess
     board, starting at row number [row] and moving up the board.
     Requires: [row] is in 0..7. *)
@@ -153,6 +166,34 @@ let rec draw_position_rows
 let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
+
+let draw_promotion_menu color =
+  set_color white;
+  fill_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  set_color black;
+  draw_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  let y_pos = (4 * step) + ((step - 60) / 2) in
+  draw_image
+    (get_piece_img !imgs color Knight)
+    ((2 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Bishop)
+    ((3 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Rook)
+    ((4 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Queen)
+    ((5 * step) + ((step - 60) / 2))
+    y_pos;
+  ()
+
+let query_promotion (color : Game.color) : Game.soldier =
+  draw_promotion_menu color;
+  wait_click_promotion ()
 
 let draw_game (bd : Game.t) =
   clear_graph ();

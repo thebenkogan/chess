@@ -40,7 +40,7 @@ type properties = {
   queenside_castle : bool;
 }
 
-val update_board : t -> move -> t
+val update_board : ?promote_piece:soldier -> t -> move -> t
 (** [update_board board move] is the board with [move] played. Requires:
     [mv] represents a complete and legally valid game move. *)
 

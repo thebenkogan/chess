@@ -12,6 +12,20 @@ exception Illegal
     is in checkmate if it has no legal moves and its king is in check. *)
 let is_checkmate st = List.length st.moves = 0 && st.king_in_check
 
+(** [is_pawn_promotion bd mv] is true if the move [mv] on board [bd] is
+    a pawn promotion. A pawn promotion move is when a pawn reaches the
+    end of the board in its corresponding direction. Requires: [mv] is a
+    legal move in the current position. *)
+let is_pawn_promotion (bd : Game.t) ((x1, y1), (x2, y2)) : bool =
+  let board_arr = board_to_array bd in
+  let white_promote =
+    board_arr.(x1).(y1) = Some (White, Pawn) && y2 = 7
+  in
+  let black_promote =
+    board_arr.(x1).(y1) = Some (Black, Pawn) && y2 = 0
+  in
+  white_promote || black_promote
+
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
     game by receiving a clicked move. If [result] specifies a color,
@@ -34,7 +48,12 @@ let rec play_game state black result =
       try
         if not (List.mem move state.moves) then raise Illegal
         else
-          let next_state = play_move state move in
+          let promote_piece =
+            if is_pawn_promotion state.game_state.board move then
+              query_promotion state.game_state.color
+            else Queen
+          in
+          let next_state = play_move state move ~promote_piece in
           let next_black = receive_move black move in
           if is_checkmate next_black then
             play_game next_state next_black (Some White)
