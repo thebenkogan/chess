@@ -12,7 +12,6 @@ type t = {
   h_rook_moved : bool;
   king_moved : bool;
 }
-
 let init_state (board : Game.t) (color : Game.color) : t =
   let init_properties =
     {
@@ -63,7 +62,49 @@ let init_state (board : Game.t) (color : Game.color) : t =
     check, and a/h_rook_moved and king_moved will give you all the
     context for the pieces.*)
 let castling_rights (st : t) : bool * bool =
-  raise (Failure "Unimplemented")
+  if st.king_moved || st.king_in_check then (false, false)
+  else (kingside_castle_rights st, queenside_castle_rights st)
+
+let kingside_castle_rights (st: t): bool =
+  let square1 = (fst st.game_state.king_pos + 1, snd st.game_state.king_pos) in
+  let square2 = (fst st.game_state.king_pos + 2, snd st.game_state.king_pos) in
+  let board_arr = board_to_array st.game_state.board in
+  let piece1 = board_arr.(fst square1).(snd square1) in
+  let piece2 = board_arr(fst square2).(snd square2) in
+  if piece1 = Some(st.game_state.color, Knight) || (**etc. can soldier instead?, need to check black knight and bishop otherwise*)
+     piece1 = Some(st.game_state.color, Bishop) ||
+     piece1 = Some(st.game_state.color, Rook) ||
+     piece1 = Some(st.game_state.color, Queen) ||
+     piece2 = Some(st.game_state.color, Knight) ||
+     piece2 = Some(st.game_state.color, Bishop) ||
+     piece2 = Some(st.game_state.color, Rook) ||
+     piece2 = Some(st.game_state.color, Queen) ||
+     st.game_state.h_rook_moved ||
+     is_attacked st.game_state.enemy_moves square1 ||
+     is_attacked st.game_state.enemy_moves square2
+     then false
+  else true
+
+
+let queenside_castle_rights (st: t): bool =
+  let square1 = (fst st.game_state.king_pos - 1, snd st.game_state.king_pos) in
+  let square2 = (fst st.game_state.king_pos - 2, snd st.game_state.king_pos) in
+  let board_arr = board_to_array st.game_state.board in
+  let piece1 = board_arr.(fst square1).(snd square1) in
+  let piece2 = board_arr(fst square2).(snd square2) in
+  if piece1 = Some(st.game_state.color, Knight) || (**etc. can soldier instead?, need to check black knight and bishop otherwise*)
+      piece1 = Some(st.game_state.color, Bishop) ||
+      piece1 = Some(st.game_state.color, Rook) ||
+      piece1 = Some(st.game_state.color, Queen) ||
+      piece2 = Some(st.game_state.color, Knight) ||
+      piece2 = Some(st.game_state.color, Bishop) ||
+      piece2 = Some(st.game_state.color, Rook) ||
+      piece2 = Some(st.game_state.color, Queen) ||
+      st.game_state.h_rook_moved ||
+      is_attacked st.game_state.enemy_moves square1 ||
+      is_attacked st.game_state.enemy_moves square2
+      then false
+  else true
 
 (** [enemy_properties bd our_color] is the game properties for the
     opponent with the opposite color of [our_color] and board [bd]. The
@@ -144,13 +185,14 @@ let receive_move (st : t) (mv : move) : t =
   let new_king_in_check =
     is_attacked new_enemy_moves st.game_state.king_pos
   in
+  let can_castle = castling_rights st in
   let new_properties =
     {
       st.game_state with
       board = new_board;
       last_move = mv;
-      queenside_castle = false (*TODO*);
-      kingside_castle = false (*TODO*);
+      kingside_castle = fst can_castle;
+      queenside_castle = snd can_castle;
     }
   in
   let new_moves = legal_moves ~move_checker new_properties in
