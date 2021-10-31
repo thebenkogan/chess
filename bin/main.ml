@@ -26,15 +26,40 @@ let is_pawn_promotion (bd : Game.t) ((x1, y1), (x2, y2)) : bool =
   in
   white_promote || black_promote
 
+(** [play_and_receive state black move] is the new states of the player
+    and opponent with game result after [move] is played. Prompts the
+    player if the move is a pawn promotion. Chooses a random reply for
+    the opponent. Returns [(update_state, update_black, result)]:
+    [update_state] and [update_black] are the new states for the player
+    and opponent respectively after playing and receiving a move, and
+    [result] specifies which color wins the game, if any. *)
+let play_and_receive state black move =
+  let promote_piece =
+    if is_pawn_promotion state.game_state.board move then
+      query_promotion state.game_state.color
+    else Queen
+  in
+  let next_state = play_move state move ~promote_piece in
+  let next_black = receive_move black move in
+  if is_checkmate next_black then (next_state, next_black, Some White)
+  else
+    let black_move =
+      List.nth next_black.moves
+        (Random.int (List.length next_black.moves))
+    in
+    let update_black = play_move next_black black_move in
+    let update_state = receive_move next_state black_move in
+    if is_checkmate update_state then
+      (update_state, update_black, Some Black)
+    else (update_state, update_black, None)
+
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
     game by receiving a clicked move. If [result] specifies a color,
     then that color wins by checkmate. After the player inputs a move,
     this checks if the move is legal. If illegal, this repeats with no
-    new inputs. If legal, the move is played, and then this chooses a
-    random move based off of black's state after updating [black] with
-    the new move. This then repeats with the new states for white and
-    black.*)
+    new inputs. If legal, the move is played, and this repeats with the
+    new states for white and black.*)
 let rec play_game state black result =
   match result with
   | Some White ->
@@ -48,25 +73,10 @@ let rec play_game state black result =
       try
         if not (List.mem move state.moves) then raise Illegal
         else
-          let promote_piece =
-            if is_pawn_promotion state.game_state.board move then
-              query_promotion state.game_state.color
-            else Queen
+          let update_state, update_black, result =
+            play_and_receive state black move
           in
-          let next_state = play_move state move ~promote_piece in
-          let next_black = receive_move black move in
-          if is_checkmate next_black then
-            play_game next_state next_black (Some White)
-          else
-            let black_move =
-              List.nth next_black.moves
-                (Random.int (List.length next_black.moves))
-            in
-            let update_black = play_move next_black black_move in
-            let update_state = receive_move next_state black_move in
-            if is_checkmate update_state then
-              play_game update_state update_black (Some Black)
-            else play_game update_state update_black None
+          play_game update_state update_black result
       with Illegal ->
         print_endline "\nIllegal move. Try again.";
         play_game state black None)

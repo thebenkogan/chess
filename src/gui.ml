@@ -167,6 +167,8 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
+(** [draw_promotion_menu color] draws a pawn promotion menu for the
+    player with the [color] pieces. *)
 let draw_promotion_menu color =
   set_color white;
   fill_rect (2 * step) (4 * step) (4 * step) (1 * step);

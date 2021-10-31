@@ -12,7 +12,6 @@ val draw_game : Game.t -> Game.move
     click. Requires: [bd] is a valid chess board. *)
 
 val query_promotion : Game.color -> Game.soldier
-(** [query_promotion
-  color] is the soldier type the player of [color]
+(** [query_promotion color] is the soldier type the player of [color]
     chooses after prompting them with a menu to select a pawn promotion
     piece. *)
