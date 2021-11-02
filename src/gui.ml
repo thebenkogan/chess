@@ -45,6 +45,7 @@ let load_imgs () : image list =
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
          Png.load "imgs/green_edges.png" [];
+         Png.load "imgs/green_circle.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -180,14 +181,20 @@ let draw_potential_edges
     (move_list : move list)
     (imgs : image list)
     (currX : int)
-    (currY : int) =
+    (currY : int)
+    (board : piece option array array) =
   let potential_moves = get_potential_squares move_list currX currY in
   let rec draw_circle (potential_moves : (int * int) list) =
     match potential_moves with
     | (a, b) :: t ->
-        draw_image (List.nth imgs 12)
-          ((a * step) + ((step - 60) / 2))
-          ((b * step) + ((step - 60) / 2));
+        if board.(a).(b) = None then
+          draw_image (List.nth imgs 13)
+            ((a * step) + ((step - 60) / 2))
+            ((b * step) + ((step - 60) / 2))
+        else
+          draw_image (List.nth imgs 12)
+            ((a * step) + ((step - 60) / 2))
+            ((b * step) + ((step - 60) / 2));
         draw_circle t
     | [] -> ()
   in
@@ -208,7 +215,7 @@ let draw_edges
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
   if piece = None then ()
-  else draw_potential_edges move_list imgs currX currY
+  else draw_potential_edges move_list imgs currX currY board
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
