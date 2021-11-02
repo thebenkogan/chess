@@ -10,3 +10,4 @@ val init_gui : unit -> unit
     height and width [window_length], writes the title of the window,
     sets the line width to 2 pixels, and loads the chess piece images
     into [imgs]. *)
+val draw_win_screen : Game.color -> char
