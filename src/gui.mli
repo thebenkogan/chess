@@ -9,6 +9,7 @@ val query_promotion : Game.color -> Game.soldier
 (** [query_promotion color] is the soldier type the player of [color]
     chooses after prompting them with a menu to select a pawn promotion
     piece. *)
+
 val init_gui : unit -> unit
 (** [init_gui ()] initializes the Graphics GUI by opening a window of
     height and width [window_length], writes the title of the window,
@@ -16,6 +17,6 @@ val init_gui : unit -> unit
     into [imgs]. *)
 
 val draw_win_screen : Game.color -> char
-(** [draw_win_screen color] draws the gameover screen with a win message if 
-    [color] is white, and a lose message if [color] is black. Returns 'P' if 
-    user wants to play again, 'Q' if they want to quit. *)
+(** [draw_win_screen color] draws the gameover screen with a win message
+    if [color] is white, and a lose message if [color] is black. Returns
+    'P' if user wants to play again, 'Q' if they want to quit. *)

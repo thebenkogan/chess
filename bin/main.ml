@@ -89,9 +89,7 @@ let rec play_game state black result =
             play_and_receive state black move
           in
           play_game update_state update_black result
-      with Illegal ->
-        print_endline "\nIllegal move. Try again.";
-        play_game state black None)
+      with Illegal -> play_game state black None)
 
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
