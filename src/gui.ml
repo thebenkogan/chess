@@ -172,14 +172,6 @@ let rec get_potential_squares (move_list : move list) (currX, currY) :
       (* No match currX or currY *)
   | _ -> []
 
-(** [get_green_circle lst] returns the 13th element of lst, which is the
-    green circles of potential moves *)
-let get_green_circle lst = List.nth lst 13
-
-(** [get_green_circle lst] returns the 12th element of lst, which is the
-    green circles of potential moves *)
-let get_green_edges lst = List.nth lst 12
-
 (** [draw_potential_edges move_list imgs currX currY] draws the legally
     valid markers onto the board. [move_list] is the legally valid moves
     for the player. [imgs] is the list of png images to draw, [currX] is
@@ -192,15 +184,17 @@ let draw_potential_edges
   let potential_moves =
     get_potential_squares move_list (currX, currY)
   in
+  let get_green_circle = List.nth imgs 13 in
+  let get_green_edges = List.nth imgs 12 in
   let rec draw_circle (potential_moves : (int * int) list) =
     match potential_moves with
     | (a, b) :: t ->
         if board.(a).(b) = None then
-          draw_image (get_green_circle imgs)
+          draw_image get_green_circle
             ((a * step) + ((step - 60) / 2))
             ((b * step) + ((step - 60) / 2))
         else
-          draw_image (get_green_edges imgs)
+          draw_image get_green_edges
             ((a * step) + ((step - 60) / 2))
             ((b * step) + ((step - 60) / 2));
         draw_circle t
@@ -222,7 +216,27 @@ let draw_edges
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
   if piece = None then ()
-  else draw_potential_edges move_list imgs (currX, currY) board
+  else
+    let potential_moves =
+      get_potential_squares move_list (currX, currY)
+    in
+    let get_green_circle = List.nth imgs 13 in
+    let get_green_edges = List.nth imgs 12 in
+    let rec draw_circle (potential_moves : (int * int) list) =
+      match potential_moves with
+      | (a, b) :: t ->
+          if board.(a).(b) = None then
+            draw_image get_green_circle
+              ((a * step) + ((step - 60) / 2))
+              ((b * step) + ((step - 60) / 2))
+          else
+            draw_image get_green_edges
+              ((a * step) + ((step - 60) / 2))
+              ((b * step) + ((step - 60) / 2));
+          draw_circle t
+      | [] -> ()
+    in
+    draw_circle potential_moves
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
