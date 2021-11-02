@@ -161,17 +161,24 @@ let draw_position (bd : Game.t) (imgs : image list) =
     currY). [move_list] reprents all legally valid game moves, [currX]
     is current x-coordinate integer location, [currY] is current
     y-coordinate integer location. *)
-let rec get_potential_squares
-    (move_list : move list)
-    (currX : int)
-    (currY : int) : (int * int) list =
+let rec get_potential_squares (move_list : move list) (currX, currY) :
+    (int * int) list =
   match move_list with
   | ((a, b), (c, d)) :: t when currX = a && currY = b ->
-      (c, d) :: get_potential_squares t currX currY
+      (c, d) :: get_potential_squares t (currX, currY)
       (* Match currX & currY *)
-  | h :: t ->
-      get_potential_squares t currX currY (* No match currX or currY *)
+  | _ :: t ->
+      get_potential_squares t (currX, currY)
+      (* No match currX or currY *)
   | _ -> []
+
+(** [get_green_circle lst] returns the 13th element of lst, which is the
+    green circles of potential moves *)
+let get_green_circle lst = List.nth lst 13
+
+(** [get_green_circle lst] returns the 12th element of lst, which is the
+    green circles of potential moves *)
+let get_green_edges lst = List.nth lst 12
 
 (** [draw_potential_edges move_list imgs currX currY] draws the legally
     valid markers onto the board. [move_list] is the legally valid moves
@@ -180,19 +187,20 @@ let rec get_potential_squares
 let draw_potential_edges
     (move_list : move list)
     (imgs : image list)
-    (currX : int)
-    (currY : int)
+    (currX, currY)
     (board : piece option array array) =
-  let potential_moves = get_potential_squares move_list currX currY in
+  let potential_moves =
+    get_potential_squares move_list (currX, currY)
+  in
   let rec draw_circle (potential_moves : (int * int) list) =
     match potential_moves with
     | (a, b) :: t ->
         if board.(a).(b) = None then
-          draw_image (List.nth imgs 13)
+          draw_image (get_green_circle imgs)
             ((a * step) + ((step - 60) / 2))
             ((b * step) + ((step - 60) / 2))
         else
-          draw_image (List.nth imgs 12)
+          draw_image (get_green_edges imgs)
             ((a * step) + ((step - 60) / 2))
             ((b * step) + ((step - 60) / 2));
         draw_circle t
@@ -209,20 +217,19 @@ let draw_potential_edges
 let draw_edges
     (bd : Game.t)
     (imgs : image list)
-    (currX : int)
-    (currY : int)
+    (currX, currY)
     (move_list : move list) =
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
   if piece = None then ()
-  else draw_potential_edges move_list imgs currX currY board
+  else draw_potential_edges move_list imgs (currX, currY) board
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
   let x1, y1 = wait_click_square () in
-  let draw_potential = draw_edges bd !imgs x1 y1 move_list in
+  let draw_potential = draw_edges bd !imgs (x1, y1) move_list in
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
