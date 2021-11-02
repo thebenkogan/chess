@@ -65,7 +65,7 @@ let rec play_game state black result =
   | Some White -> (
       print_endline "\nCheckmate! You win.";
       match draw_win_screen White with
-      | 'p' ->
+      | 'P' ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
@@ -74,7 +74,7 @@ let rec play_game state black result =
   | Some Black -> (
       print_endline "\nCheckmate! You Lose.";
       match draw_win_screen Black with
-      | 'p' ->
+      | 'P' ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
