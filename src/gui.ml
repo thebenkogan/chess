@@ -44,7 +44,7 @@ let load_imgs () : image list =
          Png.load "imgs/black_rook.png" [];
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
-         Png.load "imgs/grey_square.png" [];
+         Png.load "imgs/green_edges.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -167,15 +167,16 @@ let rec get_potential_squares
   match move_list with
   | ((a, b), (c, d)) :: t when currX = a && currY = b ->
       (c, d) :: get_potential_squares t currX currY
-  | h :: t -> get_potential_squares t currX currY
+      (* Match currX & currY *)
+  | h :: t ->
+      get_potential_squares t currX currY (* No match currX or currY *)
   | _ -> []
 
-(** [draw_potential_circles move_list imgs currX currY] draws the
-    legally valid markers onto the board. [move_list] is the legally
-    valid moves for the player. [imgs] is the list of png images to
-    draw, [currX] is integer of x-coordinate, [currY] is integer of
-    y-coordinate *)
-let draw_potential_circles
+(** [draw_potential_edges move_list imgs currX currY] draws the legally
+    valid markers onto the board. [move_list] is the legally valid moves
+    for the player. [imgs] is the list of png images to draw, [currX] is
+    integer of x-coordinate, [currY] is integer of y-coordinate *)
+let draw_potential_edges
     (move_list : move list)
     (imgs : image list)
     (currX : int)
@@ -192,13 +193,13 @@ let draw_potential_circles
   in
   draw_circle potential_moves
 
-(** [draw circles bd imgs currX currY move_list] draws grey circles
-    based on the potential moves of the clicked square. Requires: [bd]
+(** [draw_edges bd imgs currX currY move_list] draws green edges based
+    on the potential moves of the clicked square. Requires: [bd]
     represents a valid board, [imgs] is the list of png images to draw,
     [currX] is current x-coordinate integer, [currY] is current
     y-coordinate integer, [move_list] is list of legally valid moves for
     player. *)
-let draw_circles
+let draw_edges
     (bd : Game.t)
     (imgs : image list)
     (currX : int)
@@ -207,14 +208,14 @@ let draw_circles
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
   if piece = None then ()
-  else draw_potential_circles move_list imgs currX currY
+  else draw_potential_edges move_list imgs currX currY
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
   let x1, y1 = wait_click_square () in
-  let draw_potential = draw_circles bd !imgs x1 y1 move_list in
+  let draw_potential = draw_edges bd !imgs x1 y1 move_list in
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
