@@ -155,19 +155,31 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
-let rec get_potential_squares (move_list : move list) currX currY :
-    (int * int) list =
+(** [get_potential_squares move_list currX currY] returns a (int * int)
+    list of potential moves for the location represented by (currX,
+    currY). [move_list] reprents all legally valid game moves, [currX]
+    is current x-coordinate integer location, [currY] is current
+    y-coordinate integer location. *)
+let rec get_potential_squares
+    (move_list : move list)
+    (currX : int)
+    (currY : int) : (int * int) list =
   match move_list with
   | ((a, b), (c, d)) :: t when currX = a && currY = b ->
       (c, d) :: get_potential_squares t currX currY
   | h :: t -> get_potential_squares t currX currY
   | _ -> []
 
+(** [draw_potential_circles move_list imgs currX currY] draws the
+    legally valid markers onto the board. [move_list] is the legally
+    valid moves for the player. [imgs] is the list of png images to
+    draw, [currX] is integer of x-coordinate, [currY] is integer of
+    y-coordinate *)
 let draw_potential_circles
     (move_list : move list)
     (imgs : image list)
-    currX
-    currY =
+    (currX : int)
+    (currY : int) =
   let potential_moves = get_potential_squares move_list currX currY in
   let rec draw_circle (potential_moves : (int * int) list) =
     match potential_moves with
@@ -180,13 +192,17 @@ let draw_potential_circles
   in
   draw_circle potential_moves
 
-(** [draw circles bd imgs] draws grey circles based on the potential
-    moves of the clicked square. *)
+(** [draw circles bd imgs currX currY move_list] draws grey circles
+    based on the potential moves of the clicked square. Requires: [bd]
+    represents a valid board, [imgs] is the list of png images to draw,
+    [currX] is current x-coordinate integer, [currY] is current
+    y-coordinate integer, [move_list] is list of legally valid moves for
+    player. *)
 let draw_circles
     (bd : Game.t)
     (imgs : image list)
-    currX
-    currY
+    (currX : int)
+    (currY : int)
     (move_list : move list) =
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
