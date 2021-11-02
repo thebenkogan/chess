@@ -7,7 +7,7 @@ conf-libpng
 camlimages
 
 (note: install everything if prompted with sudo apt install [DEPENDENCY] on Windows, or brew install [DEPENDENCY])
-(note 2: if prompted to install a dependency with a number in the name, leave it out)
+(note 2: if prompted to install a dependency with a number in the name, install it without the number)
 
 ## How to Play
 
