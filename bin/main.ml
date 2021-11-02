@@ -12,6 +12,8 @@ exception Illegal
     is in checkmate if it has no legal moves and its king is in check. *)
 let is_checkmate st = List.length st.moves = 0 && st.king_in_check
 
+
+
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
     game by receiving a clicked move. If [result] specifies a color,
@@ -24,11 +26,17 @@ let is_checkmate st = List.length st.moves = 0 && st.king_in_check
 let rec play_game state black result =
   match result with
   | Some White ->
-      print_endline "\nCheckmate! You win.";
-      exit 0
+      (print_endline "\nCheckmate! You win.";
+      match draw_win_screen White with 
+        |'p' -> play_game (init_state starting_board White) (init_state starting_board Black) None
+        |_ -> exit 0;
+      )
   | Some Black ->
-      print_endline "\nCheckmate! You Lose.";
-      exit 0
+      (print_endline "\nCheckmate! You Lose.";
+      match draw_win_screen Black with 
+        |'p' -> play_game (init_state starting_board White) (init_state starting_board Black) None
+        |_ -> exit 0;
+      )
   | None -> (
       let move = draw_game state.game_state.board in
       try
@@ -62,6 +70,7 @@ let main () =
   print_endline
     "\n\
      You can play a move by clicking on a piece and its target square.";
+  
   init_gui ();
   Random.self_init ();
   play_game

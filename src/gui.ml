@@ -168,3 +168,13 @@ let init_gui () =
   set_window_title "OCaml Chess";
   set_line_width 2;
   imgs := load_imgs ()
+  
+let  draw_win_screen (result : color)= 
+  set_color white;
+  fill_rect (window_length/8) (window_length/3) ((window_length*3)/4) (window_length/3);
+  set_color black;
+  set_font "-*-fixed-medium-r-semicondensed--20-*-*-*-*-*-iso8859-1";
+  moveto (window_length/6) (window_length/2);
+  if result = White then draw_string "You win! Press P to play again, Q to quit"
+  else draw_string "You Lose! Press P to play again, Q to quit";
+  read_key ()
