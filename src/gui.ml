@@ -28,7 +28,7 @@ let make_transparent img =
 
 (** [load_imgs ()] loads all chess piece images in ../imgs and returns
     them in a list. Requires: the Graphics window is open. *)
-let load_imgs () =
+let load_imgs () : image list =
   List.map make_transparent
     (List.map Graphic_image.of_image
        [
@@ -44,6 +44,8 @@ let load_imgs () =
          Png.load "imgs/black_rook.png" [];
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
+         Png.load "imgs/green_edges.png" [];
+         Png.load "imgs/green_circle.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -129,7 +131,7 @@ let rec draw_position_rows
     (bd : piece option array array)
     (imgs : image list)
     (row : int) =
-  if row = 8 then ()
+  if row = 8 then () (* Stops drawing on board *)
   else
     let rec draw_position_row index =
       (match bd.(index).(row) with
@@ -154,11 +156,65 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
-let draw_game (bd : Game.t) =
+(** [get_potential_squares move_list currX currY] returns a (int * int)
+    list of potential moves for the location represented by (currX,
+    currY). [move_list] reprents all legally valid game moves, [currX]
+    is current x-coordinate integer location, [currY] is current
+    y-coordinate integer location. *)
+let rec get_potential_squares (move_list : move list) (currX, currY) :
+    (int * int) list =
+  match move_list with
+  | ((a, b), (c, d)) :: t when currX = a && currY = b ->
+      (c, d) :: get_potential_squares t (currX, currY)
+      (* Match currX & currY *)
+  | _ :: t ->
+      get_potential_squares t (currX, currY)
+      (* No match currX or currY *)
+  | _ -> []
+
+(** [draw_markers bd imgs currX currY move_list] draws green edges based
+    on the potential moves of the clicked square. Requires: [bd]
+    represents a valid board, [imgs] is the list of png images to draw,
+    [currX] is current x-coordinate integer, [currY] is current
+    y-coordinate integer, [move_list] is list of legally valid moves for
+    player. *)
+let draw_markers
+    (bd : Game.t)
+    (imgs : image list)
+    (currX, currY)
+    (move_list : move list) =
+  let board = board_to_array bd in
+  let piece = board.(currX).(currY) in
+  if piece = None then ()
+  else
+    let potential_moves =
+      get_potential_squares move_list (currX, currY)
+    in
+    let get_green_circle = List.nth imgs 13 in
+    let get_green_edges = List.nth imgs 12 in
+    let rec draw_circle (potential_moves : (int * int) list) =
+      match potential_moves with
+      | (a, b) :: t ->
+          if board.(a).(b) = None then
+            draw_image get_green_circle
+              ((a * step) + ((step - 60) / 2))
+              ((b * step) + ((step - 60) / 2))
+          else
+            draw_image get_green_edges
+              ((a * step) + ((step - 60) / 2))
+              ((b * step) + ((step - 60) / 2));
+          draw_circle t
+      | [] -> ()
+    in
+    draw_circle potential_moves
+
+let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
   let x1, y1 = wait_click_square () in
+  let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
+  draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
 
@@ -168,13 +224,16 @@ let init_gui () =
   set_window_title "OCaml Chess";
   set_line_width 2;
   imgs := load_imgs ()
-  
-let  draw_win_screen (result : color)= 
+
+let draw_win_screen (result : color) =
   set_color white;
-  fill_rect (window_length/8) (window_length/3) ((window_length*3)/4) (window_length/3);
+  fill_rect (window_length / 8) (window_length / 3)
+    (window_length * 3 / 4)
+    (window_length / 3);
   set_color black;
   set_font "-*-fixed-medium-r-semicondensed--20-*-*-*-*-*-iso8859-1";
-  moveto (window_length/6) (window_length/2);
-  if result = White then draw_string "You win! Press P to play again, Q to quit"
+  moveto (window_length / 6) (window_length / 2);
+  if result = White then
+    draw_string "You win! Press P to play again, Q to quit"
   else draw_string "You Lose! Press P to play again, Q to quit";
   read_key ()
