@@ -172,43 +172,13 @@ let rec get_potential_squares (move_list : move list) (currX, currY) :
       (* No match currX or currY *)
   | _ -> []
 
-(** [draw_potential_edges move_list imgs currX currY] draws the legally
-    valid markers onto the board. [move_list] is the legally valid moves
-    for the player. [imgs] is the list of png images to draw, [currX] is
-    integer of x-coordinate, [currY] is integer of y-coordinate *)
-let draw_potential_edges
-    (move_list : move list)
-    (imgs : image list)
-    (currX, currY)
-    (board : piece option array array) =
-  let potential_moves =
-    get_potential_squares move_list (currX, currY)
-  in
-  let get_green_circle = List.nth imgs 13 in
-  let get_green_edges = List.nth imgs 12 in
-  let rec draw_circle (potential_moves : (int * int) list) =
-    match potential_moves with
-    | (a, b) :: t ->
-        if board.(a).(b) = None then
-          draw_image get_green_circle
-            ((a * step) + ((step - 60) / 2))
-            ((b * step) + ((step - 60) / 2))
-        else
-          draw_image get_green_edges
-            ((a * step) + ((step - 60) / 2))
-            ((b * step) + ((step - 60) / 2));
-        draw_circle t
-    | [] -> ()
-  in
-  draw_circle potential_moves
-
-(** [draw_edges bd imgs currX currY move_list] draws green edges based
+(** [draw_markers bd imgs currX currY move_list] draws green edges based
     on the potential moves of the clicked square. Requires: [bd]
     represents a valid board, [imgs] is the list of png images to draw,
     [currX] is current x-coordinate integer, [currY] is current
     y-coordinate integer, [move_list] is list of legally valid moves for
     player. *)
-let draw_edges
+let draw_markers
     (bd : Game.t)
     (imgs : image list)
     (currX, currY)
@@ -243,7 +213,7 @@ let draw_game (bd : Game.t) (move_list : move list) =
   draw_board ();
   draw_position bd !imgs;
   let x1, y1 = wait_click_square () in
-  let draw_potential = draw_edges bd !imgs (x1, y1) move_list in
+  let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
