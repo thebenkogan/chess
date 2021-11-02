@@ -62,14 +62,26 @@ let play_and_receive state black move =
     new states for white and black.*)
 let rec play_game state black result =
   match result with
-  | Some White ->
+  | Some White -> (
       print_endline "\nCheckmate! You win.";
-      exit 0
-  | Some Black ->
+      match draw_win_screen White with
+      | 'p' ->
+          play_game
+            (init_state starting_board White)
+            (init_state starting_board Black)
+            None
+      | _ -> exit 0)
+  | Some Black -> (
       print_endline "\nCheckmate! You Lose.";
-      exit 0
+      match draw_win_screen Black with
+      | 'p' ->
+          play_game
+            (init_state starting_board White)
+            (init_state starting_board Black)
+            None
+      | _ -> exit 0)
   | None -> (
-      let move = draw_game state.game_state.board in
+      let move = draw_game state.game_state.board state.moves in
       try
         if not (List.mem move state.moves) then raise Illegal
         else
@@ -91,6 +103,7 @@ let main () =
   print_endline
     "\n\
      You can play a move by clicking on a piece and its target square.";
+
   init_gui ();
   Random.self_init ();
   play_game
