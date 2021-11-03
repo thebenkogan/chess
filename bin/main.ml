@@ -6,9 +6,18 @@ open Helper
 open Printer
 open Gui
 
+type game_result =
+  | Win of color
+  | Draw
+
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
     is in checkmate if it has no legal moves and its king is in check. *)
 let is_checkmate st = List.length st.moves = 0 && st.king_in_check
+
+(** [is_stalemate st] is true if [st] is currently in stalemate. A state
+    is in stalemate if it has no legal moves and its king is not in
+    check. *)
+let is_stalemate st = List.length st.moves = 0
 
 (** [is_pawn_promotion bd mv] is true if the move [mv] on board [bd] is
     a pawn promotion. A pawn promotion move is when a pawn reaches the
@@ -39,7 +48,10 @@ let play_and_receive state black move =
   in
   let next_state = play_move state move ~promote_piece in
   let next_black = receive_move black move in
-  if is_checkmate next_black then (next_state, next_black, Some White)
+  if is_checkmate next_black then
+    (next_state, next_black, Some (Win White))
+  else if is_stalemate next_black then
+    (next_state, next_black, Some Draw)
   else
     let black_move =
       List.nth next_black.moves
@@ -48,8 +60,12 @@ let play_and_receive state black move =
     let update_black = play_move next_black black_move in
     let update_state = receive_move next_state black_move in
     if is_checkmate update_state then
-      (update_state, update_black, Some Black)
+      (update_state, update_black, Some (Win Black))
+    else if is_stalemate update_state then
+      (next_state, next_black, Some Draw)
     else (update_state, update_black, None)
+(** [is_stalemate st] is true if [st] is currently in stalemate. A state
+    is in stalemate if it has no legal moves. *)
 
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
@@ -60,21 +76,28 @@ let play_and_receive state black move =
     new states for white and black.*)
 let rec play_game state black result =
   match result with
-  | Some White -> (
+  | Some (Win White) -> (
       print_endline "\nCheckmate! You win.";
-      draw_game_basic state.game_state.board;
-      match draw_win_screen White with
-      | 'P' ->
+      match draw_win_screen (Some White) with
+      | 'p' ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
             None
       | _ -> exit 0)
-  | Some Black -> (
+  | Some (Win Black) -> (
       print_endline "\nCheckmate! You Lose.";
-      draw_game_basic state.game_state.board;
-      match draw_win_screen Black with
-      | 'P' ->
+      match draw_win_screen (Some Black) with
+      | 'p' ->
+          play_game
+            (init_state starting_board White)
+            (init_state starting_board Black)
+            None
+      | _ -> exit 0)
+  | Some Draw -> (
+      print_endline "\nStalemate! Draw.";
+      match draw_win_screen None with
+      | 'p' ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)

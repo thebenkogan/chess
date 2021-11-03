@@ -17,10 +17,11 @@ val init_gui : unit -> unit
     sets the line width to 2 pixels, and loads the chess piece images
     into [imgs]. *)
 
-val draw_win_screen : Game.color -> char
-(** [draw_win_screen color] draws the gameover screen with a win message
-    if [color] is white, and a lose message if [color] is black. Returns
-    'P' if user wants to play again, 'Q' if they want to quit. *)
+val draw_win_screen : Game.color option -> char
+(** [draw_win_screen result] takes a given result at the end of the game
+    and displays the proper message to the user, and gives options for
+    the user to either quit or play again. None corresponds to
+    stalemate. *)
 
 val draw_game_basic : Game.t -> unit
 (** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
