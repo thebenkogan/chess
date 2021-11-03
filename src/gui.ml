@@ -273,14 +273,12 @@ let draw_game_basic (bd : Game.t) =
   draw_board ();
   draw_position bd !imgs
 
-(** wait_action () waits a user input of a key and will continue to be
+(** [wait_action ()] waits a user input of a key and will continue to be
     called until one of the presented options is pressed. *)
 let rec wait_action () =
   match read_key () with
-  | 'p' -> 'p'
-  | 'q' -> 'q'
-  | 'P' -> 'p'
-  | 'Q' -> 'q'
+  | 'p' | 'P' -> true
+  | 'q' | 'Q' -> false
   | _ -> wait_action ()
 
 let draw_win_screen (result : Game.color option) =

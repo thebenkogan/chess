@@ -78,31 +78,34 @@ let rec play_game state black result =
   match result with
   | Some (Win White) -> (
       print_endline "\nCheckmate! You win.";
+      draw_game_basic state.game_state.board;
       match draw_win_screen (Some White) with
-      | 'p' ->
+      | true ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
             None
-      | _ -> exit 0)
+      | false -> exit 0)
   | Some (Win Black) -> (
       print_endline "\nCheckmate! You Lose.";
+      draw_game_basic state.game_state.board;
       match draw_win_screen (Some Black) with
-      | 'p' ->
+      | true ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
             None
-      | _ -> exit 0)
+      | false -> exit 0)
   | Some Draw -> (
       print_endline "\nStalemate! Draw.";
+      draw_game_basic state.game_state.board;
       match draw_win_screen None with
-      | 'p' ->
+      | true ->
           play_game
             (init_state starting_board White)
             (init_state starting_board Black)
             None
-      | _ -> exit 0)
+      | false -> exit 0)
   | None ->
       let move = draw_game state.game_state.board state.moves in
       if not (List.mem move state.moves) then play_game state black None
