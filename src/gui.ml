@@ -169,7 +169,7 @@ let init_gui () =
   set_line_width 2;
   imgs := load_imgs ()
   
-let  draw_win_screen (result : color)= 
+let rec draw_win_screen (result : color)= 
   set_color white;
   fill_rect (window_length/8) (window_length/3) ((window_length*3)/4) (window_length/3);
   set_color black;
@@ -177,4 +177,7 @@ let  draw_win_screen (result : color)=
   moveto (window_length/6) (window_length/2);
   if result = White then draw_string "You win! Press P to play again, Q to quit"
   else draw_string "You Lose! Press P to play again, Q to quit";
-  read_key ()
+  match read_key () with
+  |'p' -> read_key();
+  |'q' -> read_key();
+  |_ -> draw_win_screen result;
