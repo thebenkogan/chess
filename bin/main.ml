@@ -6,8 +6,6 @@ open Helper
 open Printer
 open Gui
 
-exception Illegal
-
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
     is in checkmate if it has no legal moves and its king is in check. *)
 let is_checkmate st = List.length st.moves = 0 && st.king_in_check
@@ -64,6 +62,7 @@ let rec play_game state black result =
   match result with
   | Some White -> (
       print_endline "\nCheckmate! You win.";
+      draw_game_basic state.game_state.board;
       match draw_win_screen White with
       | 'P' ->
           play_game
@@ -73,6 +72,7 @@ let rec play_game state black result =
       | _ -> exit 0)
   | Some Black -> (
       print_endline "\nCheckmate! You Lose.";
+      draw_game_basic state.game_state.board;
       match draw_win_screen Black with
       | 'P' ->
           play_game
@@ -80,16 +80,14 @@ let rec play_game state black result =
             (init_state starting_board Black)
             None
       | _ -> exit 0)
-  | None -> (
+  | None ->
       let move = draw_game state.game_state.board state.moves in
-      try
-        if not (List.mem move state.moves) then raise Illegal
-        else
-          let update_state, update_black, result =
-            play_and_receive state black move
-          in
-          play_game update_state update_black result
-      with Illegal -> play_game state black None)
+      if not (List.mem move state.moves) then play_game state black None
+      else
+        let update_state, update_black, result =
+          play_and_receive state black move
+        in
+        play_game update_state update_black result
 
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)

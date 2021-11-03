@@ -280,3 +280,8 @@ let draw_win_screen (result : color) =
     draw_string "You win! Press P to play again, Q to quit"
   else draw_string "You Lose! Press P to play again, Q to quit";
   read_key ()
+
+let draw_game_basic (bd : Game.t) =
+  clear_graph ();
+  draw_board ();
+  draw_position bd !imgs
