@@ -225,15 +225,31 @@ let init_gui () =
   set_line_width 2;
   imgs := load_imgs ()
 
-let draw_win_screen (result : color) =
+(** wait_action () waits a user input of a key and will continue to be called 
+  until one of the presented options is pressed.
+*)
+let rec wait_action () = 
+  match read_key () with
+  |'p' -> 'p';
+  |'q' -> 'q';
+  |'P' -> 'p';
+  |'Q' -> 'q';
+  | _ -> wait_action ()
+
+let draw_win_screen (result : Game.color option) =
   set_color white;
   fill_rect (window_length / 8) (window_length / 3)
     (window_length * 3 / 4)
     (window_length / 3);
   set_color black;
-  set_font "-*-fixed-medium-r-semicondensed--20-*-*-*-*-*-iso8859-1";
+  draw_rect (window_length / 8) (window_length / 3)
+  (window_length * 3 / 4)
+  (window_length / 3);
+  set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
   moveto (window_length / 6) (window_length / 2);
-  if result = White then
+  if result = (Some White) then
     draw_string "You win! Press P to play again, Q to quit"
-  else draw_string "You Lose! Press P to play again, Q to quit";
-  read_key ()
+  else if result = (Some Black) then
+    draw_string "You Lose! Press P to play again, Q to quit"
+  else draw_string "Stalemate! Press P to play again, Q to quit";
+  wait_action ()
