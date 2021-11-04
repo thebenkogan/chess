@@ -39,8 +39,16 @@ let init_state (board : Game.t) (color : Game.color) : t =
     king_moved = false;
   }
 
-let kingside_castle_rights king_pos board h_rook_moved enemy_moves :
-    bool =
+(**[kingside_castle_rights king_pos board h_rook_moved enemy_moves] is
+   the kingside castling rights for the player. The squares on [board]
+   between [king_pos] and the h rook are checked to determine whether
+   they are being attacked by [enemy_moves]. [h_rook_moved] checks if
+   the h rook has moved*)
+let kingside_castle_rights
+    (king_pos : int * int)
+    (board : Game.t)
+    (h_rook_moved : bool)
+    (enemy_moves : move list) : bool =
   let square1 = (fst king_pos + 1, snd king_pos) in
   let square2 = (fst king_pos + 2, snd king_pos) in
   let board_arr = board_to_array board in
@@ -53,8 +61,16 @@ let kingside_castle_rights king_pos board h_rook_moved enemy_moves :
   then false
   else true
 
-let queenside_castle_rights king_pos board a_rook_moved enemy_moves :
-    bool =
+(**[queenside_castle_rights king_pos board a_rook_moved enemy_moves] is
+   the queenside castling rights for the player. The squares on [board]
+   between [king_pos] and the a rook are checked to determine whether
+   they are being attacked by [enemy_moves]. [a_rook_moved] checks if
+   the a rook has moved*)
+let queenside_castle_rights
+    (king_pos : int * int)
+    (board : Game.t)
+    (a_rook_moved : bool)
+    (enemy_moves : move list) : bool =
   let square1 = (fst king_pos - 1, snd king_pos) in
   let square2 = (fst king_pos - 2, snd king_pos) in
   let square3 = (fst king_pos - 3, snd king_pos) in
@@ -69,37 +85,30 @@ let queenside_castle_rights king_pos board a_rook_moved enemy_moves :
   then false
   else true
 
-(** [castling_rights st] is the kingside and queenside castling rights
-    for the player in [st]. Kingside castling is legal if the first
-    element of the output is true, and queenside castling is legal if
-    the second element of the output is true. A player can castle in a
-    certain direciton if:
+(** [castling_rights king_moved king_pos king_in_check h_rook_moved a_rook_moved
+    board enemy_moves]
+    is the kingside and queenside castling rights for the player.
+    Kingside castling is legal if the first element of the output is
+    true, and queenside castling is legal if the second element of the
+    output is true.
 
-    - The king and the corresponding rook have not moved.
-    - All squares between the king and rook are empty.
-    - The king is not in check.
-    - All the squares in between the king's current location and target
-      destination (inclusive) are not attacked.
-    - Note: The corresponding rook may be attacked, this only requires
-      the king's path is clear.
+    A player can castle in a certain direciton if:
 
-    NOTE: This implementation can be agnostic to color. You can make
-    separate functions for kingside and queenside detection, but you do
-    not need to do it by color. Everything can be done relative to the
-    current king_pos, found in st.game_state.king_pos. Use the
-    is_attacked function in game.ml and the other state variables to
-    check each condition. enemy_moves will help you check if squares are
-    attacked, king_in_check will tell you if our king is currently in
-    check, and a/h_rook_moved and king_moved will give you all the
-    context for the pieces.*)
+    - The king has not moved, determined by [king_moved], and the
+      corresponding rook has not moved, determined by [a_rook_moved] and
+      [h_rook_moved].
+    - All squares between [king_pos] and rook on [board] are empty.
+    - The king is not in check, determined by [king_in_check].
+    - All the squares in between [king_pos] and target destination
+      (inclusive) are not attacked by [enemy_moves].*)
 let castling_rights
-    king_moved
-    king_pos
-    king_in_check
-    h_rook_moved
-    a_rook_moved
-    board
-    enemy_moves : bool * bool =
+    (king_moved : bool)
+    (king_pos : int * int)
+    (king_in_check : bool)
+    (h_rook_moved : bool)
+    (a_rook_moved : bool)
+    (board : Game.t)
+    (enemy_moves : move list) : bool * bool =
   if king_moved || king_in_check then (false, false)
   else
     ( kingside_castle_rights king_pos board h_rook_moved enemy_moves,
