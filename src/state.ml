@@ -142,11 +142,16 @@ let check_h_rook (oldx, oldy) = function
   | White -> oldx = 7 && oldy = 0
   | Black -> oldx = 7 && oldy = 7
 
-let play_move (st : t) ((oldx, oldy), (newx, newy)) : t =
+let play_move
+    ?promote_piece:(pp = Queen)
+    (st : t)
+    ((oldx, oldy), (newx, newy)) : t =
   let new_last_move = ((oldx, oldy), (newx, newy)) in
   let old_board_arr = board_to_array st.game_state.board in
   let old_piece = old_board_arr.(oldx).(oldy) in
-  let new_board = update_board st.game_state.board new_last_move in
+  let new_board =
+    update_board st.game_state.board new_last_move ~promote_piece:pp
+  in
   let new_king_pos =
     if old_piece = Some (st.game_state.color, King) then (newx, newy)
     else st.game_state.king_pos
@@ -186,8 +191,10 @@ let play_move (st : t) ((oldx, oldy), (newx, newy)) : t =
     turn = false;
   }
 
-let receive_move (st : t) (mv : move) : t =
-  let new_board = update_board st.game_state.board mv in
+let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
+  let new_board =
+    update_board st.game_state.board mv ~promote_piece:pp
+  in
   let enemy_prop = enemy_properties new_board st.game_state.color in
   let new_enemy_moves = legal_moves enemy_prop in
   let new_king_in_check =

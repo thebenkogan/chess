@@ -11,6 +11,8 @@ Windows, or brew install [DEPENDENCY])
 (note 2: if prompted to install a dependency with a number in the name, leave
 just the number out)
 
+Requires an XServer to be running
+
 ## How to Play
 
 Run 'make play' in Ubuntu, Mac, or VS Code terminal.

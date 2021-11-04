@@ -83,6 +83,19 @@ let wait_click_square () =
   let pos = get_next_click_pos () in
   click_to_coord pos
 
+(** [wait_click_promotion ()] waits for the user to click on the
+    Graphics window and then returns the selected piece on the pawn
+    promotion screen. If the player does not click on a piece, this will
+    prompt the player again.*)
+let rec wait_click_promotion () =
+  let pos = get_next_click_pos () in
+  match click_to_coord pos with
+  | 2, 4 -> Knight
+  | 3, 4 -> Bishop
+  | 4, 4 -> Rook
+  | 5, 4 -> Queen
+  | _ -> wait_click_promotion ()
+
 (** [draw_rows row] draws the outlines of each square on the chess
     board, starting at row number [row] and moving up the board.
     Requires: [row] is in 0..7. *)
@@ -92,7 +105,6 @@ let rec draw_rows row start =
     let rec draw_row index alt =
       let color = if alt then light else dark in
       set_color color;
-      draw_rect (index * step) (row * step) step step;
       fill_rect (index * step) (row * step) step step;
       if index = 7 then () else draw_row (index + 1) (not alt)
     in
@@ -155,6 +167,36 @@ let draw_position (bd : Game.t) (imgs : image list) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0
 
+(** [draw_promotion_menu color] draws a pawn promotion menu for the
+    player with the [color] pieces. *)
+let draw_promotion_menu color =
+  set_color white;
+  fill_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  set_color black;
+  draw_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  let y_pos = (4 * step) + ((step - 60) / 2) in
+  draw_image
+    (get_piece_img !imgs color Knight)
+    ((2 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Bishop)
+    ((3 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Rook)
+    ((4 * step) + ((step - 60) / 2))
+    y_pos;
+  draw_image
+    (get_piece_img !imgs color Queen)
+    ((5 * step) + ((step - 60) / 2))
+    y_pos;
+  ()
+
+let query_promotion (color : Game.color) : Game.soldier =
+  draw_promotion_menu color;
+  wait_click_promotion ()
+
 (** [get_potential_squares move_list currX currY] returns a (int * int)
     list of potential moves for the location represented by (currX,
     currY). [move_list] reprents all legally valid game moves, [currX]
@@ -196,10 +238,6 @@ let draw_markers
       | (a, b) :: t ->
           if board.(a).(b) = None then (
             set_color green_color;
-            draw_circle
-              ((a * step) + (step / 2))
-              ((b * step) + (step / 2))
-              12;
             fill_circle
               ((a * step) + (step / 2))
               ((b * step) + (step / 2))
@@ -232,14 +270,17 @@ let init_gui () =
   set_line_width 2;
   imgs := load_imgs ()
 
-(** wait_action () waits a user input of a key and will continue to be
+let draw_game_basic (bd : Game.t) =
+  clear_graph ();
+  draw_board ();
+  draw_position bd !imgs
+
+(** [wait_action ()] waits a user input of a key and will continue to be
     called until one of the presented options is pressed. *)
 let rec wait_action () =
   match read_key () with
-  | 'p' -> 'p'
-  | 'q' -> 'q'
-  | 'P' -> 'p'
-  | 'Q' -> 'q'
+  | 'p' | 'P' -> true
+  | 'q' | 'Q' -> false
   | _ -> wait_action ()
 
 let draw_win_screen (result : Game.color option) =
