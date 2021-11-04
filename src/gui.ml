@@ -45,7 +45,6 @@ let load_imgs () : image list =
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
          Png.load "imgs/green_edges.png" [];
-         Png.load "imgs/green_circle.png" [];
        ])
 
 (** [window_length] is the height and width of the game window in
@@ -228,28 +227,36 @@ let draw_markers
     (move_list : move list) =
   let board = board_to_array bd in
   let piece = board.(currX).(currY) in
+  let green_color = rgb 0 204 102 in
   if piece = None then ()
   else
     let potential_moves =
       get_potential_squares move_list (currX, currY)
     in
-    let get_green_circle = List.nth imgs 13 in
     let get_green_edges = List.nth imgs 12 in
-    let rec draw_circle (potential_moves : (int * int) list) =
+    let rec draw_circle_func (potential_moves : (int * int) list) =
       match potential_moves with
       | (a, b) :: t ->
-          if board.(a).(b) = None then
-            draw_image get_green_circle
-              ((a * step) + ((step - 60) / 2))
-              ((b * step) + ((step - 60) / 2))
+          if board.(a).(b) = None then (
+            set_color green_color;
+            draw_circle
+              ((a * step) + (step / 2))
+              ((b * step) + (step / 2))
+              12;
+            fill_circle
+              ((a * step) + (step / 2))
+              ((b * step) + (step / 2))
+              12)
           else
             draw_image get_green_edges
               ((a * step) + ((step - 60) / 2))
               ((b * step) + ((step - 60) / 2));
-          draw_circle t
+          draw_circle_func t
       | [] -> ()
     in
-    draw_circle potential_moves
+    draw_circle_func potential_moves
+
+let test = draw_circle
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
