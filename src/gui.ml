@@ -105,7 +105,6 @@ let rec draw_rows row start =
     let rec draw_row index alt =
       let color = if alt then light else dark in
       set_color color;
-      draw_rect (index * step) (row * step) step step;
       fill_rect (index * step) (row * step) step step;
       if index = 7 then () else draw_row (index + 1) (not alt)
     in
@@ -239,10 +238,6 @@ let draw_markers
       | (a, b) :: t ->
           if board.(a).(b) = None then (
             set_color green_color;
-            draw_circle
-              ((a * step) + (step / 2))
-              ((b * step) + (step / 2))
-              12;
             fill_circle
               ((a * step) + (step / 2))
               ((b * step) + (step / 2))
