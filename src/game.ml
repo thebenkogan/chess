@@ -27,8 +27,10 @@ type properties = {
   queenside_castle : bool;
 }
 
-let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
-    =
+let update_board
+    ?promote_piece:(pp = Queen)
+    (bd : t)
+    (((old_x, old_y), (new_x, new_y)) : move) : t =
   let board_arr = board_to_array bd in
   let prev_at_loc = board_arr.(new_x).(new_y) in
   let old_piece = board_arr.(old_x).(old_y) in
@@ -39,11 +41,11 @@ let update_board (bd : t) (((old_x, old_y), (new_x, new_y)) : move) : t
     if
       board_arr.(new_x).(new_y) = Some (White, Pawn)
       && new_y = 7 && old_y < 7
-    then board_arr.(new_x).(new_y) <- Some (White, Queen)
+    then board_arr.(new_x).(new_y) <- Some (White, pp)
     else if
       board_arr.(new_x).(new_y) = Some (Black, Pawn)
       && new_y = 0 && old_y > 0
-    then board_arr.(new_x).(new_y) <- Some (Black, Queen)
+    then board_arr.(new_x).(new_y) <- Some (Black, pp)
       (* Check for if en passant just occurred *)
     else if
       old_piece = Some (White, Pawn)

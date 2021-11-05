@@ -1,13 +1,17 @@
-# How to install and play Chess game 
+# How to install and play Chess game for MS2
 
 ## Dependencies (run with opam install)
 ANSITerminal
+graphics
+conf-libpng
+camlimages
 
-## Terminal Fonts
+(note: install everything if prompted with sudo apt install [DEPENDENCY] on 
+Windows, or brew install [DEPENDENCY])
+(note 2: if prompted to install a dependency with a number in the name, leave
+just the number out)
 
-For Windows Ubuntu, use MS Gothic. 
-For Mac Terminal, use SF Mono Regular 11.
-Note: VS Code Integrated Terminal works with default font
+Requires an XServer to be running
 
 ## How to Play
 
