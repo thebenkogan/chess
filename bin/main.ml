@@ -5,6 +5,7 @@ open Boards
 open Helper
 open Printer
 open Gui
+open Engine
 
 type game_result =
   | Win of color
@@ -53,10 +54,7 @@ let play_and_receive state black move =
   else if is_stalemate next_black then
     (next_state, next_black, Some Draw)
   else
-    let black_move =
-      List.nth next_black.moves
-        (Random.int (List.length next_black.moves))
-    in
+    let black_move = next_move next_black next_state in
     let update_black = play_move next_black black_move in
     let update_state = receive_move next_state black_move in
     if is_checkmate update_state then

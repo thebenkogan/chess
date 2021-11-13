@@ -33,8 +33,9 @@ let rec minimax pl opp depth max =
 
 let next_move pl opp =
   let eval_move mv =
+    print_endline "Evaluated one move";
     let pl', opp' = update_states pl opp mv true in
-    minimax pl' opp' 5 false
+    minimax pl' opp' 2 false
   in
   let evals = List.map eval_move pl.moves in
   let map = List.combine evals pl.moves in
