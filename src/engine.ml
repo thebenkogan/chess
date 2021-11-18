@@ -45,7 +45,6 @@ let result pl opp max =
     [depth]. [move] is the first move played by [pl] in some path, with
     this move determined when [first] is true. *)
 let rec minimax pl opp depth max (alpha, beta) =
-  print_endline (string_of_int !counter);
   counter := !counter + 1;
   let best_move = ref ((-1, -1), (-1, -1)) in
   let rec step value (a, b) = function
@@ -77,4 +76,6 @@ let rec minimax pl opp depth max (alpha, beta) =
 
 let next_move pl opp =
   counter := 1;
-  snd (minimax pl opp 3 true (neg_infinity, infinity))
+  let out = minimax pl opp 3 true (neg_infinity, infinity) in
+  print_endline (string_of_int !counter);
+  snd out
