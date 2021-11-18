@@ -2,6 +2,8 @@ open State
 open Game
 open Printer
 
+let counter = ref 1
+
 (** [eval bd color] is the static evaluation of [bd] for the player with
     [color] pieces. Is the difference in material count. *)
 let eval bd color =
@@ -30,18 +32,9 @@ let update_states pl opp mv turn =
     is [Some infinity] or [Some 0] respectively. If [opp] is checkmating
     or stalemating, then this is [Some neg_infinity] or [Some 0]
     respectively. [max] determines which side the result is for. *)
-let result pl opp max move =
-  if move = ((3, 6), (3, 5)) then begin
-    print_endline "result check:";
-    print_endline (pp_move_list pl.moves);
-    print_endline (string_of_bool pl.king_in_check);
-    pretty_print pl.game_state.board
-  end
-  else ();
+let result pl opp max =
   match (pl.moves, opp.moves) with
-  | [], _ when pl.king_in_check && max ->
-      print_endline "gotem!";
-      Some neg_infinity
+  | [], _ when pl.king_in_check && max -> Some neg_infinity
   | [], _ when (not pl.king_in_check) && max -> Some 0.
   | _, [] when opp.king_in_check && not max -> Some infinity
   | _, [] when (not opp.king_in_check) && not max -> Some 0.
@@ -51,67 +44,37 @@ let result pl opp max move =
     [max] or the minimizing move for [pl] if [not max], searching to
     [depth]. [move] is the first move played by [pl] in some path, with
     this move determined when [first] is true. *)
-let rec minimax pl opp depth max (alpha, beta) move first =
-  if List.length pl.moves = 0 && max then
-    (*pretty_print pl.game_state.board*) ()
-  else ();
+let rec minimax pl opp depth max (alpha, beta) =
+  print_endline (string_of_int !counter);
+  counter := !counter + 1;
+  let best_move = ref ((-1, -1), (-1, -1)) in
   let rec step value (a, b) = function
-    | [] -> value
+    | [] -> (value, !best_move)
     | mv :: t ->
-        if first then begin
-          print_endline "begin:";
-          print_endline (pp_move_list [ mv ]);
-          print_endline (string_of_float (fst value));
-          print_endline (pp_move_list [ snd value ]);
-          print_endline (string_of_float a);
-          print_endline (string_of_float b)
-        end
-        else ();
-        if move = ((3, 6), (3, 5)) then begin
-          print_endline "begin (3, 6), (3, 5):";
-          print_endline (pp_move_list [ mv ]);
-          print_endline (string_of_float (fst value));
-          print_endline (pp_move_list [ snd value ]);
-          print_endline (string_of_float a);
-          print_endline (string_of_float b)
-        end
-        else ();
         let pl', opp' = update_states pl opp mv max in
         let choose = if max then Stdlib.max else Stdlib.min in
-        let mv = if first then mv else move in
-        let out =
-          minimax pl' opp' (depth - 1) (not max) (a, b) mv false
+        let value' =
+          choose value
+            (fst (minimax pl' opp' (depth - 1) (not max) (a, b)))
         in
-        if first then begin
-          print_endline "value:";
-          print_endline (string_of_float (fst out))
-        end
-        else ();
-        if move = ((3, 6), (3, 5)) then begin
-          print_endline "value:";
-          print_endline (string_of_float (fst out))
-        end
-        else ();
-        let value' = choose value out in
-        if (max && fst value' >= b) || ((not max) && fst value' <= a)
-        then value'
+        if (max && value' > a) || ((not max) && value' < b) then
+          best_move := mv;
+        if max && value' >= b then (b, !best_move)
+        else if (not max) && value' <= a then (a, !best_move)
         else
-          let a' = if max then choose a (fst value') else a in
-          let b' = if not max then choose b (fst value') else b in
+          let a' = if max then choose a value' else a in
+          let b' = if not max then choose b value' else b in
           step value' (a', b') t
   in
-  match result pl opp max move with
-  | Some v -> (v, move)
+  match result pl opp max with
+  | Some v -> (v, ((-1, -1), (-1, -1)))
   | None ->
       if depth = 0 then
-        (eval pl.game_state.board pl.game_state.color, move)
-      else if max then step (neg_infinity, move) (alpha, beta) pl.moves
-      else step (infinity, move) (alpha, beta) opp.moves
+        ( eval pl.game_state.board pl.game_state.color,
+          ((-1, -1), (-1, -1)) )
+      else if max then step neg_infinity (alpha, beta) pl.moves
+      else step infinity (alpha, beta) opp.moves
 
 let next_move pl opp =
-  print_endline "next";
-  snd
-    (minimax pl opp 2 true
-       (neg_infinity, infinity)
-       ((-1, -1), (-1, -1))
-       true)
+  counter := 1;
+  snd (minimax pl opp 3 true (neg_infinity, infinity))
