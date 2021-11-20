@@ -27,13 +27,14 @@ let set_properties
     ?last_move:(lm = ((-1, -1), (-1, -1)))
     (bd : Game.t)
     (c : Game.color)
-    (king_pos : int * int) =
+    (king_pos : int * int)
+    (king_in_check : bool) =
   {
     board = bd;
     color = c;
     last_move = lm;
     king_pos;
-    king_in_check = false;
+    king_in_check;
     kingside_castle = false;
     queenside_castle = false;
   }
@@ -57,7 +58,7 @@ let is_attacked_test
 let legal_moves_test
     (name : string)
     (prop : properties)
-    ?pin_checker:(pc = fun _ _ -> false)
+    ?pin_checker:(pc = fun _ _ _ -> None)
     ?move_checker:(mc = fun _ _ -> true)
     (expected_output : (int * int) list)
     (piece_pos : int * int) : test =
@@ -102,11 +103,11 @@ let knight_tests =
     legal_moves_test "Middle of empty board"
       (set_properties
          (empty_with_piece (Some (White, Knight)))
-         White (-1, -1))
+         White (-1, -1) false)
       [ (1, 4); (1, 2); (2, 5); (4, 5); (5, 4); (5, 2); (4, 1); (2, 1) ]
       (3, 3);
     legal_moves_test "Edge of board same and enemy pieces"
-      (set_properties knight_board White (-1, -1))
+      (set_properties knight_board White (-1, -1) false)
       [ (1, 0); (2, 3); (1, 4) ]
       (0, 2);
   ]
@@ -116,24 +117,24 @@ let king_tests =
     legal_moves_test "Middle of empty board"
       (set_properties
          (empty_with_piece (Some (White, King)))
-         White (-1, -1))
+         White (-1, -1) false)
       [ (4, 4); (4, 3); (3, 2); (3, 4); (2, 3); (2, 2); (2, 4); (4, 2) ]
       (3, 3);
     legal_moves_test "Does not move to attacked squares"
-      (set_properties king_board1 Black (3, 7))
+      (set_properties king_board1 Black (3, 7) false)
       ~pin_checker ~move_checker [ (2, 6); (2, 7) ] (3, 7);
     legal_moves_test "Does not move to attacked squares in line"
-      (set_properties king_board2 Black (4, 5))
+      (set_properties king_board2 Black (4, 5) true)
       ~pin_checker ~move_checker
       [ (3, 5); (3, 4); (3, 6); (5, 5); (5, 6); (5, 4) ]
       (4, 5);
     legal_moves_test "Can move in front of pawn, not corners"
-      (set_properties king_board3 Black (4, 5))
+      (set_properties king_board3 Black (4, 5) false)
       ~pin_checker ~move_checker
       [ (4, 4); (4, 6); (3, 6); (5, 6); (3, 5); (5, 5) ]
       (4, 5);
     legal_moves_test "Cannot take protected piece"
-      (set_properties king_board4 Black (4, 5))
+      (set_properties king_board4 Black (4, 5) false)
       ~pin_checker ~move_checker
       [ (4, 6); (5, 6); (5, 5) ]
       (4, 5);
@@ -143,27 +144,27 @@ let move_checker_tests =
   [
     legal_moves_test
       "Bishop in line with Knight but King blocked, not pinned"
-      (set_properties move_checker_board1 White (4, 0))
-      ~move_checker
+      (set_properties move_checker_board1 White (4, 0) false)
+      ~pin_checker ~move_checker
       [ (1, 0); (0, 3); (1, 4); (3, 4); (4, 3) ]
       (2, 2);
     legal_moves_test "Knight pinned by Bishop"
-      (set_properties move_checker_board2 White (4, 0))
-      ~move_checker [] (2, 2);
+      (set_properties move_checker_board2 White (4, 0) false)
+      ~pin_checker ~move_checker [] (2, 2);
     legal_moves_test "Queen pinned by Rook, can move in line of Rook"
-      (set_properties move_checker_board3 Black (3, 7))
-      ~move_checker
+      (set_properties move_checker_board3 Black (3, 7) false)
+      ~pin_checker ~move_checker
       [ (3, 0); (3, 1); (3, 2); (3, 3); (3, 4); (3, 5) ]
       (3, 6);
     legal_moves_test "King in check, no blocks or moves"
-      (set_properties move_checker_board4 Black (3, 4))
-      ~move_checker [] (7, 1);
+      (set_properties move_checker_board4 Black (3, 4) true)
+      ~pin_checker ~move_checker [] (7, 1);
     legal_moves_test "King in check, pinned piece cannot block"
-      (set_properties move_checker_board5 White (4, 0))
-      ~move_checker [] (2, 2);
+      (set_properties move_checker_board5 White (4, 0) true)
+      ~pin_checker ~move_checker [] (2, 2);
     legal_moves_test "King in check, one move to block check"
-      (set_properties move_checker_board6 Black (3, 6))
-      ~move_checker [ (3, 5) ] (7, 1);
+      (set_properties move_checker_board6 Black (3, 6) true)
+      ~pin_checker ~move_checker [ (3, 5) ] (7, 1);
   ]
 
 let init_properties color =
@@ -204,13 +205,13 @@ let bishop_tests =
     legal_moves_test "Middle of empty board"
       (set_properties
          (empty_with_piece (Some (White, Bishop)))
-         White (-1, -1))
+         White (-1, -1) false)
       bishop_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
-      (set_properties starting_board White (-1, -1))
+      (set_properties starting_board White (-1, -1) false)
       [] (2, 0);
     legal_moves_test "Bishop check path interference"
-      (set_properties bishop_board White (-1, -1))
+      (set_properties bishop_board White (-1, -1) false)
       [ (1, 1); (2, 0); (1, 3) ]
       (2, 0);
   ]
@@ -220,13 +221,13 @@ let rook_tests =
     legal_moves_test "Middle of empty board rook"
       (set_properties
          (empty_with_piece (Some (White, Rook)))
-         White (-1, -1))
+         White (-1, -1) false)
       rook_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
-      (set_properties starting_board White (-1, -1))
+      (set_properties starting_board White (-1, -1) false)
       [] (0, 0);
     legal_moves_test "Rook check path interference"
-      (set_properties rook_board White (-1, -1))
+      (set_properties rook_board White (-1, -1) false)
       rook_path_interference_coords (0, 0);
   ]
 
@@ -235,13 +236,13 @@ let queen_tests =
     legal_moves_test "Middle of empty board queen"
       (set_properties
          (empty_with_piece (Some (White, Queen)))
-         White (-1, -1))
+         White (-1, -1) false)
       queen_empty_board_coords (3, 3);
     legal_moves_test "Standard board starting position"
-      (set_properties starting_board White (-1, -1))
+      (set_properties starting_board White (-1, -1) false)
       [] (3, 0);
     legal_moves_test "Queen check path interference"
-      (set_properties queen_board White (-1, -1))
+      (set_properties queen_board White (-1, -1) false)
       queen_path_interference_coords (3, 0);
   ]
 
@@ -250,19 +251,19 @@ let pawn_tests =
     legal_moves_test "Middle of empty board pawn"
       (set_properties
          (empty_with_piece (Some (White, Pawn)))
-         White (-1, -1))
+         White (-1, -1) false)
       [ (3, 4) ] (3, 3);
     legal_moves_test "Forward from standard board"
-      (set_properties starting_board White (-1, -1))
+      (set_properties starting_board White (-1, -1) false)
       [ (5, 2); (5, 3) ] (5, 1);
     legal_moves_test "Forward from standard board other position"
-      (set_properties starting_board White (-1, -1))
+      (set_properties starting_board White (-1, -1) false)
       [ (2, 2); (2, 3) ] (2, 1);
     legal_moves_test "Basic capture"
-      (set_properties starting_board_pawn1 White (-1, -1))
+      (set_properties starting_board_pawn1 White (-1, -1) false)
       [ (2, 5); (1, 5) ] (2, 4);
     legal_moves_test "En passant move"
-      (set_properties starting_board_pawn2 White (-1, -1)
+      (set_properties starting_board_pawn2 White (-1, -1) false
          ~last_move:((1, 6), (1, 4)))
       [ (2, 5); (1, 5) ] (2, 4);
   ]

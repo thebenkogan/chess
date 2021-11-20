@@ -216,14 +216,15 @@ module Pawn = struct
       (coords : int * int)
       pin_checker
       move_checker : move list =
-    if pin_checker prop coords then []
-    else
-      let board_arr = board_to_array prop.board in
-      let moves =
-        squares_to_moves coords
-          (potential_squares coords board_arr prop.color prop.last_move)
-      in
+    let pinned = pin_checker prop Pawn coords <> None in
+    let board_arr = board_to_array prop.board in
+    let moves =
+      squares_to_moves coords
+        (potential_squares coords board_arr prop.color prop.last_move)
+    in
+    if prop.king_in_check || pinned then
       List.filter (move_checker prop) moves
+    else moves
 end
 
 module Knight = struct
@@ -251,46 +252,52 @@ module Knight = struct
       (coords : int * int)
       pin_checker
       move_checker : move list =
-    if pin_checker prop coords then []
-    else
-      let board = board_to_array prop.board in
-      let moves =
-        squares_to_moves coords
-          (potential_squares coords board prop.color)
-      in
-      List.filter (move_checker prop) moves
+    match pin_checker prop Knight coords with
+    | Some moves -> moves
+    | None ->
+        let board = board_to_array prop.board in
+        let moves =
+          squares_to_moves coords
+            (potential_squares coords board prop.color)
+        in
+        if prop.king_in_check then List.filter (move_checker prop) moves
+        else moves
 end
 
 module Bishop = struct
   let legal_moves (prop : properties) (x, y) pin_checker move_checker :
       move list =
-    if pin_checker prop (x, y) then []
-    else
-      let board = board_to_array prop.board in
-      let square_list =
-        build_line (x + 1, y + 1) board 1 1 prop.color
-        @ build_line (x - 1, y + 1) board (-1) 1 prop.color
-        @ build_line (x + 1, y - 1) board 1 (-1) prop.color
-        @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
-      in
-      let moves = squares_to_moves (x, y) square_list in
-      List.filter (move_checker prop) moves
+    match pin_checker prop Bishop (x, y) with
+    | Some moves -> moves
+    | None ->
+        let board = board_to_array prop.board in
+        let square_list =
+          build_line (x + 1, y + 1) board 1 1 prop.color
+          @ build_line (x - 1, y + 1) board (-1) 1 prop.color
+          @ build_line (x + 1, y - 1) board 1 (-1) prop.color
+          @ build_line (x - 1, y - 1) board (-1) (-1) prop.color
+        in
+        let moves = squares_to_moves (x, y) square_list in
+        if prop.king_in_check then List.filter (move_checker prop) moves
+        else moves
 end
 
 module Rook = struct
   let legal_moves (prop : properties) (x, y) pin_checker move_checker :
       move list =
-    if pin_checker prop (x, y) then []
-    else
-      let board = board_to_array prop.board in
-      let square_list =
-        build_line (x + 1, y) board 1 0 prop.color
-        @ build_line (x - 1, y) board (-1) 0 prop.color
-        @ build_line (x, y + 1) board 0 1 prop.color
-        @ build_line (x, y - 1) board 0 (-1) prop.color
-      in
-      let moves = squares_to_moves (x, y) square_list in
-      List.filter (move_checker prop) moves
+    match pin_checker prop Rook (x, y) with
+    | Some moves -> moves
+    | None ->
+        let board = board_to_array prop.board in
+        let square_list =
+          build_line (x + 1, y) board 1 0 prop.color
+          @ build_line (x - 1, y) board (-1) 0 prop.color
+          @ build_line (x, y + 1) board 0 1 prop.color
+          @ build_line (x, y - 1) board 0 (-1) prop.color
+        in
+        let moves = squares_to_moves (x, y) square_list in
+        if prop.king_in_check then List.filter (move_checker prop) moves
+        else moves
 end
 
 module Queen = struct
@@ -347,15 +354,6 @@ module King = struct
     List.filter (move_checker prop) moves @ castle_append
 end
 
-(* ASSUMPTION FOR THE FOLLOWING FUNCTIONS: A board is a 2d list of
-   pieces as defined above, where the first element in that list is the
-   first column on the chess board (column 0, leftmost). Each element in
-   a corresponding column is ordered by row starting at 0. We get the
-   legal moves for each piece of our color by iterating through every
-   column and getting the legal moves for the elements in those columns
-   that match the color defined in prop, then concatenating the results
-   together. *)
-
 (** [moves_for_column prop (x, y) pc mc column] is the list of all legal
     moves for each piece in column number [x] that is of the same color
     as defined in [prop], beginning at the [y]th element of the column.
@@ -381,7 +379,7 @@ let rec moves_for_column prop (x, y) pc mc = function
         end
 
 let legal_moves
-    ?pin_checker:(pc = fun _ _ -> false)
+    ?pin_checker:(pc = fun _ _ _ -> None)
     ?move_checker:(mc = fun _ _ -> true)
     (prop : properties) =
   let column_handler (lst, col_num) column =
@@ -389,22 +387,38 @@ let legal_moves
   in
   fst (List.fold_left column_handler ([], 0) prop.board)
 
-let pin_checker (prop : properties) (x, y) : bool =
-  if prop.king_in_check then false
+let pin_checker (prop : properties) (p : soldier) (x, y) :
+    move list option =
+  if prop.king_in_check then None
   else
     let board_arr = board_to_array prop.board in
     board_arr.(x).(y) <- None;
     let new_board = array_to_board board_arr in
     let enemy_color = if prop.color = White then Black else White in
-    is_attacked
-      (legal_moves
-         {
-           prop with
-           board = new_board;
-           color = enemy_color;
-           king_in_check = false;
-         })
-      prop.king_pos
+    let enemy_moves =
+      legal_moves
+        {
+          prop with
+          board = new_board;
+          color = enemy_color;
+          king_in_check = false;
+        }
+    in
+    if not (is_attacked enemy_moves prop.king_pos) then None
+    else
+      let attack_pos =
+        List.hd (get_piece_targets prop.king_pos enemy_moves)
+      in
+      match p with
+      | Pawn -> Some []
+      | Knight -> Some []
+      | Bishop ->
+          if in_line (x, y) attack_pos then Some []
+          else Some (line_moves (x, y) attack_pos)
+      | Rook ->
+          if not (in_line (x, y) attack_pos) then Some []
+          else Some (line_moves (x, y) attack_pos)
+      | _ -> None
 
 let move_checker (prop : properties) (((x1, y1), (x2, y2)) : move) :
     bool =
