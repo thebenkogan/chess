@@ -14,12 +14,6 @@ type t = {
   (*The pseudo-legal moves of the opponent in the current position (king
     independent).*)
   enemy_moves : Game.move list;
-  (*Players can only make a move if turn is true? After a move is
-    played, we set this to false, and back to true when we receive a
-    move from the opponent.*)
-  turn : bool;
-  (*True if the king is attacked in the current position.*)
-  king_in_check : bool;
   (*True if the starting rook on the A file has moved.*)
   a_rook_moved : bool;
   (*True if the starting rook on the H file has moved.*)

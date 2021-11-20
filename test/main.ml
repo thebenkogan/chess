@@ -23,31 +23,17 @@ let cmp_set_like_lists lst1 lst2 =
     piece. [last_move], [enemy_moves], and [king_pos] are all
     disregarded. [king_in_check], [kingside_castle], and
     [queenside_castle] are false. *)
-let set_properties bd c king_pos =
+let set_properties
+    ?last_move:(lm = ((-1, -1), (-1, -1)))
+    (bd : Game.t)
+    (c : Game.color)
+    (king_pos : int * int) =
   {
     board = bd;
     color = c;
-    last_move = ((-1, -1), (-1, -1));
+    last_move = lm;
     king_pos;
-    kingside_castle = false;
-    queenside_castle = false;
-  }
-
-(** [set_properties_pawn bd c prev_move] is the game properties for Pawn
-    pieces with board [bd] and color [c] used to test the
-    king-independent movement of a piece. [enemy_moves], and [king_pos]
-    are all disregarded. [king_in_check], [kingside_castle], and
-    [queenside_castle] are false. *)
-let set_properties_pawn
-    bd
-    c
-    king_pos
-    (prev_move : (int * int) * (int * int)) =
-  {
-    board = bd;
-    color = c;
-    last_move = prev_move;
-    king_pos;
+    king_in_check = false;
     kingside_castle = false;
     queenside_castle = false;
   }
@@ -71,12 +57,14 @@ let is_attacked_test
 let legal_moves_test
     (name : string)
     (prop : properties)
+    ?pin_checker:(pc = fun _ _ -> false)
     ?move_checker:(mc = fun _ _ -> true)
     (expected_output : (int * int) list)
     (piece_pos : int * int) : test =
   let expected_moves = squares_to_moves piece_pos expected_output in
   let output =
-    get_piece_moves piece_pos (legal_moves ~move_checker:mc prop)
+    get_piece_moves piece_pos
+      (legal_moves ~pin_checker:pc ~move_checker:mc prop)
   in
   name >:: fun _ ->
   assert_equal ~cmp:cmp_set_like_lists ~printer:pp_move_list
@@ -133,20 +121,20 @@ let king_tests =
       (3, 3);
     legal_moves_test "Does not move to attacked squares"
       (set_properties king_board1 Black (3, 7))
-      ~move_checker [ (2, 6); (2, 7) ] (3, 7);
+      ~pin_checker ~move_checker [ (2, 6); (2, 7) ] (3, 7);
     legal_moves_test "Does not move to attacked squares in line"
       (set_properties king_board2 Black (4, 5))
-      ~move_checker
+      ~pin_checker ~move_checker
       [ (3, 5); (3, 4); (3, 6); (5, 5); (5, 6); (5, 4) ]
       (4, 5);
     legal_moves_test "Can move in front of pawn, not corners"
       (set_properties king_board3 Black (4, 5))
-      ~move_checker
+      ~pin_checker ~move_checker
       [ (4, 4); (4, 6); (3, 6); (5, 6); (3, 5); (5, 5) ]
       (4, 5);
     legal_moves_test "Cannot take protected piece"
       (set_properties king_board4 Black (4, 5))
-      ~move_checker
+      ~pin_checker ~move_checker
       [ (4, 6); (5, 6); (5, 5) ]
       (4, 5);
   ]
@@ -184,6 +172,7 @@ let init_properties color =
     color;
     last_move = ((-1, -1), (-1, -1));
     king_pos = (if color = White then (4, 0) else (4, 7));
+    king_in_check = false;
     kingside_castle = false;
     queenside_castle = false;
   }
@@ -195,8 +184,6 @@ let state_tests =
         game_state = init_properties White;
         moves = starting_board_init_moves;
         enemy_moves = [];
-        turn = true;
-        king_in_check = false;
         a_rook_moved = false;
         h_rook_moved = false;
         king_moved = false;
@@ -206,8 +193,6 @@ let state_tests =
         game_state = init_properties Black;
         moves = [];
         enemy_moves = [];
-        turn = false;
-        king_in_check = false;
         a_rook_moved = false;
         h_rook_moved = false;
         king_moved = false;
@@ -277,8 +262,8 @@ let pawn_tests =
       (set_properties starting_board_pawn1 White (-1, -1))
       [ (2, 5); (1, 5) ] (2, 4);
     legal_moves_test "En passant move"
-      (set_properties_pawn starting_board_pawn2 White (-1, -1)
-         ((1, 6), (1, 4)))
+      (set_properties starting_board_pawn2 White (-1, -1)
+         ~last_move:((1, 6), (1, 4)))
       [ (2, 5); (1, 5) ] (2, 4);
   ]
 

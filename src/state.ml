@@ -6,8 +6,6 @@ type t = {
   game_state : Game.properties;
   moves : Game.move list;
   enemy_moves : Game.move list;
-  turn : bool;
-  king_in_check : bool;
   a_rook_moved : bool;
   h_rook_moved : bool;
   king_moved : bool;
@@ -20,6 +18,7 @@ let init_state (board : Game.t) (color : Game.color) : t =
       color;
       last_move = ((-1, -1), (-1, -1));
       king_pos = (if color = White then (4, 0) else (4, 7));
+      king_in_check = false;
       kingside_castle = false;
       queenside_castle = false;
     }
@@ -27,13 +26,10 @@ let init_state (board : Game.t) (color : Game.color) : t =
   let init_moves =
     if color = White then legal_moves init_properties else []
   in
-  let init_turn = color = White in
   {
     game_state = init_properties;
     moves = init_moves;
     enemy_moves = [];
-    turn = init_turn;
-    king_in_check = false;
     a_rook_moved = false;
     h_rook_moved = false;
     king_moved = false;
@@ -126,6 +122,7 @@ let enemy_properties bd our_color =
     color = (if our_color = White then Black else White);
     last_move = ((-1, -1), (-1, -1));
     king_pos = (-1, -1);
+    king_in_check = false;
     queenside_castle = false;
     kingside_castle = false;
   }
@@ -162,6 +159,7 @@ let play_move
       board = new_board;
       last_move = new_last_move;
       king_pos = new_king_pos;
+      king_in_check = false;
     }
   in
   (*If a piece has moved before, it will stay moved. Otherwise, check if
@@ -184,11 +182,9 @@ let play_move
     game_state = new_properties;
     moves = [];
     enemy_moves = [];
-    king_in_check = false;
     a_rook_moved = new_a_rook_moved;
     h_rook_moved = new_h_rook_moved;
     king_moved = new_king_moved;
-    turn = false;
   }
 
 let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
@@ -210,16 +206,17 @@ let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
       st.game_state with
       board = new_board;
       last_move = mv;
+      king_in_check = new_king_in_check;
       kingside_castle = fst can_castle;
       queenside_castle = snd can_castle;
     }
   in
-  let new_moves = legal_moves ~move_checker new_properties in
+  let new_moves =
+    legal_moves ~pin_checker ~move_checker new_properties
+  in
   {
     st with
     game_state = new_properties;
     moves = new_moves;
     enemy_moves = new_enemy_moves;
-    turn = true;
-    king_in_check = new_king_in_check;
   }

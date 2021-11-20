@@ -35,10 +35,10 @@ let update_states pl opp mv turn =
     respectively. [max] determines which side the result is for. *)
 let result pl opp max =
   match (pl.moves, opp.moves) with
-  | [], _ when pl.king_in_check && max -> Some neg_infinity
-  | [], _ when (not pl.king_in_check) && max -> Some 0.
-  | _, [] when opp.king_in_check && not max -> Some infinity
-  | _, [] when (not opp.king_in_check) && not max -> Some 0.
+  | [], _ when pl.game_state.king_in_check && max -> Some neg_infinity
+  | [], _ when (not pl.game_state.king_in_check) && max -> Some 0.
+  | _, [] when opp.game_state.king_in_check && not max -> Some infinity
+  | _, [] when (not opp.game_state.king_in_check) && not max -> Some 0.
   | _, _ -> None
 
 (** [minimax pl opp depth max move first] is maximizing move for [pl] if

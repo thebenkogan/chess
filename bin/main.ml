@@ -13,7 +13,8 @@ type game_result =
 
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
     is in checkmate if it has no legal moves and its king is in check. *)
-let is_checkmate st = List.length st.moves = 0 && st.king_in_check
+let is_checkmate st =
+  List.length st.moves = 0 && st.game_state.king_in_check
 
 (** [is_stalemate st] is true if [st] is currently in stalemate. A state
     is in stalemate if it has no legal moves and its king is not in
