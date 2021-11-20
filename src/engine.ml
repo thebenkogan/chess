@@ -1,6 +1,7 @@
 open State
 open Game
-open Printer
+
+let depth = 3
 
 let counter = ref 1
 
@@ -46,36 +47,35 @@ let result pl opp max =
     this move determined when [first] is true. *)
 let rec minimax pl opp depth max (alpha, beta) =
   counter := !counter + 1;
-  let best_move = ref ((-1, -1), (-1, -1)) in
   let rec step value (a, b) = function
-    | [] -> (value, !best_move)
+    | [] -> value
     | mv :: t ->
         let pl', opp' = update_states pl opp mv max in
         let choose = if max then Stdlib.max else Stdlib.min in
         let value' =
-          choose value
-            (fst (minimax pl' opp' (depth - 1) (not max) (a, b)))
+          choose value (minimax pl' opp' (depth - 1) (not max) (a, b))
         in
-        if (max && value' > a) || ((not max) && value' < b) then
-          best_move := mv;
-        if max && value' >= b then (b, !best_move)
-        else if (not max) && value' <= a then (a, !best_move)
+        if (max && value' >= b) || ((not max) && value' <= a) then
+          value'
         else
           let a' = if max then choose a value' else a in
           let b' = if not max then choose b value' else b in
           step value' (a', b') t
   in
   match result pl opp max with
-  | Some v -> (v, ((-1, -1), (-1, -1)))
+  | Some v -> v
   | None ->
-      if depth = 0 then
-        ( eval pl.game_state.board pl.game_state.color,
-          ((-1, -1), (-1, -1)) )
+      if depth = 0 then eval pl.game_state.board pl.game_state.color
       else if max then step neg_infinity (alpha, beta) pl.moves
       else step infinity (alpha, beta) opp.moves
 
 let next_move pl opp =
   counter := 1;
-  let out = minimax pl opp 3 true (neg_infinity, infinity) in
+  let eval_move mv =
+    let pl', opp' = update_states pl opp mv true in
+    minimax pl' opp' (depth - 1) false (neg_infinity, infinity)
+  in
+  let evals = List.map eval_move pl.moves in
+  let map = List.combine evals pl.moves in
   print_endline (string_of_int !counter);
-  snd out
+  List.sort compare map |> List.rev |> List.hd |> snd
