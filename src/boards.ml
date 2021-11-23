@@ -320,3 +320,108 @@ let starting_board_update2 : Game.t =
     (*Column 8*)
     [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ]
+
+
+
+let castle1 : Game.t =
+  [
+    (*Column 1*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+    (*Column 2*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 3*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 4*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
+    (*Column 5*)
+    [ Some (White, King); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, King);];
+    (*Column 6*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 7*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 8*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+  ](*castle works*)
+
+
+let castle2 : Game.t =
+  [
+    (*Column 1*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+    (*Column 2*)
+    [ Some (White, Knight); Some (White, Pawn);None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 3*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 4*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
+    (*Column 5*)
+    [ Some (White, King); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, King);];
+    (*Column 6*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 7*)
+    [ Some (White, Knight); None; None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 8*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+  ](*castle blocked by piece*)
+
+
+
+let castle3 : Game.t =
+  [
+    (*Column 1*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); None;];
+    (*Column 2*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 3*)
+    [ None; None; None; None; None; Some (Black, Rook); Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 4*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
+    (*Column 5*)
+    [ Some (White, King); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, King);];
+    (*Column 6*)
+    [ None; None; None; None; None;Some (Black, Rook); Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 7*)
+    [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 8*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); None;];
+  ](*open sqaure in check*)
+
+let castle4 : Game.t =
+  [
+    (*Column 1*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+    (*Column 2*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 3*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 4*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
+    (*Column 5*)
+    [ Some (White, King); None; None; None; None; Some (Black, Rook); Some (Black, Pawn); Some (Black, King);];
+    (*Column 6*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 7*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Knight);];
+    (*Column 8*)
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+  ](*king in check*)
+
+let castle5 : Game.t =
+  [
+    (*Column 1*)
+    [ Some (Black, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+    (*Column 2*)
+    [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); None;];
+    (*Column 3*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 4*)
+    [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
+    (*Column 5*)
+    [ Some (White, King); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, King);];
+    (*Column 6*)
+    [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
+    (*Column 7*)
+    [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); None;];
+    (*Column 8*)
+    [ Some (Black, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+  ](*rook captured*)
