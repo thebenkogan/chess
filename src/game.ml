@@ -398,8 +398,8 @@ let pin_checker (prop : properties) (p : soldier) (x, y) :
     let last_piece = board_arr.(lx2).(ly2) in
     if
       p = Pawn && ly2 = y
-      && abs lx2 - x = 1
-      && abs ly2 - ly1 = 2
+      && abs (lx2 - x) = 1
+      && abs (ly2 - ly1) = 2
       && last_piece = Some (enemy_color, Pawn)
     then board_arr.(lx2).(ly2) <- None;
     let new_board = array_to_board board_arr in
