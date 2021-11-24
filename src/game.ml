@@ -392,7 +392,16 @@ let pin_checker (prop : properties) (p : soldier) (x, y) :
   if prop.king_in_check then None
   else
     let board_arr = board_to_array prop.board in
+    let (_, ly1), (lx2, ly2) = prop.last_move in
     board_arr.(x).(y) <- None;
+    let enemy_color = if prop.color = White then Black else White in
+    let last_piece = board_arr.(lx2).(ly2) in
+    if
+      p = Pawn && ly2 = y
+      && abs lx2 - x = 1
+      && abs ly2 - ly1 = 2
+      && last_piece = Some (enemy_color, Pawn)
+    then board_arr.(lx2).(ly2) <- None;
     let new_board = array_to_board board_arr in
     let enemy_color = if prop.color = White then Black else White in
     let enemy_moves =
