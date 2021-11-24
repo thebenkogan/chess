@@ -50,6 +50,7 @@ let play_and_receive state black move =
   in
   let next_state = play_move state move ~promote_piece in
   let next_black = receive_move black move ~promote_piece in
+  draw_game_basic next_state.game_state.board;
   if is_checkmate next_black then
     (next_state, next_black, Some (Win White))
   else if is_stalemate next_black then
