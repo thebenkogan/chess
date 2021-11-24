@@ -1,5 +1,6 @@
 open State
 open Game
+open Printer
 
 let depth = 3
 
@@ -71,11 +72,19 @@ let rec minimax pl opp depth max (alpha, beta) =
 
 let next_move pl opp =
   counter := 1;
-  let eval_move mv =
-    let pl', opp' = update_states pl opp mv true in
-    minimax pl' opp' (depth - 1) false (neg_infinity, infinity)
+  let rec eval_moves best_value best_move = function
+    | [] ->
+        print_endline (string_of_int !counter);
+        best_move
+    | mv :: t ->
+        let pl', opp' = update_states pl opp mv true in
+        let eval =
+          minimax pl' opp' (depth - 1) false (best_value, infinity)
+        in
+        let best_value' =
+          if eval > best_value then eval else best_value
+        in
+        let best_move' = if eval > best_value then mv else best_move in
+        eval_moves best_value' best_move' t
   in
-  let evals = List.map eval_move pl.moves in
-  let map = List.combine evals pl.moves in
-  print_endline (string_of_int !counter);
-  List.sort compare map |> List.rev |> List.hd |> snd
+  eval_moves neg_infinity (List.hd pl.moves) pl.moves
