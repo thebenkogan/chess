@@ -177,6 +177,18 @@ let move_checker_board6 : Game.t =
     [ None; None; None; None; None; None; None; None;];
     [ None; Some (Black, Bishop); None; None; None; None; None; None;];
   ]  
+
+let move_checker_board7 : Game.t = 
+  [
+    [ None; None; None; None; None; None; None; Some (Black, King);];
+    [ None; None; None; None; Some (White, King); None; None; None;];
+    [ None; None; None; None; Some (White, Pawn); None; None; None;];
+    [ None; None; None; None; Some (Black, Pawn); None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; None; None; None; None;];
+    [ None; None; None; None; Some (Black, Rook); None; None; None;];
+  ]   
 let bishop_board : Game.t = 
   [
     [ None; None; None; None; None; None; None; None;];

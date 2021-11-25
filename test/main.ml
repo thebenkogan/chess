@@ -165,6 +165,10 @@ let move_checker_tests =
     legal_moves_test "King in check, one move to block check"
       (set_properties move_checker_board6 Black (3, 6) true)
       ~pin_checker ~move_checker [ (3, 5) ] (7, 1);
+    legal_moves_test "En passant move blocked"
+      (set_properties move_checker_board7 White (1, 4) true
+         ~last_move:((3, 6), (3, 4)))
+      ~pin_checker ~move_checker [ (2, 5) ] (2, 4);
   ]
 
 let init_properties color =
