@@ -38,48 +38,36 @@ let update_board
   board_arr.(old_x).(old_y) <- None;
   board_arr.(new_x).(new_y) <- old_piece;
   let check_conditions =
-    (* Check for if pawn reaches either end *)
-    if
-      board_arr.(new_x).(new_y) = Some (White, Pawn)
-      && new_y = 7 && old_y < 7
-    then board_arr.(new_x).(new_y) <- Some (White, pp)
-    else if
-      board_arr.(new_x).(new_y) = Some (Black, Pawn)
-      && new_y = 0 && old_y > 0
+    (* Check if pawn reaches either end *)
+    if board_arr.(new_x).(new_y) = Some (White, Pawn) && new_y = 7 then
+      board_arr.(new_x).(new_y) <- Some (White, pp)
+    else if board_arr.(new_x).(new_y) = Some (Black, Pawn) && new_y = 0
     then board_arr.(new_x).(new_y) <- Some (Black, pp)
-      (* Check for if en passant just occurred *)
+      (* Check if en passant just occurred *)
     else if
-      old_piece = Some (White, Pawn)
-      && (new_x - old_x = 1 || new_x - old_x = -1)
-      && new_y - old_y = 1
+      (old_piece = Some (White, Pawn) || old_piece = Some (Black, Pawn))
+      && abs (new_x - old_x) = 1
+      && abs (new_y - old_y) = 1
       && prev_at_loc = None
-    then board_arr.(new_x).(new_y - 1) <- None
+    then begin
+      if old_piece = Some (White, Pawn) then
+        board_arr.(new_x).(new_y - 1) <- None
+      else if old_piece = Some (Black, Pawn) then
+        board_arr.(new_x).(new_y + 1) <- None
+    end
     else if
-      old_piece = Some (Black, Pawn)
-      && (new_x - old_x = 1 || new_x - old_x = -1)
-      && new_y - old_y = -1
-      && prev_at_loc = None
-    then board_arr.(new_x).(new_y + 1) <- None
-      (* Check if castling just occurred *)
-      (* Rightside castle *)
-    else if
+      (* Castle kingside or queenside *)
       (old_piece = Some (White, King) || old_piece = Some (Black, King))
-      && new_x - old_x = 2
+      && abs (new_x - old_x) = 2
     then
-      let move_right =
+      if new_x - old_x > 0 then begin
         board_arr.(new_x - 1).(new_y) <- board_arr.(7).(new_y);
         board_arr.(7).(new_y) <- None
-      in
-      move_right (* Leftside castle *)
-    else if
-      (old_piece = Some (White, King) || old_piece = Some (Black, King))
-      && new_x - old_x = -2
-    then
-      let move_left =
+      end
+      else begin
         board_arr.(new_x + 1).(new_y) <- board_arr.(0).(new_y);
         board_arr.(0).(new_y) <- None
-      in
-      move_left
+      end
     else ()
   in
   check_conditions;
