@@ -101,87 +101,56 @@ let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
    piece and does not put the king in check.*)
 
 module Pawn = struct
+  (** [check_en_passant pos last_move color board] is a list of squares
+      which the pawn at [pos] can move to via en passant. Requires:
+      [pos] has a pawn of [color]. *)
   let check_en_passant
-      (curr_x, curr_y)
-      (((last_x_old, last_y_old), (last_x_new, last_y_new)) : move)
+      (x, y)
+      (((lx1, ly1), (lx2, ly2)) : move)
       color
       board =
     (* Check if disregarded last move *)
-    if last_x_old = -1 then []
+    if lx1 = -1 then []
     else
       let enemy_color = if color = White then Black else White in
-      let last_piece = board.(last_x_new).(last_y_new) in
-      let net_x = last_x_new - curr_x in
-      let net_y = last_y_new - last_y_old in
+      let last_piece = board.(lx2).(ly2) in
+      let net_x = abs (lx2 - x) in
+      let net_y = abs (ly2 - ly1) in
       let en_passant_able : bool =
-        (net_y = 2 || net_y = -2)
-        && last_y_new = curr_y
-        && (net_x = 1 || net_x = -1)
+        net_y = 2 && ly2 = y && net_x = 1
         && last_piece = Some (enemy_color, Pawn)
       in
-      if en_passant_able && color = White then
-        [ (last_x_new, last_y_new + 1) ]
-      else if en_passant_able && color = Black then
-        [ (last_x_new, last_y_new - 1) ]
+      if en_passant_able && color = White then [ (lx2, ly2 + 1) ]
+      else if en_passant_able && color = Black then [ (lx2, ly2 - 1) ]
       else []
 
-  let is_valid_square_pawn
-      (curr_x, curr_y)
-      board
-      color
-      last_move
-      (pot_x, pot_y) : bool =
-    let net_x = pot_x - curr_x in
-    let net_y = pot_y - curr_y in
+  (** [is_valid_square_pawn start board color target] is true if the
+      pawn move from [start] to [target] on [board] for the side with
+      the [color] pieces is pseudo-legal (independent of the king). *)
+  let is_valid_square_pawn (x, y) board (color : color) (pot_x, pot_y) :
+      bool =
+    let net_x = abs (pot_x - x) in
+    let net_y = abs (pot_y - y) in
     let basic_valid_square =
       is_valid_square board color (pot_x, pot_y)
     in
+    if basic_valid_square then
+      if (* Go forward two *)
+         (y = 1 || y = 6) && net_y = 2 && net_x = 0
+      then
+        if pot_y > y then board.(x).(2) = None && board.(x).(3) = None
+        else board.(x).(5) = None && board.(x).(4) = None
+      else if
+        (* Go forward one *)
+        net_y = 1 && net_x = 0 && board.(pot_x).(pot_y) = None
+      then true
+      else if
+        (* Diagonal up to left or right *)
+        net_y = 1 && net_x = 1 && board.(pot_x).(pot_y) <> None
+      then true (* Diagonal up-right *)
+      else false (* Check when color is Black *)
+    else false
 
-    let check_conditions =
-      if color = White && basic_valid_square then
-        if
-          (* Go forward two *)
-          curr_y = 1 && net_y = 2 && net_x = 0
-          && board.(curr_x).(curr_y + 1) = None
-          && board.(curr_x).(curr_y + 2) = None
-        then true (* Go forward one *)
-        else if
-          net_y = 1 && net_x = 0 && board.(curr_x).(curr_y + 1) = None
-        then true (* Diagonal up-left *)
-        else if
-          net_y = 1 && net_x = -1
-          && board.(curr_x - 1).(curr_y + 1) != None
-        then true (* Diagonal up-right *)
-        else if
-          net_y = 1 && net_x = 1
-          && board.(curr_x + 1).(curr_y + 1) != None
-        then true
-        else false (* Check when color is Black *)
-      else if basic_valid_square && color = Black then
-        if
-          (* Go forward two *)
-          curr_y = 6 && net_y = -2 && net_x = 0
-          && board.(curr_x).(curr_y - 1) = None
-          && board.(curr_x).(curr_y - 2) = None
-        then true (* Go forward one *)
-        else if
-          net_y = -1 && net_x = 0 && board.(curr_x).(curr_y - 1) = None
-        then true (* Diagonal down-left -- no en passant *)
-        else if
-          net_y = -1 && net_x = -1
-          && board.(curr_x - 1).(curr_y - 1) != None
-        then true (* Diagonal down-right *)
-        else if
-          net_y = -1 && net_x = 1
-          && board.(curr_x + 1).(curr_y - 1) != None
-        then true
-        else false
-      else false
-    in
-
-    check_conditions
-
-  (* =================================================== *)
   let potential_squares
       (curr_x, curr_y)
       board_arr
@@ -205,7 +174,7 @@ module Pawn = struct
     in
     let valid_moves =
       List.filter
-        (is_valid_square_pawn (curr_x, curr_y) board_arr color last_move)
+        (is_valid_square_pawn (curr_x, curr_y) board_arr color)
         squares
     in
     valid_moves
