@@ -48,6 +48,7 @@ let load_imgs () : image list =
          Png.load "imgs/black_queen.png" [];
          Png.load "imgs/black_king.png" [];
          Png.load "imgs/green_edges.png" [];
+         Png.load "imgs/restart_button.png" [];
        ])
 
 (** [board_length] is the height and width of the game window in pixels. *)
@@ -265,7 +266,7 @@ let draw_sideboard () =
   set_color background_color;
   fill_rect board_length 0 (window_width - board_length) window_height;
   fill_rect 0 board_length board_length (window_height - board_length);
-  draw_image (List.nth !imgs 12) (window_width - 60) (window_height - 60);
+  draw_image (List.nth !imgs 13) (window_width - 60) (window_height - 60);
   set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
   moveto (window_width - 180) (window_height - 30);
   set_color white;
