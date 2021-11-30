@@ -9,6 +9,9 @@ let light = rgb 236 217 177
 (** [dark] is the color of dark squares on the board. *)
 let dark = rgb 174 137 94
 
+(** [background_color] is the background of the gui *)
+let background_color = rgb 93 93 94
+
 (** [imgs] is the currently loaded images of the game. *)
 let imgs = ref ([] : image list)
 
@@ -47,13 +50,18 @@ let load_imgs () : image list =
          Png.load "imgs/green_edges.png" [];
        ])
 
-(** [window_length] is the height and width of the game window in
-    pixels. *)
-let window_length = 600
+(** [board_length] is the height and width of the game window in pixels. *)
+let board_length = 600
+
+(** [window_height] is the entire height of the window *)
+let window_height = board_length + 50
+
+(** [window_with] is the entire width of the window *)
+let window_width = board_length + 200
 
 (** [step] is the height and width of each square on the chessboard,
     allowing for 8 squares in the x and y direction. *)
-let step = window_length / 8
+let step = board_length / 8
 
 (** [click_to_coord coord] is the chess coordinate from the click
     position [coord]. If the click is registered outside the legal chess
@@ -251,12 +259,18 @@ let draw_markers
     in
     draw_circle_func potential_moves
 
-let test = draw_circle
+(** [draw_sides ()] draws the appropriate extra features on the side of
+    the board. *)
+let draw_sides () =
+  set_color background_color;
+  fill_rect board_length 0 (window_width - board_length) window_height;
+  fill_rect 0 board_length board_length (window_height - board_length)
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs;
+  draw_sides ();
   let x1, y1 = wait_click_square () in
   let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
   draw_potential;
@@ -265,7 +279,7 @@ let draw_game (bd : Game.t) (move_list : move list) =
 
 let init_gui () =
   open_graph "";
-  resize_window window_length window_length;
+  resize_window window_width window_height;
   set_window_title "OCaml Chess";
   set_line_width 2;
   imgs := load_imgs ()
@@ -285,15 +299,15 @@ let rec wait_action () =
 
 let draw_win_screen (result : Game.color option) =
   set_color white;
-  fill_rect (window_length / 8) (window_length / 3)
-    (window_length * 3 / 4)
-    (window_length / 3);
+  fill_rect (board_length / 8) (board_length / 3)
+    (board_length * 3 / 4)
+    (board_length / 3);
   set_color black;
-  draw_rect (window_length / 8) (window_length / 3)
-    (window_length * 3 / 4)
-    (window_length / 3);
+  draw_rect (board_length / 8) (board_length / 3)
+    (board_length * 3 / 4)
+    (board_length / 3);
   set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
-  moveto (window_length / 6) (window_length / 2);
+  moveto (board_length / 6) (board_length / 2);
   if result = Some White then
     draw_string "You win! Press P to play again, Q to quit"
   else if result = Some Black then
