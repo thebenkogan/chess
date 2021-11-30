@@ -261,16 +261,22 @@ let draw_markers
 
 (** [draw_sides ()] draws the appropriate extra features on the side of
     the board. *)
-let draw_sides () =
+let draw_sideboard () =
   set_color background_color;
   fill_rect board_length 0 (window_width - board_length) window_height;
-  fill_rect 0 board_length board_length (window_height - board_length)
+  fill_rect 0 board_length board_length (window_height - board_length);
+  draw_image (List.nth !imgs 12) (window_width - 60) (window_height - 60);
+  set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
+  moveto (window_width - 180) (window_height - 30);
+  set_color white;
+  set_text_size 50;
+  draw_string "Restart Game:"
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
+  draw_sideboard ();
   draw_position bd !imgs;
-  draw_sides ();
   let x1, y1 = wait_click_square () in
   let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
   draw_potential;
