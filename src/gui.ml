@@ -260,6 +260,13 @@ let draw_markers
     in
     draw_circle_func potential_moves
 
+let draw_last_move (move : Game.move) =
+  set_color blue;
+  fill_circle 250 250 50;
+  draw_image (List.nth !imgs 13) (window_width - 60)
+    (window_height - 160);
+  ()
+
 (** [draw_sides ()] draws the appropriate extra features on the side of
     the board. *)
 let draw_sideboard () =

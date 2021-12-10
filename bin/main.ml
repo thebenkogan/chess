@@ -107,6 +107,7 @@ let rec play_game state black result =
             None
       | false -> exit 0)
   | None ->
+      draw_last_move state.game_state.last_move;
       let move = draw_game state.game_state.board state.moves in
       if not (List.mem move state.moves) then play_game state black None
       else
