@@ -95,8 +95,19 @@ let set_castle_properties bd =
     color = White;
     last_move = ((-1, -1), (-1, -1));
     king_pos = (4, 0);
+    king_in_check = false;
     kingside_castle = true;
     queenside_castle = true;
+  }
+
+let set_castle_state gs a_rook h_rook king_moved =
+  {
+    game_state = gs;
+    moves = [];
+    enemy_moves = [];
+    a_rook_moved = a_rook;
+    h_rook_moved = h_rook;
+    king_moved;
   }
 
 let castle_test
@@ -113,107 +124,51 @@ let castle_test
 let castle_tests =
   [
     castle_test "Can castle"
-      {
-        game_state = set_castle_properties castle1;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle1)
+         false false false)
       ((1, 1), (1, 2))
       (true, true);
     castle_test "king moved"
-      {
-        game_state = set_castle_properties castle1;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = true;
-      }
+      (set_castle_state
+         (set_castle_properties castle1)
+         false false true)
       ((1, 1), (1, 2))
       (false, false);
     castle_test "a rook moved"
-      {
-        game_state = set_castle_properties castle1;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = true;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle1)
+         true false false)
       ((1, 1), (1, 2))
       (true, false);
     castle_test "h rook moved"
-      {
-        game_state = set_castle_properties castle1;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = true;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle1)
+         false true false)
       ((1, 1), (1, 2))
       (false, true);
     castle_test "blocked by piece"
-      {
-        game_state = set_castle_properties castle2;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle2)
+         false false false)
       ((1, 1), (1, 2))
       (false, false);
     castle_test "square in check"
-      {
-        game_state = set_castle_properties castle3;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle3)
+         false false false)
       ((1, 1), (1, 2))
       (false, false);
     castle_test "King in check"
-      {
-        game_state = set_castle_properties castle4;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle4)
+         false false false)
       ((1, 1), (1, 2))
       (false, false);
     castle_test "Rook captured"
-      {
-        game_state = set_castle_properties castle5;
-        moves = [];
-        enemy_moves = [];
-        turn = true;
-        king_in_check = false;
-        a_rook_moved = false;
-        h_rook_moved = false;
-        king_moved = false;
-      }
+      (set_castle_state
+         (set_castle_properties castle5)
+         false false false)
       ((1, 1), (1, 2))
       (false, false);
   ]
