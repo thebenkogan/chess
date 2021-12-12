@@ -168,8 +168,8 @@ let castle_tests =
     castle_test "Rook captured"
       (set_castle_state
          (set_castle_properties castle5)
-         false false false)
-      ((1, 1), (1, 2))
+         true false false)
+      ((6, 2), (7, 1))
       (false, false);
   ]
 

@@ -357,6 +357,6 @@ let castle5 : Game.t =
     [ None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Queen);];
     [ Some (White, King); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, King);];
     [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Bishop);];
-    [None; Some (White, Pawn); None; None; None; None; Some (Black, Pawn); None;];
-    [ Some (Black, Knight); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
+    [None; Some (White, Pawn); Some (Black, Knight); None; None; None; Some (Black, Pawn); None;];
+    [ Some (White, Rook); Some (White, Pawn); None; None; None; None; Some (Black, Pawn); Some (Black, Rook);];
   ] (*rook captured*)

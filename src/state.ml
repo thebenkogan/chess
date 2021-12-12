@@ -35,57 +35,30 @@ let init_state (board : Game.t) (color : Game.color) : t =
     king_moved = false;
   }
 
-(**[kingside_castle_rights king_pos board h_rook_moved enemy_moves color]
-   is the kingside castling rights for the [color] side player. The
-   squares on [board] between [king_pos] and the h rook are checked to
-   determine whether they are being attacked by [enemy_moves].
-   [h_rook_moved] checks if the h rook has moved*)
-let kingside_castle_rights
-    (king_pos : int * int)
-    (board : Game.t)
-    (h_rook_moved : bool)
-    (enemy_moves : move list)
-    (color : Game.color) : bool =
-  let square1 = (fst king_pos + 1, snd king_pos) in
-  let square2 = (fst king_pos + 2, snd king_pos) in
-  let board_arr = board_to_array board in
-  let piece1 = board_arr.(fst square1).(snd square1) in
-  let piece2 = board_arr.(fst square2).(snd square2) in
-  let h_rook = board_arr.(fst king_pos + 3).(snd king_pos) in
-  if
-    piece1 != None || piece2 != None || h_rook_moved
-    || is_attacked enemy_moves square1
-    || is_attacked enemy_moves square2
-    || h_rook <> Some (color, Rook)
-  then false
-  else true
-
-(**[queenside_castle_rights king_pos board a_rook_moved enemy_moves] is
-   the queenside castling rights for the player. The squares on [board]
-   between [king_pos] and the a rook are checked to determine whether
-   they are being attacked by [enemy_moves]. [a_rook_moved] checks if
-   the a rook has moved*)
-let queenside_castle_rights
+let castle_rights
     (king_pos : int * int)
     (board : Game.t)
     (a_rook_moved : bool)
+    (h_rook_moved : bool)
     (enemy_moves : move list)
-    (color : Game.color) : bool =
-  let square1 = (fst king_pos - 1, snd king_pos) in
-  let square2 = (fst king_pos - 2, snd king_pos) in
-  let square3 = (fst king_pos - 3, snd king_pos) in
+    (color : Game.color)
+    (kingside : bool) : bool =
+  let dir = if kingside then 1 else -1 in
+  let square1 = (fst king_pos + dir, snd king_pos) in
+  let square2 = (fst king_pos + (2 * dir), snd king_pos) in
+  let square3 = (fst king_pos + (3 * dir), snd king_pos) in
   let board_arr = board_to_array board in
   let piece1 = board_arr.(fst square1).(snd square1) in
   let piece2 = board_arr.(fst square2).(snd square2) in
-  let piece3 = board_arr.(fst square3).(snd square3) in
-  let a_rook = board_arr.(fst king_pos - 4).(snd king_pos) in
-  if
-    piece1 != None || piece2 != None || piece3 != None || a_rook_moved
-    || is_attacked enemy_moves square1
-    || is_attacked enemy_moves square2
-    || a_rook <> Some (color, Rook)
-  then false
-  else true
+  let piece3 =
+    if kingside then None else board_arr.(fst square3).(snd square3)
+  in
+  let rook_moved =
+    (kingside && h_rook_moved) || ((not kingside) && a_rook_moved)
+  in
+  piece1 = None && piece2 = None && piece3 = None && (not rook_moved)
+  && (not (is_attacked enemy_moves square1))
+  && not (is_attacked enemy_moves square2)
 
 (** [castling_rights king_moved king_pos king_in_check h_rook_moved a_rook_moved
     board enemy_moves]
@@ -114,10 +87,10 @@ let castling_rights
     (color : Game.color) : bool * bool =
   if king_moved || king_in_check then (false, false)
   else
-    ( kingside_castle_rights king_pos board h_rook_moved enemy_moves
-        color,
-      queenside_castle_rights king_pos board a_rook_moved enemy_moves
-        color )
+    ( castle_rights king_pos board a_rook_moved h_rook_moved enemy_moves
+        color true,
+      castle_rights king_pos board a_rook_moved h_rook_moved enemy_moves
+        color false )
 
 (** [enemy_properties bd our_color] is the game properties for the
     opponent with the opposite color of [our_color] and board [bd]. The
@@ -196,7 +169,10 @@ let play_move
     king_moved = new_king_moved;
   }
 
-let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
+let receive_move
+    ?promote_piece:(pp = Queen)
+    (st : t)
+    (((x1, y1), (x2, y2)) as mv : move) : t =
   let new_board =
     update_board st.game_state.board mv ~promote_piece:pp
   in
@@ -204,6 +180,18 @@ let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
   let new_enemy_moves = legal_moves enemy_prop in
   let new_king_in_check =
     is_attacked new_enemy_moves st.game_state.king_pos
+  in
+  let old_board_arr = board_to_array st.game_state.board in
+  let rook_captured =
+    old_board_arr.(x2).(y2) = Some (st.game_state.color, Rook)
+  in
+  let new_a_rook_moved =
+    st.a_rook_moved
+    || (rook_captured && check_a_rook (x2, y2) st.game_state.color)
+  in
+  let new_h_rook_moved =
+    st.h_rook_moved
+    || (rook_captured && check_h_rook (x2, y2) st.game_state.color)
   in
   let can_castle =
     castling_rights st.king_moved st.game_state.king_pos
@@ -228,4 +216,6 @@ let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
     game_state = new_properties;
     moves = new_moves;
     enemy_moves = new_enemy_moves;
+    a_rook_moved = new_a_rook_moved;
+    h_rook_moved = new_h_rook_moved;
   }
