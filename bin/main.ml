@@ -74,45 +74,29 @@ let play_and_receive state black move =
     new inputs. If legal, the move is played, and this repeats with the
     new states for white and black.*)
 let rec play_game state black result =
-  match result with
-  | Some (Win White) -> (
-      print_endline "\nCheckmate! You win.";
-      draw_game_basic state.game_state.board;
-      match draw_win_screen (Some White) with
-      | true ->
-          play_game
-            (init_state starting_board White)
-            (init_state starting_board Black)
-            None
-      | false -> exit 0)
-  | Some (Win Black) -> (
-      print_endline "\nCheckmate! You Lose.";
-      draw_game_basic state.game_state.board;
-      match draw_win_screen (Some Black) with
-      | true ->
-          play_game
-            (init_state starting_board White)
-            (init_state starting_board Black)
-            None
-      | false -> exit 0)
-  | Some Draw -> (
-      print_endline "\nStalemate! Draw.";
-      draw_game_basic state.game_state.board;
-      match draw_win_screen None with
-      | true ->
-          play_game
-            (init_state starting_board White)
-            (init_state starting_board Black)
-            None
-      | false -> exit 0)
-  | None ->
-      let move = draw_game state.game_state.board state.moves in
-      if not (List.mem move state.moves) then play_game state black None
-      else
-        let update_state, update_black, result =
-          play_and_receive state black move
-        in
-        play_game update_state update_black result
+  draw_game_basic state.game_state.board;
+  if result <> None then
+    let res_color =
+      match result with
+      | Some (Win White) -> Some White
+      | Some (Win Black) -> Some Black
+      | _ -> None
+    in
+    match draw_win_screen res_color with
+    | true ->
+        play_game
+          (init_state starting_board White)
+          (init_state starting_board Black)
+          None
+    | false -> exit 0
+  else
+    let move = draw_game state.game_state.board state.moves in
+    if not (List.mem move state.moves) then play_game state black None
+    else
+      let update_state, update_black, result =
+        play_and_receive state black move
+      in
+      play_game update_state update_black result
 
 (** [main ()] prompts for the game to play, then starts it. The player
     is given the white pieces. *)
