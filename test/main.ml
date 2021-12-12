@@ -89,6 +89,135 @@ let update_board_test
     (expected_output : t) : test =
   name >:: fun _ -> assert_equal expected_output (update_board bd move)
 
+let set_castle_properties bd =
+  {
+    board = bd;
+    color = White;
+    last_move = ((-1, -1), (-1, -1));
+    king_pos = (4, 0);
+    kingside_castle = true;
+    queenside_castle = true;
+  }
+
+let castle_test
+    (name : string)
+    (state : State.t)
+    (mv : move)
+    (expected_output : bool * bool) : test =
+  let new_state = receive_move state mv in
+  name >:: fun _ ->
+  assert_equal expected_output
+    ( new_state.game_state.kingside_castle,
+      new_state.game_state.queenside_castle )
+
+let castle_tests =
+  [
+    castle_test "Can castle"
+      {
+        game_state = set_castle_properties castle1;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (true, true);
+    castle_test "king moved"
+      {
+        game_state = set_castle_properties castle1;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = true;
+      }
+      ((1, 1), (1, 2))
+      (false, false);
+    castle_test "a rook moved"
+      {
+        game_state = set_castle_properties castle1;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = true;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (true, false);
+    castle_test "h rook moved"
+      {
+        game_state = set_castle_properties castle1;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = true;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (false, true);
+    castle_test "blocked by piece"
+      {
+        game_state = set_castle_properties castle2;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (false, false);
+    castle_test "square in check"
+      {
+        game_state = set_castle_properties castle3;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (false, false);
+    castle_test "King in check"
+      {
+        game_state = set_castle_properties castle4;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (false, false);
+    castle_test "Rook captured"
+      {
+        game_state = set_castle_properties castle5;
+        moves = [];
+        enemy_moves = [];
+        turn = true;
+        king_in_check = false;
+        a_rook_moved = false;
+        h_rook_moved = false;
+        king_moved = false;
+      }
+      ((1, 1), (1, 2))
+      (false, false);
+  ]
+
 let is_attacked_tests =
   [
     is_attacked_test "Not attacked" [ ((7, 6), (3, 4)) ] (2, 3) false;
@@ -298,6 +427,7 @@ let tests =
            queen_tests;
            move_checker_tests;
            state_tests;
+           castle_tests;
          ]
 
 let _ = run_test_tt_main tests
