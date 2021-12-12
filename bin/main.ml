@@ -63,8 +63,6 @@ let play_and_receive state black move =
     else if is_stalemate update_state then
       (next_state, next_black, Some Draw)
     else (update_state, update_black, None)
-(** [is_stalemate st] is true if [st] is currently in stalemate. A state
-    is in stalemate if it has no legal moves. *)
 
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
@@ -108,9 +106,7 @@ let main () =
   print_endline
     "\n\
      You can play a move by clicking on a piece and its target square.";
-
   init_gui ();
-  Random.self_init ();
   play_game
     (init_state starting_board White)
     (init_state starting_board Black)
