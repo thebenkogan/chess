@@ -82,6 +82,9 @@ let state_test
   name >:: fun _ ->
   assert_equal expected_output (init_state board color)
 
+(** [update_board_test name bd move expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output] with
+    [update_board bd move]. *)
 let update_board_test
     (name : string)
     (bd : t)
@@ -110,6 +113,9 @@ let set_castle_state gs a_rook h_rook king_moved =
     king_moved;
   }
 
+(** [castle_test name state mv expected_output] constructs an OUnit test
+    named [name] that asserts the quality of [expected_output] with the
+    kingside and queenside castling rights of [receive_move state mv]. *)
 let castle_test
     (name : string)
     (state : State.t)
