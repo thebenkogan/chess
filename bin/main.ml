@@ -3,7 +3,6 @@ open State
 open Game
 open Boards
 open Helper
-open Printer
 open Gui
 open Engine
 

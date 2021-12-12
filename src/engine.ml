@@ -1,6 +1,5 @@
 open State
 open Game
-open Printer
 
 let depth = 3
 

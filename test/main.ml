@@ -4,7 +4,6 @@ open State
 open Game
 open Helper
 open Boards
-open Printer
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists. That means checking two things.
@@ -17,6 +16,30 @@ let cmp_set_like_lists lst1 lst2 =
   List.length lst1 = List.length uniq1
   && List.length lst2 = List.length uniq2
   && uniq1 = uniq2
+
+(** [pp_move mv] pretty-prints the move [mv] as it is read as a tuple. *)
+let pp_move mv =
+  let x1 = string_of_int (fst (fst mv)) in
+  let y1 = string_of_int (snd (fst mv)) in
+  let x2 = string_of_int (fst (snd mv)) in
+  let y2 = string_of_int (snd (snd mv)) in
+  "((" ^ x1 ^ ", " ^ y1 ^ "), (" ^ x2 ^ ", " ^ y2 ^ "))"
+
+(** [pp_move_list lst] pretty-prints list [lst], using [pp_move] to
+    pretty-print each move. TAKEN FROM A2.*)
+let pp_move_list lst =
+  let pp_elt = pp_move in
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [ h ] -> acc ^ pp_elt h
+      | h1 :: (h2 :: t as t') ->
+          if n = 100 then acc ^ "..." (* stop printing long list *)
+          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
+    in
+    loop 0 "" lst
+  in
+  "[" ^ pp_elts lst ^ "]"
 
 (** [set_properties bd c king_pos] is the game properties with board
     [bd] and color [c] used to test the king-independent movement of a
