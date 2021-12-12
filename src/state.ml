@@ -35,7 +35,13 @@ let init_state (board : Game.t) (color : Game.color) : t =
     king_moved = false;
   }
 
-let castle_rights
+(** [castling_rights king_pos board a_rook_moved h_rook_moved enemy_moves 
+    color kingside]
+    is true if the side with [color] pieces on [board] can castle in the
+    specified direction. [kingside] is true if direction is kingside,
+    false is queenside. [a_rook_moved], [h_rook_moved], and
+    [enemy_moves] are used to determine legality. *)
+let castle_rights_dir
     (king_pos : int * int)
     (board : Game.t)
     (a_rook_moved : bool)
@@ -87,10 +93,10 @@ let castling_rights
     (color : Game.color) : bool * bool =
   if king_moved || king_in_check then (false, false)
   else
-    ( castle_rights king_pos board a_rook_moved h_rook_moved enemy_moves
-        color true,
-      castle_rights king_pos board a_rook_moved h_rook_moved enemy_moves
-        color false )
+    ( castle_rights_dir king_pos board a_rook_moved h_rook_moved
+        enemy_moves color true,
+      castle_rights_dir king_pos board a_rook_moved h_rook_moved
+        enemy_moves color false )
 
 (** [enemy_properties bd our_color] is the game properties for the
     opponent with the opposite color of [our_color] and board [bd]. The
