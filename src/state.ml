@@ -39,25 +39,28 @@ let init_state (board : Game.t) (color : Game.color) : t =
     king_moved = false;
   }
 
-(**[kingside_castle_rights king_pos board h_rook_moved enemy_moves] is
-   the kingside castling rights for the player. The squares on [board]
-   between [king_pos] and the h rook are checked to determine whether
-   they are being attacked by [enemy_moves]. [h_rook_moved] checks if
-   the h rook has moved*)
+(**[kingside_castle_rights king_pos board h_rook_moved enemy_moves color]
+   is the kingside castling rights for the [color] side player. The
+   squares on [board] between [king_pos] and the h rook are checked to
+   determine whether they are being attacked by [enemy_moves].
+   [h_rook_moved] checks if the h rook has moved*)
 let kingside_castle_rights
     (king_pos : int * int)
     (board : Game.t)
     (h_rook_moved : bool)
-    (enemy_moves : move list) : bool =
+    (enemy_moves : move list)
+    (color : Game.color) : bool =
   let square1 = (fst king_pos + 1, snd king_pos) in
   let square2 = (fst king_pos + 2, snd king_pos) in
   let board_arr = board_to_array board in
   let piece1 = board_arr.(fst square1).(snd square1) in
   let piece2 = board_arr.(fst square2).(snd square2) in
+  let h_rook = board_arr.(fst king_pos + 3).(snd king_pos) in
   if
     piece1 != None || piece2 != None || h_rook_moved
     || is_attacked enemy_moves square1
     || is_attacked enemy_moves square2
+    || h_rook <> Some (color, Rook)
   then false
   else true
 
@@ -70,7 +73,8 @@ let queenside_castle_rights
     (king_pos : int * int)
     (board : Game.t)
     (a_rook_moved : bool)
-    (enemy_moves : move list) : bool =
+    (enemy_moves : move list)
+    (color : Game.color) : bool =
   let square1 = (fst king_pos - 1, snd king_pos) in
   let square2 = (fst king_pos - 2, snd king_pos) in
   let square3 = (fst king_pos - 3, snd king_pos) in
@@ -78,10 +82,12 @@ let queenside_castle_rights
   let piece1 = board_arr.(fst square1).(snd square1) in
   let piece2 = board_arr.(fst square2).(snd square2) in
   let piece3 = board_arr.(fst square3).(snd square3) in
+  let a_rook = board_arr.(fst king_pos - 4).(snd king_pos) in
   if
     piece1 != None || piece2 != None || piece3 != None || a_rook_moved
     || is_attacked enemy_moves square1
     || is_attacked enemy_moves square2
+    || a_rook <> Some (color, Rook)
   then false
   else true
 
@@ -92,7 +98,7 @@ let queenside_castle_rights
     true, and queenside castling is legal if the second element of the
     output is true.
 
-    A player can castle in a certain direciton if:
+    A player can castle in a certain direction if:
 
     - The king has not moved, determined by [king_moved], and the
       corresponding rook has not moved, determined by [a_rook_moved] and
@@ -108,11 +114,14 @@ let castling_rights
     (h_rook_moved : bool)
     (a_rook_moved : bool)
     (board : Game.t)
-    (enemy_moves : move list) : bool * bool =
+    (enemy_moves : move list)
+    (color : Game.color) : bool * bool =
   if king_moved || king_in_check then (false, false)
   else
-    ( kingside_castle_rights king_pos board h_rook_moved enemy_moves,
-      queenside_castle_rights king_pos board a_rook_moved enemy_moves )
+    ( kingside_castle_rights king_pos board h_rook_moved enemy_moves
+        color,
+      queenside_castle_rights king_pos board a_rook_moved enemy_moves
+        color )
 
 (** [enemy_properties bd our_color] is the game properties for the
     opponent with the opposite color of [our_color] and board [bd]. The
@@ -203,7 +212,7 @@ let receive_move ?promote_piece:(pp = Queen) (st : t) (mv : move) : t =
   let can_castle =
     castling_rights st.king_moved st.game_state.king_pos
       new_king_in_check st.h_rook_moved st.a_rook_moved new_board
-      new_enemy_moves
+      new_enemy_moves st.game_state.color
   in
   let new_properties =
     {
