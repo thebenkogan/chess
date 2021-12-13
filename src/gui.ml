@@ -142,6 +142,8 @@ let get_piece_img
   in
   List.nth imgs index
 
+let conv (x, y) = (7 - x, 7 - y)
+
 (** [draw_position_rows bd imgs row] draws the pieces of each row of
     [bd], starting at row number [row] and moving up the board.
     Requires: [row] is in 0..7, [bd] is a valid chess board, and [imgs]
@@ -150,13 +152,17 @@ let get_piece_img
 let rec draw_position_rows
     (bd : piece option array array)
     (imgs : image list)
-    (row : int) =
+    (row : int)
+    (side : color) =
   if row = 8 then () (* Stops drawing on board *)
   else
     let rec draw_position_row index =
       (match bd.(index).(row) with
       | None -> ()
       | Some (color, soldier) ->
+          let index, row =
+            if side = White then (index, row) else conv (index, row)
+          in
           let img = get_piece_img imgs color soldier in
           draw_image img
             ((index * step) + ((step - 60) / 2))
@@ -165,16 +171,16 @@ let rec draw_position_rows
       ()
     in
     draw_position_row 0;
-    draw_position_rows bd imgs (row + 1);
+    draw_position_rows bd imgs (row + 1) side;
     ()
 
 (** [draw_position_rows bd imgs row] draws the pieces of each row of
     [bd]. Requires: [bd] is a valid chess board and [imgs] lists all
     white piece images, then black piece images, in the order: pawn,
     knight, bishop, rook, queen, king.*)
-let draw_position (bd : Game.t) (imgs : image list) =
+let draw_position (bd : Game.t) (imgs : image list) (side : color) =
   let bd = board_to_array bd in
-  draw_position_rows bd imgs 0
+  draw_position_rows bd imgs 0 side
 
 (** [draw_promotion_menu color] draws a pawn promotion menu for the
     player with the [color] pieces. *)
@@ -279,10 +285,10 @@ let draw_start_menu () =
   moveto ((3 * step) + 10) ((2 * step) + 10);
   draw_string "Black"
 
-let draw_game (bd : Game.t) (move_list : move list) =
+let draw_game (bd : Game.t) (side : color) (move_list : move list) =
   clear_graph ();
   draw_board ();
-  draw_position bd !imgs;
+  draw_position bd !imgs side;
   let x1, y1 = wait_click_square () in
   let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
   draw_potential;
@@ -301,10 +307,10 @@ let init_gui () =
   set_line_width 2;
   imgs := load_imgs ()
 
-let draw_game_basic (bd : Game.t) =
+let draw_game_basic (bd : Game.t) (side : color) =
   clear_graph ();
   draw_board ();
-  draw_position bd !imgs
+  draw_position bd !imgs side
 
 (** [wait_action ()] waits a user input of a key and will continue to be
     called until one of the presented options is pressed. *)

@@ -1,4 +1,4 @@
-val draw_game : Game.t -> Game.move list -> Game.move
+val draw_game : Game.t -> Game.color -> Game.move list -> Game.move
 (** [draw_game bd move_list] redraws the chess board and draws the
     position in [bd]. It then waits for the user to click twice on the
     Graphics window and returns the chess move associated with those
@@ -24,7 +24,7 @@ val draw_win_screen : Game.color option -> bool
     play again, false if they choose to quit. None corresponds to
     stalemate. *)
 
-val draw_game_basic : Game.t -> unit
+val draw_game_basic : Game.t -> Game.color -> unit
 (** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
     valid chess board. *)
 

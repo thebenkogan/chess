@@ -63,7 +63,7 @@ let play_and_receive pl opp move =
   in
   let next_pl = play_move pl move ~promote_piece in
   let next_opp = receive_move opp move ~promote_piece in
-  draw_game_basic next_pl.game_state.board;
+  draw_game_basic next_pl.game_state.board pl.game_state.color;
   if is_checkmate next_opp then (next_pl, next_opp, Some Win)
   else if is_stalemate next_opp then (next_pl, next_opp, Some Draw)
   else
@@ -82,7 +82,7 @@ let play_and_receive pl opp move =
     new inputs. If legal, the move is played, and this repeats with the
     new states for white and black.*)
 let rec play_game pl opp result =
-  draw_game_basic pl.game_state.board;
+  draw_game_basic pl.game_state.board pl.game_state.color;
   if result <> None then
     let res_color =
       match result with
@@ -93,12 +93,14 @@ let rec play_game pl opp result =
     match draw_win_screen res_color with
     | true ->
         let side = draw_start () in
-        draw_game_basic starting_board;
+        draw_game_basic starting_board pl.game_state.color;
         let pl, opp = get_init_states side in
         play_game pl opp None
     | false -> exit 0
   else
-    let move = draw_game pl.game_state.board pl.moves in
+    let move =
+      draw_game pl.game_state.board pl.game_state.color pl.moves
+    in
     if not (List.mem move pl.moves) then play_game pl opp None
     else
       let update_state, update_black, result =
@@ -111,7 +113,7 @@ let rec play_game pl opp result =
 let main () =
   init_gui ();
   let side = draw_start () in
-  draw_game_basic starting_board;
+  draw_game_basic starting_board side;
   let pl, opp = get_init_states side in
   print_endline (string_of_int (List.length pl.moves));
   play_game pl opp None
