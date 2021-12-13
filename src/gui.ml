@@ -55,11 +55,16 @@ let window_length = 600
     allowing for 8 squares in the x and y direction. *)
 let step = window_length / 8
 
+(** [conv coord] converts [coord] to the opposite color perspective. In
+    other words, if one were to flip the coordinate system to start at
+    the opposite corner, this is the converted coordinate. *)
+let conv (x, y) = (7 - x, 7 - y)
+
 (** [click_to_coord coord] is the chess coordinate from the click
     position [coord]. If the click is registered outside the legal chess
     coordinates, then this is the closest chess coordinate to that
     position.*)
-let click_to_coord ((x, y) : int * int) =
+let click_to_coord ((x, y) : int * int) (side : color) =
   let check_bounds = function
     | n when n > 7 -> 7
     | n when n < 0 -> 0
@@ -67,7 +72,7 @@ let click_to_coord ((x, y) : int * int) =
   in
   let newx = check_bounds (x / step) in
   let newy = check_bounds (y / step) in
-  (newx, newy)
+  if side = White then (newx, newy) else conv (newx, newy)
 
 (** [get_next_click_pos ()] waits for the user to click on the Graphics
     window and then returns the clicked x, y position relative to the
@@ -79,9 +84,9 @@ let get_next_click_pos () =
 (** [wait_click_square ()] waits for the user to click on the Graphics
     window and then returns the chess coordinate associated with the
     clicked position.*)
-let wait_click_square () =
+let wait_click_square (side : color) =
   let pos = get_next_click_pos () in
-  click_to_coord pos
+  click_to_coord pos side
 
 (** [wait_click_promotion ()] waits for the user to click on the
     Graphics window and then returns the selected piece on the pawn
@@ -89,7 +94,7 @@ let wait_click_square () =
     prompt the player again.*)
 let rec wait_click_promotion () =
   let pos = get_next_click_pos () in
-  match click_to_coord pos with
+  match click_to_coord pos White with
   | 2, 4 -> Knight
   | 3, 4 -> Bishop
   | 4, 4 -> Rook
@@ -100,7 +105,7 @@ let rec wait_click_promotion () =
     window and then returns the selected color of pieces. Assumes the
     start menu is currently drawn on the window. *)
 let rec wait_click_start () =
-  match wait_click_square () with
+  match wait_click_square White with
   | x, y when x >= 2 && x <= 5 && y = 4 -> White
   | x, y when x >= 2 && x <= 5 && y = 2 -> Black
   | _ -> wait_click_start ()
@@ -141,8 +146,6 @@ let get_piece_img
     | King -> if color = White then 5 else 11
   in
   List.nth imgs index
-
-let conv (x, y) = (7 - x, 7 - y)
 
 (** [draw_position_rows bd imgs row] draws the pieces of each row of
     [bd], starting at row number [row] and moving up the board.
@@ -236,6 +239,7 @@ let rec get_potential_squares (move_list : move list) (currX, currY) :
     player. *)
 let draw_markers
     (bd : Game.t)
+    (side : Game.color)
     (imgs : image list)
     (currX, currY)
     (move_list : move list) =
@@ -251,16 +255,17 @@ let draw_markers
     let rec draw_circle_func (potential_moves : (int * int) list) =
       match potential_moves with
       | (a, b) :: t ->
+          let a', b' = if side = White then (a, b) else conv (a, b) in
           if board.(a).(b) = None then (
             set_color green_color;
             fill_circle
-              ((a * step) + (step / 2))
-              ((b * step) + (step / 2))
+              ((a' * step) + (step / 2))
+              ((b' * step) + (step / 2))
               12)
           else
             draw_image get_green_edges
-              ((a * step) + ((step - 60) / 2))
-              ((b * step) + ((step - 60) / 2));
+              ((a' * step) + ((step - 60) / 2))
+              ((b' * step) + ((step - 60) / 2));
           draw_circle_func t
       | [] -> ()
     in
@@ -289,10 +294,10 @@ let draw_game (bd : Game.t) (side : color) (move_list : move list) =
   clear_graph ();
   draw_board ();
   draw_position bd !imgs side;
-  let x1, y1 = wait_click_square () in
-  let draw_potential = draw_markers bd !imgs (x1, y1) move_list in
+  let x1, y1 = wait_click_square side in
+  let draw_potential = draw_markers bd side !imgs (x1, y1) move_list in
   draw_potential;
-  let x2, y2 = wait_click_square () in
+  let x2, y2 = wait_click_square side in
   ((x1, y1), (x2, y2))
 
 let draw_start () =
