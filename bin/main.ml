@@ -87,8 +87,8 @@ let rec play_game pl opp result =
   if result <> None then
     let res_color =
       match result with
-      | Some Win -> Some pl.game_state.color
-      | Some Loss -> Some opp.game_state.color
+      | Some Win -> Some true
+      | Some Loss -> Some false
       | _ -> None
     in
     match draw_win_screen res_color with

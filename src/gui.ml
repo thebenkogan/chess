@@ -324,7 +324,7 @@ let rec wait_action () =
   | 'q' | 'Q' -> false
   | _ -> wait_action ()
 
-let draw_win_screen (result : Game.color option) =
+let draw_win_screen (result : bool option) =
   set_color white;
   fill_rect (window_length / 8) (window_length / 3)
     (window_length * 3 / 4)
@@ -335,9 +335,9 @@ let draw_win_screen (result : Game.color option) =
     (window_length / 3);
   set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
   moveto (window_length / 6) (window_length / 2);
-  if result = Some White then
+  if result = Some true then
     draw_string "You win! Press P to play again, Q to quit"
-  else if result = Some Black then
+  else if result = Some false then
     draw_string "You Lose! Press P to play again, Q to quit"
   else draw_string "Stalemate! Press P to play again, Q to quit";
   wait_action ()

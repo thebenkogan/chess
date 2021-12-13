@@ -17,7 +17,7 @@ val init_gui : unit -> unit
     sets the line width to 2 pixels, and loads the chess piece images
     into [imgs]. *)
 
-val draw_win_screen : Game.color option -> bool
+val draw_win_screen : bool option -> bool
 (** [draw_win_screen result] takes a given result at the end of the game
     and displays the proper message to the user, and gives options for
     the user to either quit or play again. True if the player chooses to
