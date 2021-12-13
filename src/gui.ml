@@ -251,8 +251,6 @@ let draw_markers
     in
     draw_circle_func potential_moves
 
-let test = draw_circle
-
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
