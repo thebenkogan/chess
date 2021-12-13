@@ -107,15 +107,8 @@ let rec play_game pl opp result =
       play_game update_state update_black result
 
 (** [main ()] prompts for the game to play, then starts it. The player
-    is given the white pieces. *)
+    is given the choice of which pieces to play with. *)
 let main () =
-  ANSITerminal.print_string [ ANSITerminal.red ]
-    "\n\n\
-     Welcome to OCaml Chess!\n\
-     You will play with the white pieces against our random-move engine.\n";
-  print_endline
-    "\n\
-     You can play a move by clicking on a piece and its target square.";
   init_gui ();
   let side = draw_start () in
   draw_game_basic starting_board;
