@@ -96,6 +96,15 @@ let rec wait_click_promotion () =
   | 5, 4 -> Queen
   | _ -> wait_click_promotion ()
 
+(** [wait_click_start ()] waits for the user to click on the Graphics
+    window and then returns the selected color of pieces. Assumes the
+    start menu is currently drawn on the window. *)
+let rec wait_click_start () =
+  match wait_click_square () with
+  | x, y when x >= 2 && x <= 5 && y = 4 -> White
+  | x, y when x >= 2 && x <= 5 && y = 2 -> Black
+  | _ -> wait_click_start ()
+
 (** [draw_rows row] draws the outlines of each square on the chess
     board, starting at row number [row] and moving up the board.
     Requires: [row] is in 0..7. *)
@@ -251,6 +260,25 @@ let draw_markers
     in
     draw_circle_func potential_moves
 
+(** [draw_start_menu ()] draws the start menu with buttons for choosing
+    sides. *)
+let draw_start_menu () =
+  set_color (rgb 93 93 94);
+  fill_rect 0 0 (size_x ()) (size_y ());
+  set_color white;
+  fill_rect (2 * step) (2 * step) (4 * step) (1 * step);
+  fill_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  set_color black;
+  draw_rect (2 * step) (2 * step) (4 * step) (1 * step);
+  draw_rect (2 * step) (4 * step) (4 * step) (1 * step);
+  set_font "-*-fixed-medium-r-semicondensed--55-*-*-*-*-*-iso8859-1";
+  moveto ((1 * step) + 10) ((6 * step) + 10);
+  draw_string "Choose Your Color";
+  moveto ((3 * step) + 10) ((4 * step) + 10);
+  draw_string "White";
+  moveto ((3 * step) + 10) ((2 * step) + 10);
+  draw_string "Black"
+
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
   draw_board ();
@@ -260,6 +288,11 @@ let draw_game (bd : Game.t) (move_list : move list) =
   draw_potential;
   let x2, y2 = wait_click_square () in
   ((x1, y1), (x2, y2))
+
+let draw_start () =
+  clear_graph ();
+  draw_start_menu ();
+  wait_click_start ()
 
 let init_gui () =
   open_graph "";

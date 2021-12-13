@@ -27,3 +27,7 @@ val draw_win_screen : Game.color option -> bool
 val draw_game_basic : Game.t -> unit
 (** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
     valid chess board. *)
+
+val draw_start : unit -> Game.color
+(** [draw_game_basic ()] draws the start menu and returns the selected
+    color of pieces when the user clicks on a button. *)
