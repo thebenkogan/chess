@@ -1,10 +1,10 @@
 val draw_game : Game.t -> Game.color -> Game.move list -> Game.move
-(** [draw_game bd move_list] redraws the chess board and draws the
-    position in [bd]. It then waits for the user to click twice on the
-    Graphics window and returns the chess move associated with those
-    clicked positions, starting at the first click and moving to the
-    second click. Highlights the legal moves of the first clicked piece.
-    Requires: [bd] is a valid chess board. *)
+(** [draw_game bd side move_list] redraws the chess board and draws the
+    position in [bd] from the perspective of [side]. It then waits for
+    the user to click twice on the Graphics window and returns the chess
+    move associated with those clicked positions, starting at the first
+    click and moving to the second click. Highlights the legal moves of
+    the first clicked piece. Requires: [bd] is a valid chess board. *)
 
 val query_promotion : Game.color -> Game.soldier
 (** [query_promotion color] is the soldier type the player of [color]
@@ -25,8 +25,8 @@ val draw_win_screen : Game.color option -> bool
     stalemate. *)
 
 val draw_game_basic : Game.t -> Game.color -> unit
-(** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
-    valid chess board. *)
+(** [draw_game_basic bd side] draws the position in [bd] from the
+    perspective of [side]. Requires: [bd] is a valid chess board. *)
 
 val draw_start : unit -> Game.color
 (** [draw_game_basic ()] draws the start menu and returns the selected

@@ -19,7 +19,8 @@ let is_checkmate st =
 (** [is_stalemate st] is true if [st] is currently in stalemate. A state
     is in stalemate if it has no legal moves and its king is not in
     check. *)
-let is_stalemate st = List.length st.moves = 0
+let is_stalemate st =
+  List.length st.moves = 0 && not st.game_state.king_in_check
 
 let get_init_states = function
   | White ->
@@ -115,7 +116,6 @@ let main () =
   let side = draw_start () in
   draw_game_basic starting_board side;
   let pl, opp = get_init_states side in
-  print_endline (string_of_int (List.length pl.moves));
   play_game pl opp None
 
 (* Execute the game engine. *)

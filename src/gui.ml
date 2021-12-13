@@ -60,10 +60,10 @@ let step = window_length / 8
     the opposite corner, this is the converted coordinate. *)
 let conv (x, y) = (7 - x, 7 - y)
 
-(** [click_to_coord coord] is the chess coordinate from the click
-    position [coord]. If the click is registered outside the legal chess
-    coordinates, then this is the closest chess coordinate to that
-    position.*)
+(** [click_to_coord coord side] is the chess coordinate from the click
+    position [coord] from the perspective of [side]. If the click is
+    registered outside the legal chess coordinates, then this is the
+    closest chess coordinate to that position.*)
 let click_to_coord ((x, y) : int * int) (side : color) =
   let check_bounds = function
     | n when n > 7 -> 7
@@ -81,9 +81,9 @@ let get_next_click_pos () =
   let click = Graphics.wait_next_event [ Button_down ] in
   (click.mouse_x, click.mouse_y)
 
-(** [wait_click_square ()] waits for the user to click on the Graphics
+(** [wait_click_square side] waits for the user to click on the Graphics
     window and then returns the chess coordinate associated with the
-    clicked position.*)
+    clicked position from the perspective of [side].*)
 let wait_click_square (side : color) =
   let pos = get_next_click_pos () in
   click_to_coord pos side
@@ -93,8 +93,7 @@ let wait_click_square (side : color) =
     promotion screen. If the player does not click on a piece, this will
     prompt the player again.*)
 let rec wait_click_promotion () =
-  let pos = get_next_click_pos () in
-  match click_to_coord pos White with
+  match wait_click_square White with
   | 2, 4 -> Knight
   | 3, 4 -> Bishop
   | 4, 4 -> Rook
@@ -147,11 +146,11 @@ let get_piece_img
   in
   List.nth imgs index
 
-(** [draw_position_rows bd imgs row] draws the pieces of each row of
-    [bd], starting at row number [row] and moving up the board.
-    Requires: [row] is in 0..7, [bd] is a valid chess board, and [imgs]
-    lists all white piece images, then black piece images, in the order:
-    pawn, knight, bishop, rook, queen, king.*)
+(** [draw_position_rows bd imgs row side] draws the pieces of each row
+    of [bd] from the perspective of [side], starting at row number [row]
+    and moving up the board. Requires: [row] is in 0..7, [bd] is a valid
+    chess board, and [imgs] lists all white piece images, then black
+    piece images, in the order: pawn, knight, bishop, rook, queen, king.*)
 let rec draw_position_rows
     (bd : piece option array array)
     (imgs : image list)
@@ -177,10 +176,10 @@ let rec draw_position_rows
     draw_position_rows bd imgs (row + 1) side;
     ()
 
-(** [draw_position_rows bd imgs row] draws the pieces of each row of
-    [bd]. Requires: [bd] is a valid chess board and [imgs] lists all
-    white piece images, then black piece images, in the order: pawn,
-    knight, bishop, rook, queen, king.*)
+(** [draw_position bd imgs side] draws the pieces of [bd] from the
+    perspective of [side]. Requires: [bd] is a valid chess board and
+    [imgs] lists all white piece images, then black piece images, in the
+    order: pawn, knight, bishop, rook, queen, king.*)
 let draw_position (bd : Game.t) (imgs : image list) (side : color) =
   let bd = board_to_array bd in
   draw_position_rows bd imgs 0 side
@@ -231,12 +230,12 @@ let rec get_potential_squares (move_list : move list) (currX, currY) :
       (* No match currX or currY *)
   | _ -> []
 
-(** [draw_markers bd imgs currX currY move_list] draws green edges based
-    on the potential moves of the clicked square. Requires: [bd]
-    represents a valid board, [imgs] is the list of png images to draw,
-    [currX] is current x-coordinate integer, [currY] is current
-    y-coordinate integer, [move_list] is list of legally valid moves for
-    player. *)
+(** [draw_markers bd side imgs currX currY move_list] draws green edges
+    based on the potential moves of the clicked square from the
+    perspective of [side]. Requires: [bd] represents a valid board,
+    [imgs] is the list of png images to draw, [currX] is current
+    x-coordinate integer, [currY] is current y-coordinate integer,
+    [move_list] is list of legally valid moves for player. *)
 let draw_markers
     (bd : Game.t)
     (side : Game.color)
