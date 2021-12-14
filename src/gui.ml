@@ -49,6 +49,8 @@ let load_imgs () : image list =
          Png.load "imgs/black_king.png" [];
          Png.load "imgs/green_edges.png" [];
          Png.load "imgs/restart_button.png" [];
+         Png.load "imgs/x_button.png" [];
+         Png.load "imgs/felt_image.png" [];
        ])
 
 (** [board_length] is the height and width of the game window in pixels. *)
@@ -270,18 +272,23 @@ let draw_last_move (move : Game.move) =
 (** [draw_sides ()] draws the appropriate extra features on the side of
     the board. *)
 let draw_sideboard () =
-  set_color background_color;
-  fill_rect board_length 0 (window_width - board_length) window_height;
-  fill_rect 0 board_length board_length (window_height - board_length);
-  draw_image (List.nth !imgs 13) (window_width - 60) (window_height - 60);
+  (* set_color background_color; fill_rect board_length 0 (window_width
+     - board_length) window_height; fill_rect 0 board_length
+     board_length (window_height - board_length); *)
+  draw_image (List.nth !imgs 14) (window_width - 60) (window_height - 60);
+  draw_image (List.nth !imgs 13) (window_width - 120)
+    (window_height - 60);
   set_font "-*-fixed-medium-r-semicondensed--19-*-*-*-*-*-iso8859-1";
-  moveto (window_width - 180) (window_height - 30);
+  moveto ((window_width / 2) - 50) (window_height - 30);
   set_color white;
   set_text_size 50;
-  draw_string "Restart Game:"
+  draw_string "OCaml Chess"
+
+let draw_felt () = draw_image (List.nth !imgs 15) 0 0
 
 let draw_game (bd : Game.t) (move_list : move list) =
   clear_graph ();
+  draw_felt ();
   draw_board ();
   draw_sideboard ();
   draw_position bd !imgs;
