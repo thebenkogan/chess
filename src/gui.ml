@@ -262,19 +262,9 @@ let draw_markers
     in
     draw_circle_func potential_moves
 
-let draw_last_move (move : Game.move) =
-  set_color blue;
-  fill_circle 250 250 50;
-  draw_image (List.nth !imgs 13) (window_width - 60)
-    (window_height - 160);
-  ()
-
 (** [draw_sides ()] draws the appropriate extra features on the side of
     the board. *)
 let draw_sideboard () =
-  (* set_color background_color; fill_rect board_length 0 (window_width
-     - board_length) window_height; fill_rect 0 board_length
-     board_length (window_height - board_length); *)
   draw_image (List.nth !imgs 14) (window_width - 60) (window_height - 60);
   draw_image (List.nth !imgs 13) (window_width - 120)
     (window_height - 60);
@@ -286,10 +276,24 @@ let draw_sideboard () =
 
 let draw_felt () = draw_image (List.nth !imgs 15) 0 0
 
-let draw_game (bd : Game.t) (move_list : move list) =
+(* let draw_last_move (move : Game.move) = set_color blue; fill_circle
+   250 250 50; draw_image (List.nth !imgs 13) (window_width - 60)
+   (window_height - 160); () *)
+
+let draw_last_move (((oldX, oldY), (newX, newY)) : Game.move) =
+  let red_old = rgb 173 33 33 in
+  let red_new = rgb 224 25 25 in
+  set_color red_old;
+  fill_rect (oldX * step) (oldY * step) step step;
+  set_color red_new;
+  fill_rect (newX * step) (newY * step) step step;
+  ()
+
+let draw_game (bd : Game.t) (move_list : move list) (last_move : move) =
   clear_graph ();
   draw_felt ();
   draw_board ();
+  draw_last_move last_move;
   draw_sideboard ();
   draw_position bd !imgs;
   let x1, y1 = wait_click_square () in

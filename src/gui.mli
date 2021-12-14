@@ -1,4 +1,4 @@
-val draw_game : Game.t -> Game.move list -> Game.move
+val draw_game : Game.t -> Game.move list -> Game.move -> Game.move
 (** [draw_game bd move_list] redraws the chess board and draws the
     position in [bd]. It then waits for the user to click twice on the
     Graphics window and returns the chess move associated with those
@@ -28,5 +28,5 @@ val draw_game_basic : Game.t -> unit
 (** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
     valid chess board. *)
 
-val draw_last_move : Game.move -> unit
+(* val draw_last_move : Game.move -> unit *)
 (** Draws a red square below the soldiers indicating the last move made. *)
