@@ -27,6 +27,3 @@ val draw_win_screen : Game.color option -> bool
 val draw_game_basic : Game.t -> unit
 (** [draw_game_basic bd] draws the position in [bd]. Requires: [bd] is a
     valid chess board. *)
-
-(* val draw_last_move : Game.move -> unit *)
-(** Draws a red square below the soldiers indicating the last move made. *)

@@ -274,12 +274,11 @@ let draw_sideboard () =
   set_text_size 50;
   draw_string "OCaml Chess"
 
+(** [draw_felt ()] draws the felt image background. *)
 let draw_felt () = draw_image (List.nth !imgs 15) 0 0
 
-(* let draw_last_move (move : Game.move) = set_color blue; fill_circle
-   250 250 50; draw_image (List.nth !imgs 13) (window_width - 60)
-   (window_height - 160); () *)
-
+(** [draw_last_move last_move] draws the [last_move] of the opponent
+    player. *)
 let draw_last_move (((oldX, oldY), (newX, newY)) : Game.move) =
   let red_old = rgb 173 33 33 in
   let red_new = rgb 224 25 25 in
