@@ -79,3 +79,9 @@ val legal_moves :
     moves of unpinned pieces that do not put the king in check. By
     default, [move_checker] will treat every move as not putting the
     king in check.*)
+
+val is_pawn_promotion : t -> move -> bool
+(** [is_pawn_promotion bd mv] is true if the move [mv] on board [bd] is
+    a pawn promotion. A pawn promotion move is when a pawn reaches the
+    end of the board in its corresponding direction. Requires: [mv] is a
+    legal move in the current position. *)

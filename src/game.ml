@@ -78,6 +78,16 @@ let is_attacked (enemy_moves : move list) (coords : int * int) : bool =
   let targets = get_targets enemy_moves in
   List.mem coords targets
 
+let is_pawn_promotion (bd : t) ((x1, y1), (x2, y2)) : bool =
+  let board_arr = board_to_array bd in
+  let white_promote =
+    board_arr.(x1).(y1) = Some (White, Pawn) && y2 = 7
+  in
+  let black_promote =
+    board_arr.(x1).(y1) = Some (Black, Pawn) && y2 = 0
+  in
+  white_promote || black_promote
+
 (**********************************************************************
  * SOLDIER LOGIC:
  **********************************************************************)

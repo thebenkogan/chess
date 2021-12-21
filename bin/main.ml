@@ -20,20 +20,6 @@ let is_checkmate st =
     check. *)
 let is_stalemate st = List.length st.moves = 0
 
-(** [is_pawn_promotion bd mv] is true if the move [mv] on board [bd] is
-    a pawn promotion. A pawn promotion move is when a pawn reaches the
-    end of the board in its corresponding direction. Requires: [mv] is a
-    legal move in the current position. *)
-let is_pawn_promotion (bd : Game.t) ((x1, y1), (x2, y2)) : bool =
-  let board_arr = board_to_array bd in
-  let white_promote =
-    board_arr.(x1).(y1) = Some (White, Pawn) && y2 = 7
-  in
-  let black_promote =
-    board_arr.(x1).(y1) = Some (Black, Pawn) && y2 = 0
-  in
-  white_promote || black_promote
-
 (** [play_and_receive state black move] is the new states of the player
     and opponent with game result after [move] is played. Prompts the
     player if the move is a pawn promotion. Chooses a random reply for

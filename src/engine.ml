@@ -41,6 +41,51 @@ let result pl opp max =
   | _, [] when (not opp.game_state.king_in_check) && not max -> Some 0.
   | _, _ -> None
 
+let eval_move (move : move) pl opp =
+  let board_arr = Helper.board_to_array pl.game_state.board in
+  let color = pl.game_state.color in
+  let capturePieceType = board_arr.(fst (snd move)).(snd (snd move)) in
+  let movePieceType = board_arr.(fst (fst move)).(snd (fst move)) in
+  let piece_value = function
+    | Some (c, Pawn) -> if c = color then 10. else -10.
+    | Some (c, Knight) -> if c = color then 30. else -30.
+    | Some (c, Bishop) -> if c = color then 30. else -30.
+    | Some (c, Rook) -> if c = color then 50. else -50.
+    | Some (c, Queen) -> if c = color then 90. else -90.
+    | _ -> 0.
+  in
+  let valuable_pieces =
+    if capturePieceType != None then
+      (10. *. piece_value capturePieceType) -. piece_value movePieceType
+    else 0.
+  in
+  let pawn_promotion =
+    if is_pawn_promotion pl.game_state.board move then 90. else 0.
+  in
+  let king_attack =
+    if is_attacked [ move ] opp.game_state.king_pos then 10. else 0.
+  in
+  valuable_pieces +. pawn_promotion +. king_attack
+
+let rec remove_value_and_sort moves =
+  let compare_values value1 value2 =
+    if value1 == value2 then 0 else if value1 > value2 then 1 else -1
+  in
+  let sorted_values = List.sort compare_values moves in
+  match sorted_values with
+  | [] -> []
+  | (value, mv) :: t -> mv :: remove_value_and_sort t
+
+let rec order_with_value moves pl opp =
+  match moves with
+  | [] -> []
+  | mv :: t -> (eval_move mv pl opp, mv) :: order_with_value t pl opp
+
+let rec order_moves (moves : move list) pl opp =
+  match remove_value_and_sort (order_with_value moves pl opp) with
+  | [] -> []
+  | mv :: t -> mv :: order_moves t pl opp
+
 (** [minimax pl opp depth max move first] is maximizing move for [pl] if
     [max] or the minimizing move for [pl] if [not max], searching to
     [depth]. [move] is the first move played by [pl] in some path, with
@@ -66,8 +111,9 @@ let rec minimax pl opp depth max (alpha, beta) =
   | Some v -> v
   | None ->
       if depth = 0 then eval pl.game_state.board pl.game_state.color
-      else if max then step neg_infinity (alpha, beta) pl.moves
-      else step infinity (alpha, beta) opp.moves
+      else if max then
+        step neg_infinity (alpha, beta) (order_moves pl.moves pl opp)
+      else step infinity (alpha, beta) (order_moves opp.moves opp pl)
 
 let next_move pl opp =
   counter := 1;
