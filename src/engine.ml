@@ -1,7 +1,7 @@
 open State
 open Game
 
-let depth = 3
+let depth = 4
 
 let counter = ref 1
 
@@ -65,7 +65,27 @@ let eval_move (move : move) pl opp =
   let king_attack =
     if is_attacked [ move ] opp.game_state.king_pos then 10. else 0.
   in
-  valuable_pieces +. pawn_promotion +. king_attack
+  let enemy_pawn_attack =
+    let is_attacked_by_pawn
+        (enemy_moves : move list)
+        (coords : int * int) : bool =
+      let rec pawn_targets t =
+        match enemy_moves with
+        | [] -> []
+        | mv :: t ->
+            if
+              Some (opp.game_state.color, Pawn)
+              == board_arr.(fst (fst mv)).(snd (fst mv))
+            then mv :: pawn_targets t
+            else pawn_targets t
+      in
+      List.mem move (pawn_targets opp.moves)
+    in
+    if is_attacked_by_pawn opp.moves (fst move) then
+      -.piece_value movePieceType
+    else 0.
+  in
+  valuable_pieces +. pawn_promotion +. king_attack +. enemy_pawn_attack
 
 let rec remove_value_and_sort moves =
   let compare_values value1 value2 =
