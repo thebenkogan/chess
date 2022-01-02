@@ -34,8 +34,8 @@ let same_color (x, y) board color =
 let is_valid_square board color coords =
   on_board coords && not (same_color coords board color)
 
-(** [squares_to_moves squares first] returns a list of moves starting at
-    [start] and targeting each square in [squares].*)
+(** [squares_to_moves first squares] returns a list of moves starting at
+    [first] and targeting each square in [squares].*)
 let squares_to_moves first squares =
   let to_move start target = (start, target) in
   List.map (to_move first) squares
@@ -45,6 +45,14 @@ let squares_to_moves first squares =
 let rec get_targets = function
   | [] -> []
   | h :: t -> snd h :: get_targets t
+
+(** [get_piece_targets pos moves] is the list of coordinates for each
+    starting position in [moves] that targets [pos]. *)
+let rec get_piece_targets pos = function
+  | [] -> []
+  | h :: t ->
+      if snd h = pos then fst h :: get_piece_targets pos t
+      else get_piece_targets pos t
 
 (** [build_line (x,y) board_arr dirx diry color] returns a list of valid
     squares in a single direction that a soldier can move to. If moving
@@ -69,3 +77,24 @@ let rec get_piece_moves piece_pos = function
   | h :: t ->
       if fst h = piece_pos then [ h ] @ get_piece_moves piece_pos t
       else get_piece_moves piece_pos t
+
+(** [in_line p1 p2] is true if [p1] is in line with [p2], meaning one
+    can connect the two coordinates with a straight non-diagonal line. *)
+let in_line (x1, y1) (x2, y2) = x1 = x2 || y1 = y2
+
+(** [line_moves p1 p2] is a list of moves starting at p1 to all squares
+    in a line to [p2] inclusive. Requires: [p1] and [p2] are in line,
+    square-diagonally or not. [p1] and [p2] must also be different. *)
+let line_moves (x1, y1) (x2, y2) =
+  let netx = x2 - x1 in
+  let nety = y2 - y1 in
+  let dirx = if netx > 0 then 1 else if netx < 0 then -1 else 0 in
+  let diry = if nety > 0 then 1 else if nety < 0 then -1 else 0 in
+  let rec line start target dirx diry =
+    if start = target then [ target ]
+    else
+      start
+      :: line (fst start + dirx, snd start + diry) target dirx diry
+  in
+  squares_to_moves (x1, y1)
+    (line (x1 + dirx, y1 + diry) (x2, y2) dirx diry)

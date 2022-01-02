@@ -34,6 +34,8 @@ type properties = {
   last_move : move;
   (*The current position of this color's king.*)
   king_pos : int * int;
+  (*True if the king is attacked in the current position.*)
+  king_in_check : bool;
   (*True if the king can castle kingside in the current position.*)
   kingside_castle : bool;
   (*True if the king can castle queenside in the current position.*)
@@ -51,13 +53,26 @@ val is_attacked : move list -> int * int -> bool
     and contains either no piece or a piece of the opposite color to
     those for [enemy_moves].*)
 
+val pin_checker : properties -> soldier -> int * int -> move list option
+(** [pin_checker prop p coords] is [Some moves] if the piece at [coords]
+    is pinned and its only legal moves are [moves]. A piece is pinned if
+    that color's king is attacked when the piece is removed from the
+    board. If the king of [prop] is currently in check, this is always
+    None. If [p] is a pawn, this is [None] if not pinned, and always
+    [Some \[\]] if pinned. If [p] is [King] or [Queen], this is always
+    [None]. Requires: [coords] is on the board and is a piece of the
+    color specified in [prop].*)
+
 val move_checker : properties -> move -> bool
 (** [move_checker prop mv] is true if [mv] does not put the king of the
     side specificed by [prop] in check. Requires: [mv] is not a king
     move.*)
 
 val legal_moves :
-  ?move_checker:(properties -> move -> bool) -> properties -> move list
+  ?pin_checker:(properties -> soldier -> int * int -> move list option) ->
+  ?move_checker:(properties -> move -> bool) ->
+  properties ->
+  move list
 (** [legal_moves move_checker prop] is a list of legal moves with [prop]
     providing context to the position and specifying the color to output
     moves for. If [move_checker] is provided, it will return only the
