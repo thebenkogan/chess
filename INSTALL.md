@@ -1,7 +1,6 @@
 # How to install and play Chess game for MS2
 
 ## Dependencies (run with opam install)
-ANSITerminal
 graphics
 conf-libpng
 camlimages

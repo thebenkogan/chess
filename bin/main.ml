@@ -7,7 +7,8 @@ open Gui
 open Engine
 
 type game_result =
-  | Win of color
+  | Win
+  | Loss
   | Draw
 
 (** [is_checkmate st] is true if [st] is currently in checkmate. A state
@@ -18,7 +19,21 @@ let is_checkmate st =
 (** [is_stalemate st] is true if [st] is currently in stalemate. A state
     is in stalemate if it has no legal moves and its king is not in
     check. *)
-let is_stalemate st = List.length st.moves = 0
+let is_stalemate st =
+  List.length st.moves = 0 && not st.game_state.king_in_check
+
+let get_init_states = function
+  | White ->
+      (init_state starting_board White, init_state starting_board Black)
+  | Black ->
+      let pl, opp =
+        ( init_state starting_board Black,
+          init_state starting_board White )
+      in
+      let opp_move = next_move opp pl in
+      let opp' = play_move opp opp_move in
+      let pl' = receive_move pl opp_move in
+      (pl', opp')
 
 (** [is_pawn_promotion bd mv] is true if the move [mv] on board [bd] is
     a pawn promotion. A pawn promotion move is when a pawn reaches the
@@ -41,28 +56,24 @@ let is_pawn_promotion (bd : Game.t) ((x1, y1), (x2, y2)) : bool =
     [update_state] and [update_black] are the new states for the player
     and opponent respectively after playing and receiving a move, and
     [result] specifies which color wins the game, if any. *)
-let play_and_receive state black move =
+let play_and_receive pl opp move =
   let promote_piece =
-    if is_pawn_promotion state.game_state.board move then
-      query_promotion state.game_state.color
+    if is_pawn_promotion pl.game_state.board move then
+      query_promotion pl.game_state.color
     else Queen
   in
-  let next_state = play_move state move ~promote_piece in
-  let next_black = receive_move black move ~promote_piece in
-  draw_game_basic next_state.game_state.board;
-  if is_checkmate next_black then
-    (next_state, next_black, Some (Win White))
-  else if is_stalemate next_black then
-    (next_state, next_black, Some Draw)
+  let next_pl = play_move pl move ~promote_piece in
+  let next_opp = receive_move opp move ~promote_piece in
+  draw_game_basic next_pl.game_state.board pl.game_state.color;
+  if is_checkmate next_opp then (next_pl, next_opp, Some Win)
+  else if is_stalemate next_opp then (next_pl, next_opp, Some Draw)
   else
-    let black_move = next_move next_black next_state in
-    let update_black = play_move next_black black_move in
-    let update_state = receive_move next_state black_move in
-    if is_checkmate update_state then
-      (update_state, update_black, Some (Win Black))
-    else if is_stalemate update_state then
-      (next_state, next_black, Some Draw)
-    else (update_state, update_black, None)
+    let opp_move = next_move next_opp next_pl in
+    let update_opp = play_move next_opp opp_move in
+    let update_pl = receive_move next_pl opp_move in
+    if is_checkmate update_pl then (update_pl, update_opp, Some Loss)
+    else if is_stalemate update_pl then (next_pl, next_opp, Some Draw)
+    else (update_pl, update_opp, None)
 
 (** [play_game state black result] draws the current state of the game
     onto the Graphics window and handles white's [state] in the current
@@ -71,46 +82,41 @@ let play_and_receive state black move =
     this checks if the move is legal. If illegal, this repeats with no
     new inputs. If legal, the move is played, and this repeats with the
     new states for white and black.*)
-let rec play_game state black result =
-  draw_game_basic state.game_state.board;
+let rec play_game pl opp result =
+  draw_game_basic pl.game_state.board pl.game_state.color;
   if result <> None then
     let res_color =
       match result with
-      | Some (Win White) -> Some White
-      | Some (Win Black) -> Some Black
+      | Some Win -> Some true
+      | Some Loss -> Some false
       | _ -> None
     in
     match draw_win_screen res_color with
     | true ->
-        play_game
-          (init_state starting_board White)
-          (init_state starting_board Black)
-          None
+        let side = draw_start () in
+        draw_game_basic starting_board pl.game_state.color;
+        let pl, opp = get_init_states side in
+        play_game pl opp None
     | false -> exit 0
   else
-    let move = draw_game state.game_state.board state.moves in
-    if not (List.mem move state.moves) then play_game state black None
+    let move =
+      draw_game pl.game_state.board pl.game_state.color pl.moves
+    in
+    if not (List.mem move pl.moves) then play_game pl opp None
     else
       let update_state, update_black, result =
-        play_and_receive state black move
+        play_and_receive pl opp move
       in
       play_game update_state update_black result
 
 (** [main ()] prompts for the game to play, then starts it. The player
-    is given the white pieces. *)
+    is given the choice of which pieces to play with. *)
 let main () =
-  ANSITerminal.print_string [ ANSITerminal.red ]
-    "\n\n\
-     Welcome to OCaml Chess!\n\
-     You will play with the white pieces against our random-move engine.\n";
-  print_endline
-    "\n\
-     You can play a move by clicking on a piece and its target square.";
   init_gui ();
-  play_game
-    (init_state starting_board White)
-    (init_state starting_board Black)
-    None
+  let side = draw_start () in
+  draw_game_basic starting_board side;
+  let pl, opp = get_init_states side in
+  play_game pl opp None
 
 (* Execute the game engine. *)
 let () = main ()
